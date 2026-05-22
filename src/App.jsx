@@ -2018,6 +2018,195 @@ function Analytics({ members, events, getMemberStats, attendance, newJoineeAtten
   );
 }
 
+const TEMPLATES = {
+  monthlySummary: { id: "monthlySummary", title: "Monthly Summary", desc: "Aggregated attendance and trends for a specific month.", requiredOptions: ["dateRange"] },
+  executiveReport: { id: "executiveReport", title: "Executive Report", desc: "High-level overview with charts and analytics.", requiredOptions: ["includeCharts"] },
+  volunteerReport: { id: "volunteerReport", title: "Volunteer Report", desc: "Focused on volunteer activity and contributions.", requiredOptions: [] },
+  detailedAttendance: { id: "detailedAttendance", title: "Detailed Attendance", desc: "Line-by-line attendance matrix for all members.", requiredOptions: ["includeAbsent", "includePhone"] }
+};
+
+function buildReportHtml({ template, data, options }) {
+  const { allPeople, attendanceGetter, stats, generatedAt } = data;
+  const { brandColor, includePhone, includeSignatures, includeCharts, includeAbsent, dateRange } = options;
+  
+  const statusMeta = {
+    present: { label: "Present", icon: "✓", color: "#15803d", bg: "#dcfce7" },
+    late: { label: "Late", icon: "◔", color: "#b45309", bg: "#fef3c7" },
+    excused: { label: "Excused", icon: "•", color: "#0f766e", bg: "#ccfbf1" },
+    absent: { label: "Absent", icon: "✕", color: "#be123c", bg: "#ffe4e6" }
+  };
+
+  const getStatus = (person, eventId) => {
+    const s = attendanceGetter(eventId, person.id);
+    return statusMeta[s] || { label: "-", icon: "-", color: "#9ca3af", bg: "transparent" };
+  };
+
+  // Filter events by date range if provided
+  let filteredEvents = data.events || [];
+  if (dateRange && dateRange.start && dateRange.end) {
+    const start = new Date(dateRange.start);
+    const end = new Date(dateRange.end);
+    end.setHours(23, 59, 59, 999);
+    filteredEvents = filteredEvents.filter(e => {
+      const ed = new Date(e.date);
+      return ed >= start && ed <= end;
+    });
+  }
+
+  // Filter people
+  let peopleList = [...allPeople];
+  if (template === "volunteerReport") {
+    peopleList = peopleList.filter(p => /volunteer/i.test(p.role || p.notes || ""));
+  }
+  
+  // Apply absent filter (if a template is detailed and includeAbsent is false, we could filter out those with 0 attendance)
+  if (!includeAbsent && template === "detailedAttendance") {
+     peopleList = peopleList.filter(p => {
+       const hasAttendance = filteredEvents.some(e => {
+         const s = attendanceGetter(e.id, p.id);
+         return s === 'present' || s === 'late';
+       });
+       return hasAttendance;
+     });
+  }
+
+  peopleList.sort((a,b) => a.name.localeCompare(b.name));
+
+  let htmlBody = "";
+
+  const headerHtml = `
+    <header style="border-bottom: 2px solid ${brandColor}; padding-bottom: 20px; margin-bottom: 30px;">
+      <h1 style="margin: 0; color: #111827; font-size: 28px;">AYSG Attendance Report</h1>
+      <p style="margin: 4px 0 0; color: #6b7280; font-size: 14px;">${TEMPLATES[template].title}</p>
+      <div style="margin-top: 16px; font-size: 12px; color: #4b5563; display: flex; justify-content: space-between;">
+        <span>Generated: ${generatedAt}</span>
+        ${dateRange && dateRange.start ? `<span>Period: ${dateRange.start} to ${dateRange.end || 'Now'}</span>` : ''}
+      </div>
+    </header>
+  `;
+
+  const footerHtml = includeSignatures ? `
+    <div style="margin-top: 60px; display: flex; justify-content: space-between; page-break-inside: avoid;">
+      <div style="text-align: center; width: 200px;">
+        <div style="border-bottom: 1px solid #000; height: 40px; margin-bottom: 8px;"></div>
+        <div style="font-size: 12px;">Prepared By</div>
+      </div>
+      <div style="text-align: center; width: 200px;">
+        <div style="border-bottom: 1px solid #000; height: 40px; margin-bottom: 8px;"></div>
+        <div style="font-size: 12px;">Approved By</div>
+      </div>
+    </div>
+  ` : "";
+
+  if (template === "monthlySummary" || template === "executiveReport") {
+    htmlBody += `
+      <div style="display: flex; gap: 20px; margin-bottom: 30px;">
+        <div style="flex: 1; padding: 20px; background: #f9fafb; border-radius: 8px; text-align: center;">
+          <div style="font-size: 32px; font-weight: bold; color: ${brandColor};">${stats.active}</div>
+          <div style="font-size: 12px; color: #6b7280;">Active Members</div>
+        </div>
+        <div style="flex: 1; padding: 20px; background: #f9fafb; border-radius: 8px; text-align: center;">
+          <div style="font-size: 32px; font-weight: bold; color: ${brandColor};">${filteredEvents.length}</div>
+          <div style="font-size: 12px; color: #6b7280;">Events in Period</div>
+        </div>
+        <div style="flex: 1; padding: 20px; background: #f9fafb; border-radius: 8px; text-align: center;">
+          <div style="font-size: 32px; font-weight: bold; color: #15803d;">${Math.round(stats.avgAttendance)}</div>
+          <div style="font-size: 12px; color: #6b7280;">Avg. Attendance</div>
+        </div>
+      </div>
+    `;
+    
+    if (includeCharts) {
+      // Mock chart representation
+      htmlBody += `
+        <div style="margin-bottom: 30px; page-break-inside: avoid;">
+          <h3 style="margin: 0 0 12px; font-size: 16px;">Attendance Trend</h3>
+          <div style="height: 120px; background: #f3f4f6; border-radius: 8px; position: relative; overflow: hidden; display: flex; align-items: flex-end; padding: 0 10px 10px;">
+            ${filteredEvents.slice(0,10).map((e,i) => {
+               // Calculate a rough height based on an assumed max of 50
+               const count = allPeople.filter(p => attendanceGetter(e.id, p.id) === 'present').length;
+               const h = Math.max(10, Math.min(100, (count / (allPeople.length || 1)) * 100));
+               return `<div style="flex: 1; margin: 0 4px; background: ${brandColor}; height: ${h}%; border-radius: 4px 4px 0 0; opacity: 0.8;" title="${e.title}"></div>`;
+            }).join("")}
+          </div>
+        </div>
+      `;
+    }
+  }
+
+  if (template === "detailedAttendance" || template === "volunteerReport") {
+    htmlBody += `
+      <table style="width: 100%; border-collapse: collapse; font-size: 12px;">
+        <thead>
+          <tr style="background: ${brandColor}; color: #fff;">
+            <th style="padding: 10px; text-align: left; border: 1px solid ${brandColor};">Member</th>
+            ${includePhone ? `<th style="padding: 10px; text-align: left; border: 1px solid ${brandColor};">Phone</th>` : ""}
+            ${filteredEvents.map(e => `<th style="padding: 10px; text-align: center; border: 1px solid ${brandColor};" title="${e.title}">${new Date(e.date).toLocaleDateString('en-US', {month:'short', day:'numeric'})}</th>`).join("")}
+          </tr>
+        </thead>
+        <tbody>
+          ${peopleList.map((p, i) => `
+            <tr style="background: ${i % 2 === 0 ? '#fff' : '#f9fafb'};">
+              <td style="padding: 8px; border: 1px solid #e5e7eb; font-weight: 500;">${p.name}</td>
+              ${includePhone ? `<td style="padding: 8px; border: 1px solid #e5e7eb; color: #6b7280;">${p.phone || '-'}</td>` : ""}
+              ${filteredEvents.map(e => {
+                const s = getStatus(p, e.id);
+                return `<td style="padding: 8px; text-align: center; border: 1px solid #e5e7eb; color: ${s.color}; background: ${s.bg}80;">${s.icon}</td>`;
+              }).join("")}
+            </tr>
+          `).join("")}
+        </tbody>
+      </table>
+    `;
+  } else {
+    // Basic event list for monthly summary
+    htmlBody += `
+      <table style="width: 100%; border-collapse: collapse; font-size: 12px;">
+        <thead>
+          <tr style="background: ${brandColor}; color: #fff;">
+            <th style="padding: 10px; text-align: left; border: 1px solid ${brandColor};">Event Date & Title</th>
+            <th style="padding: 10px; text-align: center; border: 1px solid ${brandColor};">Present</th>
+            <th style="padding: 10px; text-align: center; border: 1px solid ${brandColor};">Absent</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${filteredEvents.map((e, i) => {
+            const pCount = allPeople.filter(p => attendanceGetter(e.id, p.id) === 'present').length;
+            const aCount = allPeople.filter(p => attendanceGetter(e.id, p.id) === 'absent').length;
+            return `
+              <tr style="background: ${i % 2 === 0 ? '#fff' : '#f9fafb'};">
+                <td style="padding: 8px; border: 1px solid #e5e7eb;"><strong>${new Date(e.date).toLocaleDateString()}</strong> - ${e.title}</td>
+                <td style="padding: 8px; text-align: center; border: 1px solid #e5e7eb; color: #15803d;">${pCount}</td>
+                <td style="padding: 8px; text-align: center; border: 1px solid #e5e7eb; color: #be123c;">${aCount}</td>
+              </tr>
+            `;
+          }).join("")}
+        </tbody>
+      </table>
+    `;
+  }
+
+  return `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8">
+      <title>${TEMPLATES[template].title} - AYSG</title>
+      <style>
+        body { font-family: 'Inter', -apple-system, sans-serif; padding: 40px; margin: 0; color: #111827; }
+        @media print { body { padding: 0; } }
+      </style>
+    </head>
+    <body>
+      ${headerHtml}
+      ${htmlBody}
+      ${footerHtml}
+    </body>
+    </html>
+  `;
+}
+
+
 function Reports({ members, newJoinees, events, attendance, newJoineeAttendance, getEventStats, showToast, isAdmin }) {
   const [template, setTemplate] = React.useState("monthlySummary");
   const [zoom, setZoom] = React.useState(1);
