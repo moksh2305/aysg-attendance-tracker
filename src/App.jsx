@@ -2031,10 +2031,10 @@ function buildReportHtml({ template, data, options }) {
   const { brandColor, includePhone, includeSignatures, includeCharts, includeAbsent, dateRange } = options;
   
   const statusMeta = {
-    present: { label: "Present", icon: "✓", color: "#15803d", bg: "#dcfce7" },
+    present: { label: "Present", icon: "✓", color: "#dcfce7", bg: "#15803d" },
     late: { label: "Late", icon: "◔", color: "#b45309", bg: "#fef3c7" },
     excused: { label: "Excused", icon: "•", color: "#0f766e", bg: "#ccfbf1" },
-    absent: { label: "Absent", icon: "✕", color: "#be123c", bg: "#ffe4e6" }
+    absent: { label: "Absent", icon: "✕", color: "#ffe4e6", bg: "#be123c" }
   };
 
   const getStatus = (person, eventId) => {
