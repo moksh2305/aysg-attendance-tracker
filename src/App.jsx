@@ -410,6 +410,40 @@ select.input{cursor:pointer}
 @media (max-width:1100px){.grid-4,.quick-actions{grid-template-columns:repeat(2,1fr)}.grid-2{grid-template-columns:1fr}.event-actions{opacity:1;transform:none}.top-search{min-width:180px}}
 @media (max-width:820px){.sidebar{width:76px}.sidebar .brand-copy,.sidebar .nav-section,.sidebar .nav-label,.sidebar .sb-mode-copy{display:none}.sidebar .brand{justify-content:center;padding-left:8px;padding-right:8px}.sidebar .nav-item{justify-content:center;padding:8px}.topbar{gap:8px;padding:0 12px}.topbar-date,.quick-top-action{display:none}.top-search{min-width:120px}}
 @media (max-width:680px){.content{padding:16px}.grid-3,.grid-4,.quick-actions{grid-template-columns:1fr}.dashboard-event{align-items:flex-start;flex-wrap:wrap}.event-actions{width:100%;justify-content:flex-end}.member-rank-card{grid-template-columns:auto auto 1fr}.member-rank-card .avatar{display:none}.top-search{display:none}}
+
+.reports-studio { display: grid; grid-template-columns: 1fr 440px; gap: 24px; align-items: start; height: 100%; }
+.report-template-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 12px; margin-bottom: 24px; }
+.template-card { background: var(--bg3); border: 1px solid var(--border); border-radius: 12px; padding: 14px; cursor: pointer; transition: all 0.2s; }
+.template-card:hover { border-color: var(--border2); background: var(--cardh); transform: translateY(-2px); }
+.template-card.active { border-color: var(--accent); background: var(--glass); box-shadow: 0 0 0 1px var(--accent); }
+.template-card-title { font-weight: 700; color: var(--text); font-size: 13px; margin-bottom: 4px; }
+.template-card-desc { font-size: 11px; color: var(--text2); line-height: 1.4; }
+.preview-panel { position: sticky; top: 0; background: var(--bg2); border: 1px solid var(--border2); border-radius: 16px; padding: 16px; display: flex; flex-direction: column; height: calc(100vh - 80px); }
+.preview-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+.preview-device { flex: 1; background: #eef2f7; border-radius: 8px; overflow: auto; display: flex; justify-content: center; padding: 20px; box-shadow: inset 0 2px 10px rgba(0,0,0,0.2); scrollbar-width: thin; }
+.preview-page { background: #fff; width: 100%; max-width: 794px; min-height: 1123px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); transform-origin: top center; transition: transform 0.2s ease; overflow: hidden; position: relative; }
+.preview-page iframe { width: 100%; height: 100%; border: none; min-height: 1123px; }
+.export-stepper { display: flex; justify-content: space-between; align-items: center; margin-top: 16px; position: relative; padding: 0 10px; }
+.export-stepper::before { content: ''; position: absolute; left: 20px; right: 20px; top: 12px; height: 2px; background: var(--bg4); z-index: 1; }
+.step-node { position: relative; z-index: 2; display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.step-circle { width: 24px; height: 24px; border-radius: 50%; background: var(--bg3); border: 2px solid var(--border2); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 800; color: var(--text2); transition: all 0.3s; }
+.step-label { font-size: 10.5px; color: var(--text2); font-weight: 600; text-align: center; }
+.step-node.active .step-circle { border-color: var(--accent); background: var(--accent); color: #fff; box-shadow: 0 0 0 4px var(--glass); animation: stepPulse 1.5s infinite; }
+.step-node.active .step-label { color: var(--accent); }
+.step-node.done .step-circle { border-color: var(--emerald); background: var(--emerald); color: #fff; }
+.step-node.done .step-label { color: var(--emerald); }
+@keyframes stepPulse { 0% { box-shadow: 0 0 0 0 rgba(124,106,248,0.4); } 70% { box-shadow: 0 0 0 6px rgba(124,106,248,0); } 100% { box-shadow: 0 0 0 0 rgba(124,106,248,0); } }
+.preview-zoom-controls { display: flex; gap: 4px; background: var(--bg3); padding: 4px; border-radius: 8px; border: 1px solid var(--border); }
+.preview-zoom-controls button { width: 26px; height: 26px; border: none; background: transparent; color: var(--text); border-radius: 6px; cursor: pointer; font-size: 14px; display: flex; align-items: center; justify-content: center; }
+.preview-zoom-controls button:hover { background: var(--bg4); }
+.option-checkbox { display: flex; align-items: center; gap: 8px; font-size: 12.5px; color: var(--text); cursor: pointer; margin-bottom: 10px; user-select: none; }
+.option-checkbox input[type="checkbox"] { width: 16px; height: 16px; accent-color: var(--accent); cursor: pointer; }
+.color-swatch { width: 32px; height: 32px; border-radius: 8px; border: 1px solid var(--border2); cursor: pointer; display: flex; align-items: center; justify-content: center; overflow: hidden; padding: 0; background: transparent; }
+.color-swatch input[type="color"] { width: 150%; height: 150%; border: none; cursor: pointer; padding: 0; background: transparent; margin: -25%; }
+.threshold-slider { width: 100%; accent-color: var(--accent); margin-top: 8px; cursor: pointer; }
+.locked-reports { text-align: center; padding: 60px 20px; max-width: 400px; margin: 40px auto; background: var(--bg3); border: 1px solid var(--border); border-radius: 20px; }
+.reports-footer { padding: 16px; background: var(--bg2); border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; border-radius: 0 0 16px 16px; }
+@media (max-width: 1200px) { .reports-studio { grid-template-columns: 1fr; } .preview-panel { height: 800px; } }
 `;
 
 const VIEWS = ["Dashboard", "Members", "New Joinees", "Events", "Attendance", "Analytics", "Reports"];
@@ -1635,797 +1669,436 @@ function Analytics({ members, events, getMemberStats }) {
 
 // ─── PDF BUILDERS ──────────────────────────────────────────────────────────
 
-function buildSingleEventPdfHtml({ event, allPeople, attendanceGetter, attendanceStatusGetter, stats, sortBy, groupName = "All People", exportedBy = "AYSG Admin Console", generatedAt = new Date().toLocaleString("en-IN") }) {
-  const statusMeta = {
-    present: { label: "Present", icon: "✓", color: "#15803d", bg: "#dcfce7", score: 4 },
-    late: { label: "Late", icon: "◔", color: "#b45309", bg: "#fef3c7", score: 3 },
-    excused: { label: "Excused", icon: "•", color: "#0f766e", bg: "#ccfbf1", score: 2 },
-    absent: { label: "Absent", icon: "✕", color: "#be123c", bg: "#ffe4e6", score: 1 },
-  };
-  const reportGroupForPerson = (person) => {
-    if (person.group === "New Joinee") return "New Joiners";
-    if (/volunteer/i.test(person.role || person.notes || "")) return "Volunteers";
-    return "Main Group";
-  };
-  const sorted = [...allPeople].sort((a, b) => {
-    if (sortBy === "name") return a.name.localeCompare(b.name);
-    return (statusMeta[attendanceStatusGetter(event.id, b.id)]?.score || 0) - (statusMeta[attendanceStatusGetter(event.id, a.id)]?.score || 0);
-  });
-  const groupedPeople = ["Main Group", "New Joiners", "Volunteers"].map(section => ({
-    section,
-    people: sorted.filter(person => reportGroupForPerson(person) === section),
-  })).filter(section => section.people.length > 0);
-  const statusCounts = sorted.reduce((acc, person) => {
-    const status = attendanceStatusGetter(event.id, person.id);
-    acc[status] = (acc[status] || 0) + 1;
-    return acc;
-  }, { present: 0, late: 0, excused: 0, absent: 0 });
-  const pct = stats.pct;
-  const pctColor = pct >= 75 ? "#166534" : pct >= 50 ? "#854d0e" : "#991b1b";
-  const highlightList = [
-    `${statusCounts.present + statusCounts.late} active participants recorded`,
-    `${statusCounts.absent} people require follow-up`,
-    `${groupedPeople.length} roster section${groupedPeople.length !== 1 ? "s" : ""} represented in this report`,
-  ];
-  const lowAttendance = groupedPeople.flatMap(section => section.people).filter(person => !attendanceGetter(event.id, person.id)).slice(0, 4);
-  const insightBars = [
-    ["Present", statusCounts.present, "#22c55e"],
-    ["Late", statusCounts.late, "#f59e0b"],
-    ["Excused", statusCounts.excused, "#14b8a6"],
-    ["Absent", statusCounts.absent, "#f43f5e"],
-  ];
-  const renderBadge = (status) => {
-    const meta = statusMeta[status];
-    return `<span class="status-badge" style="color:${meta.color};background:${meta.bg};border-color:${meta.color}22">${meta.icon} ${meta.label}</span>`;
-  };
-  const renderRows = (people) => people.map((person, index) => {
-    const status = attendanceStatusGetter(event.id, person.id);
-    const role = person.role || reportGroupForPerson(person);
-    return `<tr>
-      <td class="idx">${index + 1}</td>
-      <td class="name-cell"><div class="name-main">${person.name}</div><div class="name-sub">${role}</div></td>
-      <td class="group-cell">${reportGroupForPerson(person)}</td>
-      <td class="status-cell">${renderBadge(status)}</td>
-    </tr>`;
-  }).join("");
+const TEMPLATES = {
+  monthlySummary: { id: "monthlySummary", title: "Monthly Summary", desc: "Aggregated attendance and trends for a specific month.", requiredOptions: ["dateRange"] },
+  executiveReport: { id: "executiveReport", title: "Executive Report", desc: "High-level overview with charts and analytics.", requiredOptions: ["includeCharts"] },
+  volunteerReport: { id: "volunteerReport", title: "Volunteer Report", desc: "Focused on volunteer activity and contributions.", requiredOptions: [] },
+  detailedAttendance: { id: "detailedAttendance", title: "Detailed Attendance", desc: "Line-by-line attendance matrix for all members.", requiredOptions: ["includeAbsent", "includePhone"] }
+};
 
-  return `<!DOCTYPE html><html><head><meta charset="UTF-8">
-  <title>${event.name} - ${groupName} Attendance</title>
-  <style>
-    *{box-sizing:border-box;margin:0;padding:0}
-    body{font-family:'Segoe UI',system-ui,Arial,sans-serif;background:#eef2f7;color:#0f172a}
-    .page{max-width:794px;margin:0 auto;background:#fff;box-shadow:0 18px 50px rgba(15,23,42,0.12)}
-    .header{background:linear-gradient(135deg,#10203e 0%,#1e3a5f 45%,#355f8c 100%);padding:38px 42px 30px;color:#fff;position:relative;overflow:hidden}
-    .header::before,.header::after{content:'';position:absolute;border-radius:999px;background:rgba(255,255,255,0.06)}
-    .header::before{width:180px;height:180px;right:-40px;top:-50px}
-    .header::after{width:140px;height:140px;right:90px;bottom:-70px}
-    .org-pill{display:inline-block;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.18);border-radius:999px;padding:5px 14px;font-size:10px;font-weight:800;letter-spacing:1.8px;text-transform:uppercase;color:#dbeafe;margin-bottom:16px}
-    .report-kicker{font-size:12px;letter-spacing:1px;text-transform:uppercase;color:#bfdbfe;margin-bottom:10px}
-    .event-title{font-size:31px;font-weight:800;line-height:1.15;max-width:80%;margin-bottom:16px}
-    .meta-grid{display:flex;flex-wrap:wrap;gap:10px}
-    .meta-chip{display:inline-flex;align-items:center;gap:6px;padding:7px 12px;border-radius:999px;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.12);font-size:11px;color:#e0f2fe}
-    .summary-wrap{padding:28px 42px 0}
-    .insights{display:grid;grid-template-columns:1.15fr 1fr;gap:18px;margin-bottom:18px}
-    .panel{border:1px solid #dde5f0;border-radius:18px;padding:20px 22px;background:#fbfdff}
-    .panel h3{font-size:12px;letter-spacing:1.1px;text-transform:uppercase;color:#64748b;margin-bottom:12px}
-    .lead-line{font-size:24px;font-weight:800;color:#0f172a;margin-bottom:10px}
-    .insight-list{display:grid;gap:10px;font-size:13px;color:#334155}
-    .insight-item{padding-left:14px;position:relative}
-    .insight-item::before{content:'';position:absolute;left:0;top:7px;width:6px;height:6px;border-radius:999px;background:#3b82f6}
-    .stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:18px}
-    .stat-card{border:1px solid #e2e8f0;border-radius:18px;padding:18px 18px 16px;background:#fff;min-height:108px;display:flex;flex-direction:column;justify-content:space-between}
-    .stat-label{font-size:11px;letter-spacing:1px;text-transform:uppercase;color:#64748b;font-weight:700}
-    .stat-value{font-size:28px;font-weight:800;line-height:1;color:#0f172a}
-    .stat-sub{font-size:11px;color:#94a3b8}
-    .divider{height:1px;background:linear-gradient(90deg,#dbe5f0,transparent);margin:0 42px}
-    .body{padding:24px 42px 28px}
-    .chart-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:20px}
-    .chart-box{border:1px solid #e2e8f0;border-radius:18px;padding:18px;background:#fff}
-    .chart-box h4{font-size:12px;letter-spacing:1px;text-transform:uppercase;color:#64748b;margin-bottom:14px}
-    .bar-list{display:grid;gap:10px}
-    .bar-row{display:grid;grid-template-columns:90px 1fr 42px;gap:10px;align-items:center;font-size:12px;color:#334155}
-    .bar-track{height:10px;background:#edf2f7;border-radius:999px;overflow:hidden}
-    .bar-fill{height:100%;border-radius:999px}
-    .alert-box{background:#fff7ed;border:1px solid #fdba74;border-radius:16px;padding:14px 16px;font-size:12.5px;color:#9a3412}
-    .alert-box strong{display:block;color:#7c2d12;margin-bottom:4px}
-    .section{margin-top:22px}
-    .section-head{display:flex;align-items:center;justify-content:space-between;padding-bottom:10px;margin-bottom:14px;border-bottom:1px solid #e8eef5}
-    .section-title{font-size:14px;font-weight:800;letter-spacing:0.4px;color:#0f172a}
-    .section-meta{font-size:11px;color:#64748b;text-transform:uppercase;letter-spacing:0.9px}
-    .group-card{border:1px solid #e2e8f0;border-radius:18px;overflow:hidden;margin-bottom:16px}
-    .group-head{padding:12px 16px;background:#f8fbff;border-bottom:1px solid #e2e8f0;font-size:12px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:#475569}
-    table{width:100%;border-collapse:separate;border-spacing:0}
-    th{padding:12px 14px;font-size:10.5px;letter-spacing:1px;text-transform:uppercase;color:#64748b;text-align:left;background:#f8fafc;border-bottom:1px solid #e2e8f0}
-    td{padding:13px 14px;border-bottom:1px solid #eef2f7;font-size:12.5px;color:#1e293b}
-    tbody tr:nth-child(odd) td{background:#fcfdff}
-    tbody tr:nth-child(even) td{background:#f7fafc}
-    tbody tr:last-child td{border-bottom:none}
-    .idx{width:44px;color:#94a3b8;text-align:center}
-    .name-main{font-weight:700;color:#0f172a}
-    .name-sub{font-size:11px;color:#64748b;margin-top:3px}
-    .group-cell{font-size:11.5px;color:#475569}
-    .status-cell{text-align:right}
-    .status-badge{display:inline-flex;align-items:center;gap:6px;padding:6px 11px;border-radius:999px;font-size:11px;font-weight:800;border:1px solid}
-    .footer{display:grid;grid-template-columns:1fr auto 1fr;gap:16px;align-items:end;padding:18px 42px 24px;background:#f8fafc;border-top:1px solid #e2e8f0;font-size:10.5px;color:#64748b}
-    .footer-center{text-align:center}
-    .footer strong{display:block;color:#334155;margin-bottom:3px}
-    .page-count::after{content:counter(page)}
-    .page-total::after{content:counter(pages)}
-    @media print{*{-webkit-print-color-adjust:exact;print-color-adjust:exact}body{background:#fff}.page{box-shadow:none}@page{margin:10mm;size:A4 portrait}}
-  </style></head><body>
-  <div class="page">
-    <div class="header">
-      <div class="org-pill">Arham Yuva Seva Group</div>
-      <div class="report-kicker">Executive Attendance Report</div>
-      <div class="event-title">${event.name}</div>
-      <div class="meta-grid">
-        <div class="meta-chip">Date ${new Date(event.date).toLocaleDateString("en-IN",{weekday:"short",day:"numeric",month:"long",year:"numeric"})}</div>
-        <div class="meta-chip">Time ${event.time}</div>
-        ${event.venue ? `<div class="meta-chip">Venue ${event.venue}</div>` : ""}
-        ${event.category ? `<div class="meta-chip">Category ${event.category}</div>` : ""}
-      </div>
-    </div>
-    <div class="summary-wrap">
-      <div class="insights">
-        <div class="panel">
-          <h3>Key Insights</h3>
-          <div class="lead-line">${stats.pct}% attendance performance</div>
-          <div class="insight-list">${highlightList.map(item => `<div class="insight-item">${item}</div>`).join("")}</div>
-        </div>
-        <div class="panel">
-          <h3>Low Attendance Alerts</h3>
-          ${lowAttendance.length ? lowAttendance.map(person => `<div class="insight-item">${person.name} - ${reportGroupForPerson(person)}</div>`).join("") : `<div class="insight-item">No low-attendance alerts in this report.</div>`}
-        </div>
-      </div>
-      <div class="stats-row">
-        <div class="stat-card"><div class="stat-label">Total Participation</div><div class="stat-value">${stats.total}</div><div class="stat-sub">Eligible people in ${groupName}</div></div>
-        <div class="stat-card"><div class="stat-label">Present</div><div class="stat-value" style="color:#15803d">${statusCounts.present}</div><div class="stat-sub">On-time attendees</div></div>
-        <div class="stat-card"><div class="stat-label">Late / Excused</div><div class="stat-value" style="color:#b45309">${statusCounts.late + statusCounts.excused}</div><div class="stat-sub">${statusCounts.late} late · ${statusCounts.excused} excused</div></div>
-        <div class="stat-card"><div class="stat-label">Attendance Rate</div><div class="stat-value" style="color:${pctColor}">${pct}%</div><div class="stat-sub">${stats.present} engaged out of ${stats.total}</div></div>
-      </div>
-    </div>
-    <div class="divider"></div>
-    <div class="body">
-      <div class="chart-grid">
-        <div class="chart-box">
-          <h4>Participation Summary</h4>
-          <div class="bar-list">
-            ${insightBars.map(([label, value, color]) => `<div class="bar-row"><span>${label}</span><div class="bar-track"><div class="bar-fill" style="width:${stats.total ? Math.round(value / stats.total * 100) : 0}%;background:${color}"></div></div><span>${value}</span></div>`).join("")}
-          </div>
-        </div>
-        <div class="chart-box">
-          <h4>Attendance Highlights</h4>
-          <div class="alert-box"><strong>Report Type</strong>${groupName} attendance summary with grouped roster separation, attendance alerts, and export authentication details.</div>
-        </div>
-      </div>
-      <div class="section">
-        <div class="section-head">
-          <div class="section-title">Attendance Register</div>
-          <div class="section-meta">${sortBy === "name" ? "Sorted Alphabetically" : "Sorted By Status"}</div>
-        </div>
-        ${groupedPeople.map(section => `
-        <div class="group-card">
-          <div class="group-head">${section.section} · ${section.people.length} people</div>
-          <table>
-            <thead><tr><th style="width:44px">#</th><th>Full Name</th><th>Section</th><th style="text-align:right">Status</th></tr></thead>
-            <tbody>${renderRows(section.people)}</tbody>
-          </table>
-        </div>`).join("")}
-      </div>
-    </div>
-    <div class="footer">
-      <div><strong>Generated</strong>${generatedAt}<br/>Exported By ${exportedBy}</div>
-      <div class="footer-center"><strong>AYSG Attendance Tracker</strong>${groupName} Event Report<br/>Page <span class="page-count"></span></div>
-      <div style="text-align:right"><strong>Report Type</strong>Executive Attendance PDF<br/>Page Total <span class="page-total"></span></div>
-    </div>
-  </div>
-  </body></html>`;
-}
-
-function buildMatrixPdfHtml({ title, subtitle, colEvents, rowPeople, attendanceGetter, attendanceStatusGetter, generatedAt, exportedBy = "AYSG Admin Console" }) {
+function buildReportHtml({ template, data, options }) {
+  const { allPeople, attendanceGetter, stats, generatedAt } = data;
+  const { brandColor, includePhone, includeSignatures, includeCharts, includeAbsent, dateRange } = options;
+  
   const statusMeta = {
     present: { label: "Present", icon: "✓", color: "#15803d", bg: "#dcfce7" },
     late: { label: "Late", icon: "◔", color: "#b45309", bg: "#fef3c7" },
     excused: { label: "Excused", icon: "•", color: "#0f766e", bg: "#ccfbf1" },
-    absent: { label: "Absent", icon: "✕", color: "#be123c", bg: "#ffe4e6" },
+    absent: { label: "Absent", icon: "✕", color: "#be123c", bg: "#ffe4e6" }
   };
-  const reportGroupForPerson = (person) => {
-    if (person.group === "New Joinee") return "New Joiners";
-    if (/volunteer/i.test(person.role || person.notes || "")) return "Volunteers";
-    return "Main Group";
-  };
-  const groupedPeople = ["Main Group", "New Joiners", "Volunteers"].map(section => ({
-    section,
-    people: rowPeople.filter(person => reportGroupForPerson(person) === section),
-  })).filter(section => section.people.length > 0);
-  const totalPresent = (pid) => colEvents.filter(e => attendanceGetter(e.id, pid)).length;
-  const eventTotals  = colEvents.map(e => rowPeople.filter(p => attendanceGetter(e.id, p.id)).length);
-  const overallPct   = rowPeople.length && colEvents.length
-    ? Math.round(rowPeople.reduce((s,p) => s + totalPresent(p.id), 0) / (rowPeople.length * colEvents.length) * 100) : 0;
-  const highPerformers = rowPeople.filter(p => colEvents.length && Math.round(totalPresent(p.id) / colEvents.length * 100) >= 75).length;
-  const lowPerformers = rowPeople.filter(p => colEvents.length && Math.round(totalPresent(p.id) / colEvents.length * 100) < 50).length;
-  const monthlyBars = colEvents.map(e => {
-    const count = rowPeople.filter(p => attendanceGetter(e.id, p.id)).length;
-    return [e.name, count, rowPeople.length ? Math.round(count / rowPeople.length * 100) : 0];
-  });
-  const eventCols = colEvents.map(e =>
-    `<th class="event-col"><div class="event-name">${e.name}</div><div class="event-date">${new Date(e.date).toLocaleDateString("en-IN",{day:"2-digit",month:"short"})}</div></th>`
-  ).join("");
-  const renderStatusCell = (eventId, personId) => {
-    const status = attendanceStatusGetter(eventId, personId);
-    const meta = statusMeta[status];
-    return `<td class="status-td" style="background:${meta.bg};color:${meta.color}">${meta.icon}</td>`;
-  };
-  const renderRows = (people) => people.map((p, i) => {
-    const cnt  = totalPresent(p.id);
-    const pct  = colEvents.length ? Math.round(cnt / colEvents.length * 100) : 0;
-    const pctColor = pct >= 75 ? "#166534" : pct >= 50 ? "#854d0e" : "#991b1b";
-    const pctBg    = pct >= 75 ? "#dcfce7" : pct >= 50 ? "#fef3c7" : "#fee2e2";
-    const cells = colEvents.map(e => renderStatusCell(e.id, p.id)).join("");
-    return `<tr>
-      <td class="idx">${i + 1}</td>
-      <td class="name-cell"><div class="name-main">${p.name}</div><div class="name-sub">${p.role || reportGroupForPerson(p)}</div></td>
-      ${cells}
-      <td class="count-cell">${cnt}/${colEvents.length}</td>
-      <td class="rate-cell"><span class="rate-pill" style="color:${pctColor};background:${pctBg}">${pct}%</span></td>
-    </tr>`;
-  }).join("");
-  const totalRow = colEvents.map((e, i) => {
-    const cnt = eventTotals[i];
-    const p = rowPeople.length ? Math.round(cnt / rowPeople.length * 100) : 0;
-    return `<td class="totals-cell">${cnt}<span>${p}%</span></td>`;
-  }).join("");
 
-  return `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>${title}</title>
-  <style>
-    *{box-sizing:border-box;margin:0;padding:0}
-    body{font-family:'Segoe UI',system-ui,Arial,sans-serif;background:#edf2f7;color:#0f172a;padding:18px}
-    .page{background:#fff;border-radius:14px;overflow:hidden;box-shadow:0 18px 46px rgba(15,23,42,0.14)}
-    .header{background:linear-gradient(135deg,#10203e 0%,#1e3a5f 45%,#355f8c 100%);padding:30px 34px 24px;color:#fff}
-    .org-pill{display:inline-block;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.18);border-radius:999px;padding:4px 13px;font-size:9.5px;font-weight:800;letter-spacing:1.7px;text-transform:uppercase;color:#dbeafe;margin-bottom:12px}
-    .title{font-size:24px;font-weight:800;letter-spacing:-0.3px;margin-bottom:7px}
-    .subtitle{font-size:11px;color:#dbeafe}
-    .summary{padding:22px 34px 0}
-    .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:18px}
-    .kpi{border:1px solid #e2e8f0;border-radius:18px;padding:16px 16px 14px;background:#fbfdff}
-    .kpi-v{font-size:24px;font-weight:800;margin-bottom:4px}
-    .kpi-l{font-size:10.5px;text-transform:uppercase;letter-spacing:1px;color:#64748b;font-weight:700}
-    .insights{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:18px}
-    .panel{border:1px solid #e2e8f0;border-radius:18px;background:#fff;padding:16px}
-    .panel h4{font-size:11px;letter-spacing:1px;text-transform:uppercase;color:#64748b;margin-bottom:12px}
-    .mini-bars{display:grid;gap:10px}
-    .mini-bar{display:grid;grid-template-columns:86px 1fr 40px;gap:10px;align-items:center;font-size:12px}
-    .track{height:10px;border-radius:999px;background:#eef2f7;overflow:hidden}
-    .fill{height:100%;border-radius:999px}
-    .legend{display:flex;gap:10px;flex-wrap:wrap;padding:0 34px 16px}
-    .leg{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;font-size:11px;font-weight:800;border:1px solid}
-    .content{padding:0 34px 28px}
-    .group-card{border:1px solid #e2e8f0;border-radius:18px;overflow:hidden;margin-top:16px}
-    .group-head{padding:12px 16px;background:#f8fbff;border-bottom:1px solid #e2e8f0;font-size:12px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:#475569}
-    table{width:100%;border-collapse:separate;border-spacing:0}
-    th{padding:10px 10px;font-size:10px;letter-spacing:1px;text-transform:uppercase;color:#64748b;background:#f8fafc;border-bottom:1px solid #e2e8f0}
-    .event-col{min-width:72px;text-align:center}
-    .event-name{font-weight:700;color:#334155}
-    .event-date{font-size:8.5px;color:#94a3b8;margin-top:2px}
-    td{padding:11px 10px;border-bottom:1px solid #edf2f7;font-size:12px}
-    tbody tr:nth-child(odd) td{background:#fcfdff}
-    tbody tr:nth-child(even) td{background:#f8fafc}
-    tbody tr:last-child td{border-bottom:none}
-    .idx{width:40px;text-align:center;color:#94a3b8}
-    .name-main{font-weight:700;color:#0f172a}
-    .name-sub{font-size:10.5px;color:#64748b;margin-top:2px}
-    .status-td{text-align:center;font-weight:800}
-    .count-cell{text-align:center;font-weight:700;color:#334155;background:#f8fafc}
-    .rate-cell{text-align:center}
-    .rate-pill{display:inline-flex;padding:4px 8px;border-radius:999px;font-size:10.5px;font-weight:800}
-    .totals-row td{background:#eef2ff !important}
-    .totals-label{font-weight:800;color:#4338ca;text-align:right}
-    .totals-cell{text-align:center;font-weight:800;color:#4338ca}
-    .totals-cell span{display:block;font-size:9px;font-weight:600;opacity:0.75;margin-top:2px}
-    .footer{display:grid;grid-template-columns:1fr auto 1fr;gap:16px;align-items:end;padding:18px 34px 22px;background:#f8fafc;border-top:1px solid #e2e8f0;font-size:10.5px;color:#64748b}
-    .footer-center{text-align:center}
-    .footer strong{display:block;color:#334155;margin-bottom:3px}
-    .page-count::after{content:counter(page)}
-    .page-total::after{content:counter(pages)}
-    @media print{*{-webkit-print-color-adjust:exact;print-color-adjust:exact}body{background:#fff;padding:0}.page{box-shadow:none;border-radius:0}@page{size:landscape;margin:8mm}}
-  </style></head><body>
-  <div class="page">
-    <div class="header">
-      <div class="org-pill">Arham Yuva Seva Group</div>
-      <div class="title">${title}</div>
-      <div class="subtitle">${subtitle} · ${rowPeople.length} people · ${colEvents.length} events</div>
-    </div>
-    <div class="summary">
-      <div class="kpis">
-        <div class="kpi"><div class="kpi-v" style="color:#1d4ed8">${rowPeople.length}</div><div class="kpi-l">Participants</div></div>
-        <div class="kpi"><div class="kpi-v" style="color:#0f766e">${colEvents.length}</div><div class="kpi-l">Tracked Events</div></div>
-        <div class="kpi"><div class="kpi-v" style="color:${overallPct >= 75 ? "#15803d" : overallPct >= 50 ? "#b45309" : "#be123c"}">${overallPct}%</div><div class="kpi-l">Average Attendance</div></div>
-        <div class="kpi"><div class="kpi-v" style="color:#7c3aed">${highPerformers}</div><div class="kpi-l">High Performers</div></div>
+  const getStatus = (person, eventId) => {
+    const s = attendanceGetter(eventId, person.id);
+    return statusMeta[s] || { label: "-", icon: "-", color: "#9ca3af", bg: "transparent" };
+  };
+
+  // Filter events by date range if provided
+  let filteredEvents = data.events || [];
+  if (dateRange && dateRange.start && dateRange.end) {
+    const start = new Date(dateRange.start);
+    const end = new Date(dateRange.end);
+    end.setHours(23, 59, 59, 999);
+    filteredEvents = filteredEvents.filter(e => {
+      const ed = new Date(e.date);
+      return ed >= start && ed <= end;
+    });
+  }
+
+  // Filter people
+  let peopleList = [...allPeople];
+  if (template === "volunteerReport") {
+    peopleList = peopleList.filter(p => /volunteer/i.test(p.role || p.notes || ""));
+  }
+  
+  // Apply absent filter (if a template is detailed and includeAbsent is false, we could filter out those with 0 attendance)
+  if (!includeAbsent && template === "detailedAttendance") {
+     peopleList = peopleList.filter(p => {
+       const hasAttendance = filteredEvents.some(e => {
+         const s = attendanceGetter(e.id, p.id);
+         return s === 'present' || s === 'late';
+       });
+       return hasAttendance;
+     });
+  }
+
+  peopleList.sort((a,b) => a.name.localeCompare(b.name));
+
+  let htmlBody = "";
+
+  const headerHtml = `
+    <header style="border-bottom: 2px solid ${brandColor}; padding-bottom: 20px; margin-bottom: 30px;">
+      <h1 style="margin: 0; color: #111827; font-size: 28px;">AYSG Attendance Report</h1>
+      <p style="margin: 4px 0 0; color: #6b7280; font-size: 14px;">${TEMPLATES[template].title}</p>
+      <div style="margin-top: 16px; font-size: 12px; color: #4b5563; display: flex; justify-content: space-between;">
+        <span>Generated: ${generatedAt}</span>
+        ${dateRange && dateRange.start ? `<span>Period: ${dateRange.start} to ${dateRange.end || 'Now'}</span>` : ''}
       </div>
-      <div class="insights">
-        <div class="panel">
-          <h4>Monthly Trend</h4>
-          <div class="mini-bars">${monthlyBars.map(([label, count, percent]) => `<div class="mini-bar"><span>${label}</span><div class="track"><div class="fill" style="width:${percent}%;background:#3b82f6"></div></div><span>${count}</span></div>`).join("")}</div>
+    </header>
+  `;
+
+  const footerHtml = includeSignatures ? `
+    <div style="margin-top: 60px; display: flex; justify-content: space-between; page-break-inside: avoid;">
+      <div style="text-align: center; width: 200px;">
+        <div style="border-bottom: 1px solid #000; height: 40px; margin-bottom: 8px;"></div>
+        <div style="font-size: 12px;">Prepared By</div>
+      </div>
+      <div style="text-align: center; width: 200px;">
+        <div style="border-bottom: 1px solid #000; height: 40px; margin-bottom: 8px;"></div>
+        <div style="font-size: 12px;">Approved By</div>
+      </div>
+    </div>
+  ` : "";
+
+  if (template === "monthlySummary" || template === "executiveReport") {
+    htmlBody += `
+      <div style="display: flex; gap: 20px; margin-bottom: 30px;">
+        <div style="flex: 1; padding: 20px; background: #f9fafb; border-radius: 8px; text-align: center;">
+          <div style="font-size: 32px; font-weight: bold; color: ${brandColor};">${stats.active}</div>
+          <div style="font-size: 12px; color: #6b7280;">Active Members</div>
         </div>
-        <div class="panel">
-          <h4>Attendance Highlights</h4>
-          <div style="font-size:13px;color:#334155;display:grid;gap:8px">
-            <div>${highPerformers} people are tracking at 75% or above.</div>
-            <div>${lowPerformers} people are below 50% attendance and may need outreach.</div>
-            <div>${groupedPeople.length} roster section${groupedPeople.length !== 1 ? "s" : ""} included for easier scanning.</div>
+        <div style="flex: 1; padding: 20px; background: #f9fafb; border-radius: 8px; text-align: center;">
+          <div style="font-size: 32px; font-weight: bold; color: ${brandColor};">${filteredEvents.length}</div>
+          <div style="font-size: 12px; color: #6b7280;">Events in Period</div>
+        </div>
+        <div style="flex: 1; padding: 20px; background: #f9fafb; border-radius: 8px; text-align: center;">
+          <div style="font-size: 32px; font-weight: bold; color: #15803d;">${Math.round(stats.avgAttendance)}</div>
+          <div style="font-size: 12px; color: #6b7280;">Avg. Attendance</div>
+        </div>
+      </div>
+    `;
+    
+    if (includeCharts) {
+      // Mock chart representation
+      htmlBody += `
+        <div style="margin-bottom: 30px; page-break-inside: avoid;">
+          <h3 style="margin: 0 0 12px; font-size: 16px;">Attendance Trend</h3>
+          <div style="height: 120px; background: #f3f4f6; border-radius: 8px; position: relative; overflow: hidden; display: flex; align-items: flex-end; padding: 0 10px 10px;">
+            ${filteredEvents.slice(0,10).map((e,i) => {
+               // Calculate a rough height based on an assumed max of 50
+               const count = allPeople.filter(p => attendanceGetter(e.id, p.id) === 'present').length;
+               const h = Math.max(10, Math.min(100, (count / (allPeople.length || 1)) * 100));
+               return `<div style="flex: 1; margin: 0 4px; background: ${brandColor}; height: ${h}%; border-radius: 4px 4px 0 0; opacity: 0.8;" title="${e.title}"></div>`;
+            }).join("")}
           </div>
         </div>
-      </div>
-    </div>
-    <div class="legend">
-      ${Object.values(statusMeta).map(meta => `<span class="leg" style="color:${meta.color};background:${meta.bg};border-color:${meta.color}22">${meta.icon} ${meta.label}</span>`).join("")}
-    </div>
-    <div class="content">
-      ${groupedPeople.map(section => `
-      <div class="group-card">
-        <div class="group-head">${section.section} · ${section.people.length} people</div>
-        <table>
-          <thead>
-            <tr>
-              <th style="width:40px;text-align:center">#</th>
-              <th style="min-width:170px;text-align:left">Participant</th>
-              ${eventCols}
-              <th style="min-width:58px;text-align:center">Count</th>
-              <th style="min-width:58px;text-align:center">Rate</th>
+      `;
+    }
+  }
+
+  if (template === "detailedAttendance" || template === "volunteerReport") {
+    htmlBody += `
+      <table style="width: 100%; border-collapse: collapse; font-size: 12px;">
+        <thead>
+          <tr style="background: ${brandColor}; color: #fff;">
+            <th style="padding: 10px; text-align: left; border: 1px solid ${brandColor};">Member</th>
+            ${includePhone ? `<th style="padding: 10px; text-align: left; border: 1px solid ${brandColor};">Phone</th>` : ""}
+            ${filteredEvents.map(e => `<th style="padding: 10px; text-align: center; border: 1px solid ${brandColor};" title="${e.title}">${new Date(e.date).toLocaleDateString('en-US', {month:'short', day:'numeric'})}</th>`).join("")}
+          </tr>
+        </thead>
+        <tbody>
+          ${peopleList.map((p, i) => `
+            <tr style="background: ${i % 2 === 0 ? '#fff' : '#f9fafb'};">
+              <td style="padding: 8px; border: 1px solid #e5e7eb; font-weight: 500;">${p.name}</td>
+              ${includePhone ? `<td style="padding: 8px; border: 1px solid #e5e7eb; color: #6b7280;">${p.phone || '-'}</td>` : ""}
+              ${filteredEvents.map(e => {
+                const s = getStatus(p, e.id);
+                return `<td style="padding: 8px; text-align: center; border: 1px solid #e5e7eb; color: ${s.color}; background: ${s.bg}80;">${s.icon}</td>`;
+              }).join("")}
             </tr>
-          </thead>
-          <tbody>
-            ${renderRows(section.people)}
-            <tr class="totals-row">
-              <td colspan="2" class="totals-label">Event Totals</td>
-              ${totalRow}
-              <td colspan="2"></td>
-            </tr>
-          </tbody>
-        </table>
-      </div>`).join("")}
-    </div>
-    <div class="footer">
-      <div><strong>Generated</strong>${generatedAt}<br/>Exported By ${exportedBy}</div>
-      <div class="footer-center"><strong>AYSG Attendance Tracker</strong>Analytical Attendance Report<br/>Page <span class="page-count"></span></div>
-      <div style="text-align:right"><strong>Report Type</strong>${title}<br/>Page Total <span class="page-total"></span></div>
-    </div>
-  </div>
-  </body></html>`;
+          `).join("")}
+        </tbody>
+      </table>
+    `;
+  } else {
+    // Basic event list for monthly summary
+    htmlBody += `
+      <table style="width: 100%; border-collapse: collapse; font-size: 12px;">
+        <thead>
+          <tr style="background: ${brandColor}; color: #fff;">
+            <th style="padding: 10px; text-align: left; border: 1px solid ${brandColor};">Event Date & Title</th>
+            <th style="padding: 10px; text-align: center; border: 1px solid ${brandColor};">Present</th>
+            <th style="padding: 10px; text-align: center; border: 1px solid ${brandColor};">Absent</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${filteredEvents.map((e, i) => {
+            const pCount = allPeople.filter(p => attendanceGetter(e.id, p.id) === 'present').length;
+            const aCount = allPeople.filter(p => attendanceGetter(e.id, p.id) === 'absent').length;
+            return `
+              <tr style="background: ${i % 2 === 0 ? '#fff' : '#f9fafb'};">
+                <td style="padding: 8px; border: 1px solid #e5e7eb;"><strong>${new Date(e.date).toLocaleDateString()}</strong> - ${e.title}</td>
+                <td style="padding: 8px; text-align: center; border: 1px solid #e5e7eb; color: #15803d;">${pCount}</td>
+                <td style="padding: 8px; text-align: center; border: 1px solid #e5e7eb; color: #be123c;">${aCount}</td>
+              </tr>
+            `;
+          }).join("")}
+        </tbody>
+      </table>
+    `;
+  }
+
+  return `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8">
+      <title>${TEMPLATES[template].title} - AYSG</title>
+      <style>
+        body { font-family: 'Inter', -apple-system, sans-serif; padding: 40px; margin: 0; color: #111827; }
+        @media print { body { padding: 0; } }
+      </style>
+    </head>
+    <body>
+      ${headerHtml}
+      ${htmlBody}
+      ${footerHtml}
+    </body>
+    </html>
+  `;
 }
 
-// ─── Reports view ──────────────────────────────────────────────────────────
-function Reports({ members, newJoinees, events, attendance, newJoineeAttendance, getEventStats, showToast }) {
-  const [tab, setTab]             = useState("single");
-  const [selEvent, setSelEvent]   = useState(events[0]?.id || "");
-  const [selMonth, setSelMonth]   = useState(() => {
-    const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}`;
-  });
-  const [rangeStart, setRangeStart] = useState("");
-  const [rangeEnd,   setRangeEnd]   = useState("");
-  const [showGroup,  setShowGroup]  = useState("all");
-  const [sortBy,     setSortBy]     = useState("status"); // "status" | "name"
-  const [showAbsent, setShowAbsent] = useState(true);
+function LockedReports({ onUnlock }) {
+  const [pwd, setPwd] = React.useState("");
+  const [err, setErr] = React.useState(false);
 
-  const active        = members.filter(m => m.active).map(m => ({ ...m, group: "Member", role: m.role || "Member" }));
-  const activeJoinees = newJoinees.filter(j => j.active).map(j => ({ ...j, group: "New Joinee", role: "New Joiner" }));
-  const allPeople     = showGroup === "members" ? active : showGroup === "joinees" ? activeJoinees : [...active, ...activeJoinees];
-  const peopleForGroup = (group = showGroup) => (
-    group === "members" ? active : group === "joinees" ? activeJoinees : [...active, ...activeJoinees]
-  );
-  const groupLabel = (group = showGroup) => (
-    group === "members" ? "Main Group" : group === "joinees" ? "New Joinees" : "All People"
-  );
-
-  const attendanceGetter = (eventId, personId) => {
-    const isJ = personId.startsWith("N");
-    return isAttendedStatus((isJ ? newJoineeAttendance[eventId] : attendance[eventId])?.[personId]);
+  const handleUnlock = (e) => {
+    e.preventDefault();
+    if (pwd === "ParamAYSG1008") {
+      onUnlock();
+    } else {
+      setErr(true);
+      setTimeout(() => setErr(false), 2000);
+    }
   };
-  const attendanceStatusGetter = (eventId, personId) => {
-    const isJ = personId.startsWith("N");
-    return normalizeAttendanceStatus((isJ ? newJoineeAttendance[eventId] : attendance[eventId])?.[personId]);
-  };
-
-  const eventsInMonth = events.filter(e => e.date.startsWith(selMonth));
-  const eventsInRange = events.filter(e => rangeStart && rangeEnd && e.date >= rangeStart && e.date <= rangeEnd);
-
-  const event       = events.find(e => e.id === selEvent);
-  const rec         = attendance[selEvent] || {};
-  const newRec      = newJoineeAttendance[selEvent] || {};
-  const isPresent   = (p) => p.group === "New Joinee" ? isAttendedStatus(newRec[p.id]) : isAttendedStatus(rec[p.id]);
-
-  const sortedPeople = [...allPeople].sort((a, b) => {
-    if (sortBy === "name") return a.name.localeCompare(b.name);
-    return isPresent(b) - isPresent(a);
-  });
-  const presentList = sortedPeople.filter(isPresent);
-  const absentList  = sortedPeople.filter(p => !isPresent(p));
-  const stats       = selEvent ? getEventStats(selEvent) : null;
-  const monthOptions = [...new Set(events.map(e => e.date.slice(0,7)))].sort().reverse();
-  const statsForPeople = (people, eventId) => {
-    const counts = people.reduce((acc, person) => {
-      const status = attendanceStatusGetter(eventId, person.id);
-      acc[status] = (acc[status] || 0) + 1;
-      return acc;
-    }, { present: 0, absent: 0, late: 0, excused: 0 });
-    const present = counts.present + counts.late;
-    const total = people.length;
-    return { total, present, absent: total - present, late: counts.late, excused: counts.excused, pct: total ? Math.round(present / total * 100) : 0 };
-  };
-
-  const openPrint = (html) => {
-    const win = window.open("", "_blank");
-    win.document.write(html);
-    win.document.close();
-    setTimeout(() => win.print(), 500);
-    showToast("Opened in new tab — use Print → Save as PDF", "success");
-  };
-
-  const printSingle = (group = showGroup) => {
-    if (!event) return showToast("Select an event first", "error");
-    const people = peopleForGroup(group);
-    if (!people.length) return showToast(`No active people in ${groupLabel(group)}`, "error");
-    openPrint(buildSingleEventPdfHtml({
-      event,
-      allPeople: people,
-      attendanceGetter,
-      attendanceStatusGetter,
-      stats: statsForPeople(people, event.id),
-      sortBy,
-      groupName: groupLabel(group),
-      generatedAt: new Date().toLocaleString("en-IN"),
-    }));
-  };
-  const printMonthly = (group = showGroup) => {
-    if (!eventsInMonth.length) return showToast("No events in that month", "error");
-    const people = peopleForGroup(group);
-    if (!people.length) return showToast(`No active people in ${groupLabel(group)}`, "error");
-    const [yr, mo] = selMonth.split("-");
-    const label = new Date(yr, mo-1).toLocaleDateString("en-IN",{month:"long",year:"numeric"});
-    const groupName = groupLabel(group);
-    openPrint(buildMatrixPdfHtml({ title:`${groupName} Monthly Attendance - ${label}`, subtitle: `${groupName} - ${label}`,
-      colEvents:[...eventsInMonth].sort((a,b)=>a.date.localeCompare(b.date)),
-      rowPeople:people, attendanceGetter, attendanceStatusGetter, generatedAt:new Date().toLocaleString("en-IN") }));
-  };
-  const printRange = (group = showGroup) => {
-    if (!rangeStart||!rangeEnd) return showToast("Set both start and end dates","error");
-    if (!eventsInRange.length) return showToast("No events in that range","error");
-    const people = peopleForGroup(group);
-    if (!people.length) return showToast(`No active people in ${groupLabel(group)}`, "error");
-    const groupName = groupLabel(group);
-    openPrint(buildMatrixPdfHtml({ title:`${groupName} Custom Range Report`,
-      subtitle:`${groupName} - ${fmtDate(rangeStart)} to ${fmtDate(rangeEnd)}`,
-      colEvents:[...eventsInRange].sort((a,b)=>a.date.localeCompare(b.date)),
-      rowPeople:people, attendanceGetter, attendanceStatusGetter, generatedAt:new Date().toLocaleString("en-IN") }));
-  };
-
-  const tabBtn = (t, label) => (
-    <button onClick={() => setTab(t)} style={{
-      padding:"9px 20px", borderRadius:10, fontSize:13.5, fontWeight:500, cursor:"pointer",
-      border:"1px solid", transition:"all 0.2s",
-      background: tab===t ? "linear-gradient(135deg,#5b46f5,#7c6af8)" : "var(--bg3)",
-      borderColor: tab===t ? "transparent" : "var(--border)",
-      color: tab===t ? "#fff" : "var(--text2)",
-      boxShadow: tab===t ? "0 4px 15px rgba(124,106,248,0.3)" : "none",
-    }}>{label}</button>
-  );
-
-  const pctColor = (p) => p>=75?"var(--emerald)":p>=50?"var(--gold)":"var(--rose)";
 
   return (
-    <div>
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="page-title">Reports</h1>
-          <p className="color-muted text-sm" style={{marginTop:4}}>Professional attendance reports & PDF export</p>
+    <div className="locked-reports">
+      <div className="lock-icon" style={{ animation: err ? "shake 0.5s" : "none" }}>🔒</div>
+      <h2 style={{ marginBottom: "8px" }}>Admin Access Required</h2>
+      <p style={{ color: "var(--text2)", marginBottom: "24px", fontSize: "14px" }}>Please enter the administrator password to access the Reports Studio.</p>
+      <form onSubmit={handleUnlock}>
+        <input 
+          type="password" 
+          placeholder="Enter password..." 
+          value={pwd} 
+          onChange={e => setPwd(e.target.value)}
+          className="input mb-4" 
+          style={{ width: "100%", borderColor: err ? "var(--rose)" : "" }}
+          autoFocus
+        />
+        <button type="submit" className="btn btn-primary" style={{ width: "100%" }}>Unlock Reports</button>
+      </form>
+    </div>
+  );
+}
+
+function Reports({ events, allPeople, attendanceGetter, stats }) {
+  const [unlocked, setUnlocked] = React.useState(false);
+  const [template, setTemplate] = React.useState("monthlySummary");
+  const [zoom, setZoom] = React.useState(1);
+  const [exportStep, setExportStep] = React.useState(0);
+  const [isExporting, setIsExporting] = React.useState(false);
+  
+  // Customization Options
+  const [options, setOptions] = React.useState({
+    brandColor: "#7c6af8",
+    includePhone: false,
+    includeSignatures: true,
+    includeCharts: true,
+    includeAbsent: true,
+    dateRange: { start: "", end: "" }
+  });
+
+  const iframeRef = React.useRef(null);
+  const [previewHtml, setPreviewHtml] = React.useState("");
+
+  const updatePreview = React.useCallback(() => {
+    const html = buildReportHtml({
+      template,
+      data: { events, allPeople, attendanceGetter, stats, generatedAt: new Date().toLocaleString("en-IN") },
+      options
+    });
+    setPreviewHtml(html);
+  }, [template, events, allPeople, attendanceGetter, stats, options]);
+
+  React.useEffect(() => {
+    if (unlocked) {
+      updatePreview();
+    }
+  }, [unlocked, updatePreview]);
+
+  React.useEffect(() => {
+    if (iframeRef.current && previewHtml) {
+      const doc = iframeRef.current.contentDocument;
+      if (doc) {
+        doc.open();
+        doc.write(previewHtml);
+        doc.close();
+      }
+    }
+  }, [previewHtml, zoom]);
+
+  const handleExport = () => {
+    setIsExporting(true);
+    setExportStep(1); // Generating PDF
+    
+    setTimeout(() => {
+      setExportStep(2); // Finalizing
+      
+      setTimeout(() => {
+        const win = window.open("", "_blank");
+        win.document.write(previewHtml);
+        win.document.close();
+        win.focus();
+        setTimeout(() => {
+          win.print();
+          setIsExporting(false);
+          setExportStep(3); // Done
+          setTimeout(() => setExportStep(0), 3000);
+        }, 500);
+      }, 1000);
+    }, 1500);
+  };
+
+  if (!unlocked) {
+    return <LockedReports onUnlock={() => setUnlocked(true)} />;
+  }
+
+  return (
+    <div className="reports-studio">
+      <div className="settings-panel">
+        <h2 className="mb-6 font-bold" style={{ fontSize: "22px" }}>Report Studio</h2>
+        
+        <div className="section mb-6">
+          <h3 className="mb-4 font-semi" style={{ fontSize: "14px" }}>1. Select Template</h3>
+          <div className="report-template-grid">
+            {Object.values(TEMPLATES).map(tpl => (
+              <div 
+                key={tpl.id} 
+                className={`template-card ${template === tpl.id ? 'active' : ''}`}
+                onClick={() => setTemplate(tpl.id)}
+              >
+                <div className="template-card-title">{tpl.title}</div>
+                <div className="template-card-desc">{tpl.desc}</div>
+              </div>
+            ))}
+          </div>
         </div>
+
+        <div className="section mb-6" style={{ background: "var(--bg2)", padding: "20px", borderRadius: "16px", border: "1px solid var(--border)" }}>
+          <h3 className="mb-4 font-semi" style={{ fontSize: "14px" }}>2. Customization</h3>
+          
+          <div className="mb-4">
+            <label className="text-xs color-muted font-semi block mb-2">Brand Color</label>
+            <div className="flex gap-2">
+              {['#7c6af8', '#ec4899', '#14b8a6', '#f59e0b', '#ef4444', '#111827'].map(c => (
+                <div 
+                  key={c}
+                  className="color-swatch"
+                  style={{ background: c, borderColor: options.brandColor === c ? 'var(--text)' : 'transparent' }}
+                  onClick={() => setOptions({...options, brandColor: c})}
+                />
+              ))}
+              <div className="color-swatch" style={{ background: options.brandColor }}>
+                <input 
+                  type="color" 
+                  value={options.brandColor} 
+                  onChange={e => setOptions({...options, brandColor: e.target.value})} 
+                />
+              </div>
+            </div>
+          </div>
+
+          <div className="grid-2 gap-4 mb-4" style={{ gridTemplateColumns: '1fr 1fr' }}>
+            <div>
+              <label className="text-xs color-muted font-semi block mb-2">Start Date</label>
+              <input 
+                type="date" 
+                className="input" 
+                style={{ width: "100%" }}
+                value={options.dateRange.start}
+                onChange={e => setOptions({...options, dateRange: {...options.dateRange, start: e.target.value}})}
+              />
+            </div>
+            <div>
+              <label className="text-xs color-muted font-semi block mb-2">End Date</label>
+              <input 
+                type="date" 
+                className="input" 
+                style={{ width: "100%" }}
+                value={options.dateRange.end}
+                onChange={e => setOptions({...options, dateRange: {...options.dateRange, end: e.target.value}})}
+              />
+            </div>
+          </div>
+
+          <label className="option-checkbox">
+            <input type="checkbox" checked={options.includeSignatures} onChange={e => setOptions({...options, includeSignatures: e.target.checked})} />
+            Include Signature Blocks
+          </label>
+          <label className="option-checkbox">
+            <input type="checkbox" checked={options.includeCharts} onChange={e => setOptions({...options, includeCharts: e.target.checked})} />
+            Include Analytics Charts
+          </label>
+          <label className="option-checkbox">
+            <input type="checkbox" checked={options.includePhone} onChange={e => setOptions({...options, includePhone: e.target.checked})} />
+            Include Phone Numbers
+          </label>
+          <label className="option-checkbox">
+            <input type="checkbox" checked={options.includeAbsent} onChange={e => setOptions({...options, includeAbsent: e.target.checked})} />
+            Include Absent Members
+          </label>
+        </div>
+
       </div>
 
-      {/* ── tabs + global filters ── */}
-      <div className="flex gap-3 mb-4 wrap items-center">
-        {tabBtn("single","📋 Single Event")}
-        {tabBtn("monthly","📆 Full Month")}
-        {tabBtn("range","📅 Custom Range")}
-        <div style={{marginLeft:"auto",display:"flex",gap:10}}>
-          <select className="input" style={{width:155}} value={showGroup} onChange={e=>setShowGroup(e.target.value)}>
-            <option value="all">All People</option>
-            <option value="members">Main Group only</option>
-            <option value="joinees">New Joinees only</option>
-          </select>
-          <select className="input" style={{width:145}} value={sortBy} onChange={e=>setSortBy(e.target.value)}>
-            <option value="status">Sort: Status first</option>
-            <option value="name">Sort: A–Z Name</option>
-          </select>
+      <div className="preview-panel">
+        <div className="preview-header">
+          <div className="font-semi text-sm">Live Preview</div>
+          <div className="preview-zoom-controls">
+            <button onClick={() => setZoom(Math.max(0.5, zoom - 0.1))} title="Zoom Out">-</button>
+            <span style={{ fontSize: '11px', fontWeight: 600, width: '40px', textAlign: 'center' }}>{Math.round(zoom * 100)}%</span>
+            <button onClick={() => setZoom(Math.min(1.5, zoom + 0.1))} title="Zoom In">+</button>
+          </div>
         </div>
-      </div>
-
-      {/* ══════════════ SINGLE EVENT ══════════════ */}
-      {tab==="single" && (
-        <>
-          {/* controls */}
-          <div className="card mb-4">
-            <div className="flex gap-4 items-end wrap">
-              <div style={{flex:1}}>
-                <label style={{display:"block",fontSize:12.5,color:"var(--text2)",marginBottom:6}}>Select Event</label>
-                <select className="input" value={selEvent} onChange={e=>setSelEvent(e.target.value)}>
-                  <option value="">-- Choose Event --</option>
-                  {[...events].sort((a,b)=>new Date(b.date)-new Date(a.date)).map(e=>(
-                    <option key={e.id} value={e.id}>{e.name} ({fmtDate(e.date)})</option>
-                  ))}
-                </select>
-              </div>
-              <label style={{display:"flex",alignItems:"center",gap:8,fontSize:13,color:"var(--text2)",cursor:"pointer",userSelect:"none"}}>
-                <input type="checkbox" checked={showAbsent} onChange={e=>setShowAbsent(e.target.checked)} style={{accentColor:"var(--accent)",width:15,height:15}} />
-                Show absent
-              </label>
-              <button className="btn btn-primary" onClick={() => printSingle()} disabled={!selEvent} style={{gap:8}}>
-                🖨️ Export PDF
-              </button>
-              <button className="btn" onClick={() => printSingle("members")} disabled={!selEvent} style={{gap:8}}>
-                Main Group PDF
-              </button>
-              <button className="btn" onClick={() => printSingle("joinees")} disabled={!selEvent} style={{gap:8}}>
-                New Joinees PDF
-              </button>
-            </div>
+        
+        <div className="preview-device">
+          <div className="preview-page" style={{ transform: `scale(${zoom})`, marginBottom: `${(zoom - 1) * 1123}px` }}>
+            <iframe ref={iframeRef} title="Report Preview" />
           </div>
+        </div>
 
-          {event && stats && (
-            <>
-              {/* banner */}
-              <div style={{background:"linear-gradient(135deg,#1e1b4b,#3730a3,#4f46e5)",borderRadius:14,padding:"22px 24px",marginBottom:16,color:"#fff",position:"relative",overflow:"hidden"}}>
-                <div style={{position:"absolute",top:-30,right:-20,width:120,height:120,borderRadius:"50%",background:"rgba(255,255,255,0.04)"}}/>
-                <div style={{fontSize:11,letterSpacing:2,textTransform:"uppercase",color:"#a5b4fc",marginBottom:6,fontWeight:700}}>Arham Yuva Seva Group</div>
-                <div style={{fontFamily:"'Syne',sans-serif",fontSize:20,fontWeight:800,marginBottom:8}}>{event.name}</div>
-                <div style={{display:"flex",gap:16,fontSize:12,color:"#c7d2fe",flexWrap:"wrap"}}>
-                  <span>📅 {fmtDate(event.date)}</span>
-                  <span>🕐 {event.time}</span>
-                  {event.venue&&<span>📍 {event.venue}</span>}
-                  {event.category&&<span>🏷 {event.category}</span>}
+        <div className="reports-footer">
+          <div style={{ flex: 1 }}>
+            {isExporting ? (
+              <div className="export-stepper">
+                <div className={`step-node ${exportStep >= 1 ? 'active' : ''} ${exportStep > 1 ? 'done' : ''}`}>
+                  <div className="step-circle">1</div>
+                  <div className="step-label">Generating</div>
+                </div>
+                <div className={`step-node ${exportStep >= 2 ? 'active' : ''} ${exportStep > 2 ? 'done' : ''}`}>
+                  <div className="step-circle">2</div>
+                  <div className="step-label">Formatting</div>
+                </div>
+                <div className={`step-node ${exportStep >= 3 ? 'active' : ''} ${exportStep > 3 ? 'done' : ''}`}>
+                  <div className="step-circle">3</div>
+                  <div className="step-label">Ready</div>
                 </div>
               </div>
-
-              {/* 4 stat tiles */}
-              <div className="grid-4 mb-4">
-                {[
-                  {label:"Total",     value:stats.total,              color:"#6366f1", bg:"rgba(99,102,241,0.1)"},
-                  {label:"Present",   value:stats.present,            color:"var(--emerald)", bg:"rgba(16,212,126,0.1)"},
-                  {label:"Absent",    value:stats.absent,             color:"var(--rose)",    bg:"rgba(244,63,94,0.1)"},
-                  {label:"Attendance",value:stats.pct+"%",            color:pctColor(stats.pct), bg:"rgba(124,106,248,0.08)"},
-                ].map(s=>(
-                  <div key={s.label} style={{background:s.bg,border:`1px solid ${s.color}22`,borderRadius:12,padding:"16px",textAlign:"center"}}>
-                    <div style={{fontSize:26,fontWeight:800,fontFamily:"'Syne',sans-serif",color:s.color}}>{s.value}</div>
-                    <div style={{fontSize:11,color:"var(--text2)",marginTop:4,textTransform:"uppercase",letterSpacing:0.8,fontWeight:600}}>{s.label}</div>
-                  </div>
-                ))}
-              </div>
-
-              {/* attendance bar */}
-              <div className="card mb-4" style={{padding:"14px 18px"}}>
-                <div className="flex items-center gap-3">
-                  <span style={{fontSize:12.5,color:"var(--text2)",minWidth:70}}>Attendance</span>
-                  <div style={{flex:1,height:10,borderRadius:5,background:"var(--bg4)",overflow:"hidden"}}>
-                    <div style={{height:"100%",width:stats.pct+"%",borderRadius:5,background:`linear-gradient(90deg,${pctColor(stats.pct)},${pctColor(stats.pct)}aa)`,transition:"width 0.5s"}}/>
-                  </div>
-                  <span style={{fontWeight:700,fontSize:14,color:pctColor(stats.pct),minWidth:40,textAlign:"right"}}>{stats.pct}%</span>
-                </div>
-              </div>
-
-              {/* present list */}
-              {presentList.length > 0 && (
-                <div className="card mb-4" style={{padding:0,overflow:"hidden",borderColor:"rgba(16,212,126,0.2)"}}>
-                  <div style={{padding:"14px 20px",borderBottom:"1px solid var(--border)",display:"flex",alignItems:"center",gap:10}}>
-                    <div style={{width:8,height:8,borderRadius:"50%",background:"var(--emerald)"}}/>
-                    <span style={{fontFamily:"'Syne',sans-serif",fontSize:14,fontWeight:700,color:"var(--emerald)"}}>Present</span>
-                    <span style={{fontSize:12,color:"var(--text2)"}}>{presentList.length} member{presentList.length!==1?"s":""}</span>
-                    <span style={{marginLeft:"auto",fontSize:12,color:"var(--text2)"}}>Sorted: {sortBy==="name"?"A–Z":"Status"}</span>
-                  </div>
-                  <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(200px,1fr))",gap:1,background:"var(--border)"}}>
-                    {presentList.map((p,i)=>(
-                      <div key={p.id} style={{background:"var(--bg2)",padding:"10px 14px",display:"flex",alignItems:"center",gap:10}}>
-                        <span style={{fontSize:11,color:"var(--text3)",minWidth:22,textAlign:"right"}}>{i+1}</span>
-                        <Avatar name={p.name} size={30} color="#10d47e"/>
-                        <span style={{fontSize:13,fontWeight:600,flex:1}}>{p.name}</span>
-                        <span style={{fontSize:16}}>✅</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* absent list */}
-              {showAbsent && absentList.length > 0 && (
-                <div className="card" style={{padding:0,overflow:"hidden",borderColor:"rgba(244,63,94,0.2)"}}>
-                  <div style={{padding:"14px 20px",borderBottom:"1px solid var(--border)",display:"flex",alignItems:"center",gap:10}}>
-                    <div style={{width:8,height:8,borderRadius:"50%",background:"var(--rose)"}}/>
-                    <span style={{fontFamily:"'Syne',sans-serif",fontSize:14,fontWeight:700,color:"var(--rose)"}}>Absent</span>
-                    <span style={{fontSize:12,color:"var(--text2)"}}>{absentList.length} member{absentList.length!==1?"s":""}</span>
-                  </div>
-                  <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(200px,1fr))",gap:1,background:"var(--border)"}}>
-                    {absentList.map((p,i)=>(
-                      <div key={p.id} style={{background:"var(--bg2)",padding:"10px 14px",display:"flex",alignItems:"center",gap:10}}>
-                        <span style={{fontSize:11,color:"var(--text3)",minWidth:22,textAlign:"right"}}>{i+1}</span>
-                        <Avatar name={p.name} size={30} color="#f43f5e"/>
-                        <span style={{fontSize:13,fontWeight:600,flex:1}}>{p.name}</span>
-                        <span style={{fontSize:16}}>❌</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </>
-          )}
-        </>
-      )}
-
-      {/* ══════════════ FULL MONTH ══════════════ */}
-      {tab==="monthly" && (
-        <>
-          <div className="card mb-4">
-            <div className="flex gap-4 items-end wrap">
-              <div>
-                <label style={{display:"block",fontSize:12.5,color:"var(--text2)",marginBottom:6}}>Select Month</label>
-                {monthOptions.length > 0
-                  ? <select className="input" style={{width:210}} value={selMonth} onChange={e=>setSelMonth(e.target.value)}>
-                      {monthOptions.map(m=>{
-                        const [yr,mo]=m.split("-");
-                        const lbl=new Date(yr,mo-1).toLocaleDateString("en-IN",{month:"long",year:"numeric"});
-                        const cnt=events.filter(e=>e.date.startsWith(m)).length;
-                        return <option key={m} value={m}>{lbl} ({cnt} event{cnt!==1?"s":""})</option>;
-                      })}
-                    </select>
-                  : <input className="input" type="month" style={{width:210}} value={selMonth} onChange={e=>setSelMonth(e.target.value)}/>
-                }
-              </div>
-              <div style={{flex:1}}/>
-              <button className="btn btn-primary" onClick={() => printMonthly()} disabled={!eventsInMonth.length}>
-                🖨️ Export Month PDF ({eventsInMonth.length} event{eventsInMonth.length!==1?"s":""})
-              </button>
-              <button className="btn" onClick={() => printMonthly("members")} disabled={!eventsInMonth.length}>
-                Main Group PDF
-              </button>
-              <button className="btn" onClick={() => printMonthly("joinees")} disabled={!eventsInMonth.length}>
-                New Joinees PDF
-              </button>
-            </div>
-          </div>
-
-          {/* month quick-stats */}
-          {eventsInMonth.length > 0 && (() => {
-            const avgPct = allPeople.length
-              ? Math.round(allPeople.reduce((s,p)=>s+eventsInMonth.filter(e=>attendanceGetter(e.id,p.id)).length,0)
-                / (allPeople.length * eventsInMonth.length) * 100) : 0;
-            return (
-              <div className="grid-4 mb-4">
-                {[
-                  {label:"Events",      value:eventsInMonth.length,  color:"#6366f1"},
-                  {label:"Members",     value:allPeople.length,       color:"var(--cyan)"},
-                  {label:"Avg Attend.", value:avgPct+"%",              color:pctColor(avgPct)},
-                  {label:"High (≥75%)", value:allPeople.filter(p=>{
-                    const c=eventsInMonth.filter(e=>attendanceGetter(e.id,p.id)).length;
-                    return eventsInMonth.length&&Math.round(c/eventsInMonth.length*100)>=75;
-                  }).length, color:"var(--emerald)"},
-                ].map(s=>(
-                  <div key={s.label} className="stat-card">
-                    <div className="stat-label">{s.label}</div>
-                    <div className="stat-value" style={{color:s.color,fontSize:24}}>{s.value}</div>
-                  </div>
-                ))}
-              </div>
-            );
-          })()}
-
-          <div className="card" style={{padding:0,overflow:"hidden"}}>
-            <div style={{padding:"14px 20px",borderBottom:"1px solid var(--border)",fontFamily:"'Syne',sans-serif",fontSize:15,fontWeight:700}}>
-              {selMonth ? new Date(selMonth+"-01").toLocaleDateString("en-IN",{month:"long",year:"numeric"}) : ""}
-              <span style={{fontSize:12,fontWeight:400,color:"var(--text2)",marginLeft:10}}>{eventsInMonth.length} events · {allPeople.length} people</span>
-            </div>
-            {eventsInMonth.length===0
-              ? <EmptyState icon="📅" msg="No events this month"/>
-              : <div style={{overflowX:"auto"}}><table className="table" style={{minWidth:eventsInMonth.length*90+260}}>
-                  <thead><tr>
-                    <th style={{minWidth:34}}>#</th>
-                    <th style={{minWidth:160}}>Name</th>
-                    {[...eventsInMonth].sort((a,b)=>a.date.localeCompare(b.date)).map(e=>(
-                      <th key={e.id} style={{minWidth:80,textAlign:"center",fontSize:11}}>
-                        <div style={{fontWeight:700}}>{e.name}</div>
-                        <div style={{fontWeight:400,opacity:0.6,fontSize:10}}>{new Date(e.date).toLocaleDateString("en-IN",{day:"2-digit",month:"short"})}</div>
-                      </th>
-                    ))}
-                    <th style={{minWidth:60,textAlign:"center"}}>Count</th>
-                    <th style={{minWidth:55,textAlign:"center"}}>%</th>
-                  </tr></thead>
-                  <tbody>{allPeople.map((p,i)=>{
-                    const cnt=eventsInMonth.filter(e=>attendanceGetter(e.id,p.id)).length;
-                    const pct=eventsInMonth.length?Math.round(cnt/eventsInMonth.length*100):0;
-                    return (<tr key={p.id}>
-                      <td style={{color:"var(--text2)",fontSize:12}}>{i+1}</td>
-                      <td><div className="flex items-center gap-2"><Avatar name={p.name} size={26}/><span style={{fontSize:13,fontWeight:600}}>{p.name}</span></div></td>
-                      {[...eventsInMonth].sort((a,b)=>a.date.localeCompare(b.date)).map(e=>{
-                        const ok=attendanceGetter(e.id,p.id);
-                        return <td key={e.id} style={{textAlign:"center"}}>
-                          <span className={`tag ${ok?"tag-present":"tag-absent"}`} style={{padding:"2px 8px",fontSize:11}}>{ok?"Yes":"No"}</span>
-                        </td>;
-                      })}
-                      <td style={{textAlign:"center",fontWeight:700,fontSize:13}}>{cnt}/{eventsInMonth.length}</td>
-                      <td style={{textAlign:"center",fontWeight:700,fontSize:13,color:pctColor(pct)}}>{pct}%</td>
-                    </tr>);
-                  })}</tbody>
-                </table></div>
-            }
-          </div>
-        </>
-      )}
-
-      {/* ══════════════ CUSTOM RANGE ══════════════ */}
-      {tab==="range" && (
-        <>
-          <div className="card mb-4">
-            <div className="flex gap-4 items-end wrap">
-              <div>
-                <label style={{display:"block",fontSize:12.5,color:"var(--text2)",marginBottom:6}}>Start Date</label>
-                <input className="input" type="date" style={{width:175}} value={rangeStart} onChange={e=>setRangeStart(e.target.value)}/>
-              </div>
-              <div>
-                <label style={{display:"block",fontSize:12.5,color:"var(--text2)",marginBottom:6}}>End Date</label>
-                <input className="input" type="date" style={{width:175}} value={rangeEnd} onChange={e=>setRangeEnd(e.target.value)}/>
-              </div>
-              <div style={{flex:1}}/>
-              <button className="btn btn-primary" onClick={() => printRange()} disabled={!rangeStart||!rangeEnd||!eventsInRange.length}>
-                🖨️ Export Range PDF ({eventsInRange.length} event{eventsInRange.length!==1?"s":""})
-              </button>
-              <button className="btn" onClick={() => printRange("members")} disabled={!rangeStart||!rangeEnd||!eventsInRange.length}>
-                Main Group PDF
-              </button>
-              <button className="btn" onClick={() => printRange("joinees")} disabled={!rangeStart||!rangeEnd||!eventsInRange.length}>
-                New Joinees PDF
-              </button>
-            </div>
-            {rangeStart&&rangeEnd&&eventsInRange.length===0&&(
-              <p style={{color:"var(--gold)",fontSize:12.5,marginTop:12}}>⚠️ No events found between {fmtDate(rangeStart)} and {fmtDate(rangeEnd)}.</p>
+            ) : (
+              <span className="text-xs color-muted">Report auto-updates as you change settings.</span>
             )}
           </div>
-
-          {eventsInRange.length > 0 && (
-            <div className="card" style={{padding:0,overflow:"hidden"}}>
-              <div style={{padding:"14px 20px",borderBottom:"1px solid var(--border)",fontFamily:"'Syne',sans-serif",fontSize:15,fontWeight:700}}>
-                {fmtDate(rangeStart)} → {fmtDate(rangeEnd)}
-                <span style={{fontSize:12,fontWeight:400,color:"var(--text2)",marginLeft:10}}>{eventsInRange.length} events · {allPeople.length} people</span>
-              </div>
-              <div style={{overflowX:"auto"}}><table className="table" style={{minWidth:eventsInRange.length*90+260}}>
-                <thead><tr>
-                  <th style={{minWidth:34}}>#</th>
-                  <th style={{minWidth:160}}>Name</th>
-                  {[...eventsInRange].sort((a,b)=>a.date.localeCompare(b.date)).map(e=>(
-                    <th key={e.id} style={{minWidth:80,textAlign:"center",fontSize:11}}>
-                      <div style={{fontWeight:700}}>{e.name}</div>
-                      <div style={{fontWeight:400,opacity:0.6,fontSize:10}}>{new Date(e.date).toLocaleDateString("en-IN",{day:"2-digit",month:"short"})}</div>
-                    </th>
-                  ))}
-                  <th style={{minWidth:60,textAlign:"center"}}>Count</th>
-                  <th style={{minWidth:55,textAlign:"center"}}>%</th>
-                </tr></thead>
-                <tbody>{allPeople.map((p,i)=>{
-                  const cnt=eventsInRange.filter(e=>attendanceGetter(e.id,p.id)).length;
-                  const pct=eventsInRange.length?Math.round(cnt/eventsInRange.length*100):0;
-                  return (<tr key={p.id}>
-                    <td style={{color:"var(--text2)",fontSize:12}}>{i+1}</td>
-                    <td><div className="flex items-center gap-2"><Avatar name={p.name} size={26}/><span style={{fontSize:13,fontWeight:600}}>{p.name}</span></div></td>
-                    {[...eventsInRange].sort((a,b)=>a.date.localeCompare(b.date)).map(e=>{
-                      const ok=attendanceGetter(e.id,p.id);
-                      return <td key={e.id} style={{textAlign:"center"}}>
-                        <span className={`tag ${ok?"tag-present":"tag-absent"}`} style={{padding:"2px 8px",fontSize:11}}>{ok?"Yes":"No"}</span>
-                      </td>;
-                    })}
-                    <td style={{textAlign:"center",fontWeight:700,fontSize:13}}>{cnt}/{eventsInRange.length}</td>
-                    <td style={{textAlign:"center",fontWeight:700,fontSize:13,color:pctColor(pct)}}>{pct}%</td>
-                  </tr>);
-                })}</tbody>
-              </table></div>
-            </div>
-          )}
-        </>
-      )}
+          <button 
+            className="btn btn-primary" 
+            onClick={handleExport} 
+            disabled={isExporting}
+            style={{ marginLeft: "16px", minWidth: "140px" }}
+          >
+            {isExporting ? "Exporting..." : "Export to PDF"}
+          </button>
+        </div>
+      </div>
     </div>
   );
 }
