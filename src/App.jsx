@@ -2144,7 +2144,7 @@ function buildReportHtml({ template, data, options }) {
           <tr style="background: ${brandColor}; color: #fff;">
             <th style="padding: 10px; text-align: left; border: 1px solid ${brandColor};">Member</th>
             ${includePhone ? `<th style="padding: 10px; text-align: left; border: 1px solid ${brandColor};">Phone</th>` : ""}
-            ${filteredEvents.map(e => `<th style="padding: 10px; text-align: center; border: 1px solid ${brandColor};" title="${e.title}">${new Date(e.date).toLocaleDateString('en-US', {month:'short', day:'numeric'})}</th>`).join("")}
+            ${filteredEvents.map(e => `<th style="padding: 10px; text-align: center; border: 1px solid ${brandColor};" title="${e.title}"><div style="font-size: 10.5px; font-weight: 600; margin-bottom: 4px; line-height: 1.2;">${e.title}</div><div>${new Date(e.date).toLocaleDateString('en-US', {month:'short', day:'numeric'})}</div></th>`).join("")}
           </tr>
         </thead>
         <tbody>
