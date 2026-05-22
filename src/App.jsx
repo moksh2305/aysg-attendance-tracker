@@ -2019,6 +2019,7 @@ function Analytics({ members, events, getMemberStats, attendance, newJoineeAtten
 }
 
 const TEMPLATES = {
+  singleEvent: { id: "singleEvent", title: "Single Event Report", desc: "Detailed attendance for one specific activity.", requiredOptions: ["eventId"] },
   monthlySummary: { id: "monthlySummary", title: "Monthly Summary", desc: "Aggregated attendance and trends for a specific month.", requiredOptions: ["dateRange"] },
   executiveReport: { id: "executiveReport", title: "Executive Report", desc: "High-level overview with charts and analytics.", requiredOptions: ["includeCharts"] },
   volunteerReport: { id: "volunteerReport", title: "Volunteer Report", desc: "Focused on volunteer activity and contributions.", requiredOptions: [] },
@@ -2043,7 +2044,9 @@ function buildReportHtml({ template, data, options }) {
 
   // Filter events by date range if provided
   let filteredEvents = data.events || [];
-  if (dateRange && dateRange.start && dateRange.end) {
+  if (template === "singleEvent" && options.eventId) {
+    filteredEvents = filteredEvents.filter(e => e.id === options.eventId);
+  } else if (dateRange && dateRange.start && dateRange.end) {
     const start = new Date(dateRange.start);
     const end = new Date(dateRange.end);
     end.setHours(23, 59, 59, 999);
@@ -2134,7 +2137,7 @@ function buildReportHtml({ template, data, options }) {
     }
   }
 
-  if (template === "detailedAttendance" || template === "volunteerReport") {
+  if (template === "detailedAttendance" || template === "volunteerReport" || template === "singleEvent") {
     htmlBody += `
       <table style="width: 100%; border-collapse: collapse; font-size: 12px;">
         <thead>
@@ -2348,28 +2351,65 @@ function Reports({ members, newJoinees, events, attendance, newJoineeAttendance,
             </div>
           </div>
 
-          <div className="grid-2 gap-4 mb-4" style={{ gridTemplateColumns: '1fr 1fr' }}>
-            <div>
-              <label className="text-xs color-muted font-semi block mb-2">Start Date</label>
-              <input 
-                type="date" 
+          {template === "singleEvent" ? (
+            <div className="mb-4">
+              <label className="text-xs color-muted font-semi block mb-2">Select Activity</label>
+              <select 
                 className="input" 
                 style={{ width: "100%" }}
-                value={options.dateRange.start}
-                onChange={e => setOptions({...options, dateRange: {...options.dateRange, start: e.target.value}})}
-              />
+                value={options.eventId}
+                onChange={e => setOptions({...options, eventId: e.target.value})}
+              >
+                {events.map(ev => (
+                  <option key={ev.id} value={ev.id}>{new Date(ev.date).toLocaleDateString()} - {ev.title}</option>
+                ))}
+              </select>
             </div>
-            <div>
-              <label className="text-xs color-muted font-semi block mb-2">End Date</label>
-              <input 
-                type="date" 
-                className="input" 
+          ) : (
+            <div className="mb-4">
+              <label className="text-xs color-muted font-semi block mb-2">Report Period</label>
+              <select 
+                className="input mb-3" 
                 style={{ width: "100%" }}
-                value={options.dateRange.end}
-                onChange={e => setOptions({...options, dateRange: {...options.dateRange, end: e.target.value}})}
-              />
+                value={options.datePreset}
+                onChange={e => {
+                  const val = e.target.value;
+                  let start = "", end = "";
+                  const d = new Date();
+                  if (val === "thisMonth") {
+                    start = new Date(d.getFullYear(), d.getMonth(), 1).toISOString().split('T')[0];
+                    end = new Date(d.getFullYear(), d.getMonth() + 1, 0).toISOString().split('T')[0];
+                  } else if (val === "lastMonth") {
+                    start = new Date(d.getFullYear(), d.getMonth() - 1, 1).toISOString().split('T')[0];
+                    end = new Date(d.getFullYear(), d.getMonth(), 0).toISOString().split('T')[0];
+                  } else if (val === "thisYear") {
+                    start = new Date(d.getFullYear(), 0, 1).toISOString().split('T')[0];
+                    end = new Date(d.getFullYear(), 11, 31).toISOString().split('T')[0];
+                  }
+                  setOptions({...options, datePreset: val, dateRange: { start, end }});
+                }}
+              >
+                <option value="allTime">All Time</option>
+                <option value="thisMonth">This Month</option>
+                <option value="lastMonth">Last Month</option>
+                <option value="thisYear">This Year</option>
+                <option value="custom">Custom Range</option>
+              </select>
+
+              {options.datePreset === "custom" && (
+                <div className="grid-2 gap-4" style={{ gridTemplateColumns: '1fr 1fr' }}>
+                  <div>
+                    <label className="text-xs color-muted font-semi block mb-2">Start Date</label>
+                    <input type="date" className="input" style={{ width: "100%" }} value={options.dateRange.start} onChange={e => setOptions({...options, dateRange: {...options.dateRange, start: e.target.value}})} />
+                  </div>
+                  <div>
+                    <label className="text-xs color-muted font-semi block mb-2">End Date</label>
+                    <input type="date" className="input" style={{ width: "100%" }} value={options.dateRange.end} onChange={e => setOptions({...options, dateRange: {...options.dateRange, end: e.target.value}})} />
+                  </div>
+                </div>
+              )}
             </div>
-          </div>
+          )}
 
           <label className="option-checkbox">
             <input type="checkbox" checked={options.includeSignatures} onChange={e => setOptions({...options, includeSignatures: e.target.checked})} />
