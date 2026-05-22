@@ -444,6 +444,66 @@ select.input{cursor:pointer}
 .locked-reports { text-align: center; padding: 60px 20px; max-width: 400px; margin: 40px auto; background: var(--bg3); border: 1px solid var(--border); border-radius: 20px; }
 .reports-footer { padding: 16px; background: var(--bg2); border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; border-radius: 0 0 16px 16px; }
 @media (max-width: 1200px) { .reports-studio { grid-template-columns: 1fr; } .preview-panel { height: 800px; } }
+
+/* Analytics Intelligence Center CSS */
+.ac-dashboard { display: flex; flex-direction: column; gap: 16px; margin-bottom: 32px; }
+.ac-grid { display: grid; grid-template-columns: repeat(12, 1fr); gap: 16px; }
+.col-2 { grid-column: span 2; }
+.col-3 { grid-column: span 3; }
+.col-4 { grid-column: span 4; }
+.col-5 { grid-column: span 5; }
+.col-6 { grid-column: span 6; }
+.col-7 { grid-column: span 7; }
+.col-8 { grid-column: span 8; }
+.col-12 { grid-column: span 12; }
+@media (max-width: 1200px) {
+  .col-2, .col-3, .col-4 { grid-column: span 4; }
+  .col-5, .col-6, .col-7, .col-8 { grid-column: span 12; }
+}
+@media (max-width: 800px) {
+  .col-2, .col-3, .col-4 { grid-column: span 6; }
+}
+
+.ac-card { background: var(--bg2); border: 1px solid var(--border2); border-radius: 12px; padding: 16px; display: flex; flex-direction: column; position: relative; overflow: hidden; }
+.ac-card-title { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; }
+.ac-card-subtitle { font-size: 11px; color: var(--text2); margin-top: 4px; }
+
+/* Top Stat Cards */
+.ac-stat-value { font-size: 24px; font-weight: 700; color: var(--text); display: flex; align-items: baseline; gap: 8px; }
+.ac-stat-trend { font-size: 11.5px; font-weight: 600; padding: 2px 6px; border-radius: 4px; display: inline-flex; align-items: center; gap: 4px; margin-top: 8px; }
+.trend-up { color: var(--emerald); background: rgba(16, 212, 126, 0.1); }
+.trend-down { color: var(--rose); background: rgba(244, 63, 94, 0.1); }
+
+/* SVG Charts */
+.ac-chart-container { flex: 1; min-height: 180px; position: relative; width: 100%; display: flex; align-items: flex-end; }
+.ac-bar { flex: 1; margin: 0 4px; background: var(--accent); border-radius: 4px 4px 0 0; position: relative; transition: height 0.5s ease; opacity: 0.85; cursor: pointer; }
+.ac-bar:hover { opacity: 1; filter: brightness(1.2); }
+.ac-bar-label { position: absolute; bottom: -20px; left: 50%; transform: translateX(-50%); font-size: 10px; color: var(--text2); }
+.ac-bar-val { position: absolute; top: -20px; left: 50%; transform: translateX(-50%); font-size: 11px; color: var(--text); font-weight: 600; opacity: 0; transition: opacity 0.2s; }
+.ac-bar:hover .ac-bar-val { opacity: 1; }
+
+/* Smart Insights */
+.insight-item { display: flex; gap: 12px; padding: 12px; background: var(--bg3); border-radius: 8px; margin-bottom: 8px; align-items: flex-start; }
+.insight-icon { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; }
+.insight-content h4 { margin: 0 0 4px 0; font-size: 12.5px; color: var(--text); }
+.insight-content p { margin: 0; font-size: 11px; color: var(--text2); line-height: 1.4; }
+
+/* Heatmap */
+.heatmap-grid { display: flex; flex-direction: column; gap: 4px; width: 100%; overflow-x: auto; padding-bottom: 8px; }
+.heatmap-row { display: flex; gap: 4px; align-items: center; }
+.heatmap-label { width: 100px; font-size: 11px; color: var(--text2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex-shrink: 0; }
+.heatmap-cell { height: 20px; flex: 1; min-width: 40px; border-radius: 4px; cursor: pointer; transition: transform 0.1s; }
+.heatmap-cell:hover { transform: scale(1.1); z-index: 10; box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
+
+/* Needs Attention Tabs */
+.ac-tabs { display: flex; gap: 8px; margin-bottom: 12px; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
+.ac-tab { padding: 4px 12px; border-radius: 12px; font-size: 11.5px; font-weight: 600; color: var(--text2); cursor: pointer; transition: all 0.2s; }
+.ac-tab.active { background: rgba(124, 106, 248, 0.15); color: var(--accent2); }
+
+/* Table */
+.ac-table { width: 100%; border-collapse: collapse; text-align: left; }
+.ac-table th { font-size: 11px; color: var(--text2); font-weight: 600; padding: 8px; border-bottom: 1px solid var(--border); }
+.ac-table td { font-size: 12px; color: var(--text); padding: 10px 8px; border-bottom: 1px solid var(--border); }
 `;
 
 const VIEWS = ["Dashboard", "Members", "New Joinees", "Events", "Attendance", "Analytics", "Reports"];
@@ -534,7 +594,7 @@ export default function App() {
             {view === "New Joinees" && <NewJoinees newJoinees={newJoinees} setNewJoinees={setNewJoinees} showToast={showToast} isAdmin={isAdmin} />}
             {view === "Events" && <Events events={events} setEvents={setEvents} getEventStats={getEventStats} showToast={showToast} isAdmin={isAdmin} />}
             {view === "Attendance" && <Attendance events={events} members={members} newJoinees={newJoinees} attendance={attendance} setAttendance={setAttendance} newJoineeAttendance={newJoineeAttendance} setNewJoineeAttendance={setNewJoineeAttendance} showToast={showToast} isAdmin={isAdmin} />}
-            {view === "Analytics" && <Analytics members={members} events={events} getMemberStats={getMemberStats} />}
+            {view === "Analytics" && <Analytics members={members} events={events} getMemberStats={getMemberStats} attendance={attendance} newJoineeAttendance={newJoineeAttendance} />}
             {view === "Reports" && <Reports members={members} newJoinees={newJoinees} events={events} attendance={attendance} newJoineeAttendance={newJoineeAttendance} getEventStats={getEventStats} showToast={showToast} />}
           </div>
         </div>
@@ -1589,305 +1649,371 @@ function Attendance({ events, members, newJoinees, attendance, setAttendance, ne
     </div>
   );
 }
-function Analytics({ members, events, getMemberStats }) {
+
+function Analytics({ members, events, getMemberStats, attendance, newJoineeAttendance }) {
   const active = members.filter(m => m.active);
-  const sortedTop = [...active].sort((a, b) => getMemberStats(b.id).pct - getMemberStats(a.id).pct);
-  const sortedLow = [...active].sort((a, b) => getMemberStats(a.id).pct - getMemberStats(b.id).pct).filter(m => getMemberStats(m.id).total > 0);
+  const totalAttendances = events.reduce((acc, e) => {
+    return acc + active.filter(m => {
+      const att = attendance[e.id]?.[m.id] || newJoineeAttendance[e.id]?.[m.id];
+      return att === 'present' || att === 'late';
+    }).length;
+  }, 0);
 
-  const catCounts = events.reduce((acc, e) => { acc[e.category] = (acc[e.category] || 0) + 1; return acc; }, {});
-  const areaCounts = active.reduce((acc, m) => { acc[m.area] = (acc[m.area] || 0) + 1; return acc; }, {});
-
-  return (
-    <div>
-      <h1 className="page-title mb-6">Analytics</h1>
-      <div className="grid-4 mb-6">
-        {[
-          { label: "Active Members", value: active.length, color: "#7c6af8" },
-          { label: "Total Events", value: events.length, color: "#06b6d4" },
-          { label: "Avg Attendance", value: active.length ? Math.round(active.reduce((s, m) => s + getMemberStats(m.id).pct, 0) / active.length) + "%" : "—", color: "#10d47e" },
-          { label: "High Performers", value: active.filter(m => getMemberStats(m.id).pct >= 75).length, color: "#f0b429" },
-        ].map(s => (
-          <div key={s.label} className="stat-card">
-            <div className="stat-label">{s.label}</div>
-            <div className="stat-value" style={{ color: s.color }}>{s.value}</div>
-          </div>
-        ))}
-      </div>
-      <div className="grid-2 mb-4">
-        <div className="card">
-          <h2 className="section-title">🏆 Top Performers</h2>
-          {sortedTop.slice(0, 8).map((m, i) => {
-            const s = getMemberStats(m.id);
-            return (
-              <div key={m.id} className="bar-item" style={{ marginBottom: 6 }}>
-                <div className="bar-fill" style={{ width: s.pct + "%", background: "var(--accent)" }} />
-                <span style={{ zIndex: 1, fontSize: 12 }}>{i + 1}. {m.name}</span>
-                <span style={{ marginLeft: "auto", zIndex: 1, fontWeight: 700, color: "var(--emerald)" }}>{s.pct}%</span>
-              </div>
-            );
-          })}
-        </div>
-        <div className="card">
-          <h2 className="section-title">⚠️ Needs Attention</h2>
-          {sortedLow.slice(0, 8).map((m) => {
-            const s = getMemberStats(m.id);
-            return (
-              <div key={m.id} className="bar-item" style={{ marginBottom: 6 }}>
-                <div className="bar-fill" style={{ width: s.pct + "%", background: "var(--rose)" }} />
-                <span style={{ zIndex: 1, fontSize: 12 }}>{m.name}</span>
-                <span style={{ marginLeft: "auto", zIndex: 1, fontWeight: 700, color: "var(--rose)" }}>{s.pct}%</span>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-      <div className="grid-2">
-        <div className="card">
-          <h2 className="section-title">📊 Events by Category</h2>
-          {Object.entries(catCounts).map(([cat, count]) => (
-            <div key={cat} className="bar-item" style={{ marginBottom: 6 }}>
-              <div className="bar-fill" style={{ width: (count / events.length * 100) + "%", background: "var(--cyan)" }} />
-              <span style={{ zIndex: 1, fontSize: 12 }}>{cat}</span>
-              <span style={{ marginLeft: "auto", zIndex: 1, fontWeight: 700 }}>{count}</span>
-            </div>
-          ))}
-        </div>
-        <div className="card">
-          <h2 className="section-title">📍 Members by Area</h2>
-          {Object.entries(areaCounts).map(([area, count]) => (
-            <div key={area} className="bar-item" style={{ marginBottom: 6 }}>
-              <div className="bar-fill" style={{ width: (count / active.length * 100) + "%", background: "var(--gold)" }} />
-              <span style={{ zIndex: 1, fontSize: 12 }}>{area}</span>
-              <span style={{ marginLeft: "auto", zIndex: 1, fontWeight: 700 }}>{count}</span>
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// ─── PDF BUILDERS ──────────────────────────────────────────────────────────
-
-const TEMPLATES = {
-  monthlySummary: { id: "monthlySummary", title: "Monthly Summary", desc: "Aggregated attendance and trends for a specific month.", requiredOptions: ["dateRange"] },
-  executiveReport: { id: "executiveReport", title: "Executive Report", desc: "High-level overview with charts and analytics.", requiredOptions: ["includeCharts"] },
-  volunteerReport: { id: "volunteerReport", title: "Volunteer Report", desc: "Focused on volunteer activity and contributions.", requiredOptions: [] },
-  detailedAttendance: { id: "detailedAttendance", title: "Detailed Attendance", desc: "Line-by-line attendance matrix for all members.", requiredOptions: ["includeAbsent", "includePhone"] }
-};
-
-function buildReportHtml({ template, data, options }) {
-  const { allPeople, attendanceGetter, stats, generatedAt } = data;
-  const { brandColor, includePhone, includeSignatures, includeCharts, includeAbsent, dateRange } = options;
+  const avgAttendance = active.length ? Math.round(active.reduce((s, m) => s + getMemberStats(m.id).pct, 0) / active.length) : 0;
   
-  const statusMeta = {
-    present: { label: "Present", icon: "✓", color: "#15803d", bg: "#dcfce7" },
-    late: { label: "Late", icon: "◔", color: "#b45309", bg: "#fef3c7" },
-    excused: { label: "Excused", icon: "•", color: "#0f766e", bg: "#ccfbf1" },
-    absent: { label: "Absent", icon: "✕", color: "#be123c", bg: "#ffe4e6" }
-  };
+  // Group events by month for trends
+  const monthGroups = {};
+  events.forEach(e => {
+    const d = new Date(e.date);
+    const key = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+    const label = d.toLocaleString('default', { month: 'short' }) + " '" + String(d.getFullYear()).slice(2);
+    if(!monthGroups[key]) monthGroups[key] = { label, events: [], totalPct: 0 };
+    monthGroups[key].events.push(e);
+  });
 
-  const getStatus = (person, eventId) => {
-    const s = attendanceGetter(eventId, person.id);
-    return statusMeta[s] || { label: "-", icon: "-", color: "#9ca3af", bg: "transparent" };
-  };
-
-  // Filter events by date range if provided
-  let filteredEvents = data.events || [];
-  if (dateRange && dateRange.start && dateRange.end) {
-    const start = new Date(dateRange.start);
-    const end = new Date(dateRange.end);
-    end.setHours(23, 59, 59, 999);
-    filteredEvents = filteredEvents.filter(e => {
-      const ed = new Date(e.date);
-      return ed >= start && ed <= end;
+  const monthKeys = Object.keys(monthGroups).sort();
+  const trendData = monthKeys.map(k => {
+    const evs = monthGroups[k].events;
+    let sumPct = 0;
+    evs.forEach(e => {
+      const pCount = active.filter(m => {
+        const att = attendance[e.id]?.[m.id];
+        return att === 'present' || att === 'late';
+      }).length;
+      sumPct += (pCount / active.length) * 100;
     });
-  }
+    const avg = evs.length ? sumPct / evs.length : 0;
+    return { label: monthGroups[k].label, value: Math.round(avg) };
+  });
 
-  // Filter people
-  let peopleList = [...allPeople];
-  if (template === "volunteerReport") {
-    peopleList = peopleList.filter(p => /volunteer/i.test(p.role || p.notes || ""));
-  }
+  // Calculate trends vs previous period (simplistic assumption based on last 2 months)
+  const currentMonth = trendData.length > 0 ? trendData[trendData.length - 1].value : 0;
+  const prevMonth = trendData.length > 1 ? trendData[trendData.length - 2].value : 0;
+  const trendDiff = currentMonth - prevMonth;
+
+  // Donut chart logic
+  const areaCounts = active.reduce((acc, m) => { acc[m.area] = (acc[m.area] || 0) + 1; return acc; }, {});
+  const areaData = Object.entries(areaCounts).map(([name, count]) => ({ name, count })).sort((a,b) => b.count - a.count);
+  const donutColors = ["#7c6af8", "#10d47e", "#f0b429", "#ec4899", "#06b6d4"];
+
+  // Heatmap logic (Top 5 events, top 8 people for brevity, or scrollable)
+  const recentEvents = [...events].sort((a,b) => new Date(b.date) - new Date(a.date)).slice(0, 5).reverse();
+  const sortedMembers = [...active].sort((a,b) => getMemberStats(b.id).pct - getMemberStats(a.id).pct);
   
-  // Apply absent filter (if a template is detailed and includeAbsent is false, we could filter out those with 0 attendance)
-  if (!includeAbsent && template === "detailedAttendance") {
-     peopleList = peopleList.filter(p => {
-       const hasAttendance = filteredEvents.some(e => {
-         const s = attendanceGetter(e.id, p.id);
-         return s === 'present' || s === 'late';
-       });
-       return hasAttendance;
-     });
+  // Categorization
+  const consistent = active.filter(m => getMemberStats(m.id).pct >= 80);
+  const irregular = active.filter(m => getMemberStats(m.id).pct >= 40 && getMemberStats(m.id).pct < 80);
+  const inactive = active.filter(m => getMemberStats(m.id).pct < 40 && getMemberStats(m.id).total > 0);
+
+  const [attentionTab, setAttentionTab] = React.useState("declining");
+
+  // Insight Generation
+  const insights = [];
+  if (trendDiff > 0) insights.push({ type: 'positive', title: 'Positive Trend', desc: `Overall attendance improved by ${Math.abs(trendDiff)}% compared to last month.`, color: '#10d47e', bg: '#dcfce7', icon: '↗' });
+  else if (trendDiff < 0) insights.push({ type: 'negative', title: 'Attention Required', desc: `Overall attendance dropped by ${Math.abs(trendDiff)}% compared to last month.`, color: '#f43f5e', bg: '#ffe4e6', icon: '↘' });
+  
+  // Find low engagement event
+  const eventPcts = events.map(e => {
+    const count = active.filter(m => {
+      const att = attendance[e.id]?.[m.id];
+      return att === 'present' || att === 'late';
+    }).length;
+    return { title: e.title, pct: active.length ? Math.round((count/active.length)*100) : 0 };
+  }).sort((a,b) => a.pct - b.pct);
+  
+  if (eventPcts.length > 0) {
+    insights.push({ type: 'warning', title: 'Low Engagement Event', desc: `${eventPcts[0].title} had the lowest participation (${eventPcts[0].pct}%).`, color: '#f0b429', bg: '#fef3c7', icon: '📉' });
   }
 
-  peopleList.sort((a,b) => a.name.localeCompare(b.name));
-
-  let htmlBody = "";
-
-  const headerHtml = `
-    <header style="border-bottom: 2px solid ${brandColor}; padding-bottom: 20px; margin-bottom: 30px;">
-      <h1 style="margin: 0; color: #111827; font-size: 28px;">AYSG Attendance Report</h1>
-      <p style="margin: 4px 0 0; color: #6b7280; font-size: 14px;">${TEMPLATES[template].title}</p>
-      <div style="margin-top: 16px; font-size: 12px; color: #4b5563; display: flex; justify-content: space-between;">
-        <span>Generated: ${generatedAt}</span>
-        ${dateRange && dateRange.start ? `<span>Period: ${dateRange.start} to ${dateRange.end || 'Now'}</span>` : ''}
-      </div>
-    </header>
-  `;
-
-  const footerHtml = includeSignatures ? `
-    <div style="margin-top: 60px; display: flex; justify-content: space-between; page-break-inside: avoid;">
-      <div style="text-align: center; width: 200px;">
-        <div style="border-bottom: 1px solid #000; height: 40px; margin-bottom: 8px;"></div>
-        <div style="font-size: 12px;">Prepared By</div>
-      </div>
-      <div style="text-align: center; width: 200px;">
-        <div style="border-bottom: 1px solid #000; height: 40px; margin-bottom: 8px;"></div>
-        <div style="font-size: 12px;">Approved By</div>
-      </div>
-    </div>
-  ` : "";
-
-  if (template === "monthlySummary" || template === "executiveReport") {
-    htmlBody += `
-      <div style="display: flex; gap: 20px; margin-bottom: 30px;">
-        <div style="flex: 1; padding: 20px; background: #f9fafb; border-radius: 8px; text-align: center;">
-          <div style="font-size: 32px; font-weight: bold; color: ${brandColor};">${stats.active}</div>
-          <div style="font-size: 12px; color: #6b7280;">Active Members</div>
-        </div>
-        <div style="flex: 1; padding: 20px; background: #f9fafb; border-radius: 8px; text-align: center;">
-          <div style="font-size: 32px; font-weight: bold; color: ${brandColor};">${filteredEvents.length}</div>
-          <div style="font-size: 12px; color: #6b7280;">Events in Period</div>
-        </div>
-        <div style="flex: 1; padding: 20px; background: #f9fafb; border-radius: 8px; text-align: center;">
-          <div style="font-size: 32px; font-weight: bold; color: #15803d;">${Math.round(stats.avgAttendance)}</div>
-          <div style="font-size: 12px; color: #6b7280;">Avg. Attendance</div>
-        </div>
-      </div>
-    `;
-    
-    if (includeCharts) {
-      // Mock chart representation
-      htmlBody += `
-        <div style="margin-bottom: 30px; page-break-inside: avoid;">
-          <h3 style="margin: 0 0 12px; font-size: 16px;">Attendance Trend</h3>
-          <div style="height: 120px; background: #f3f4f6; border-radius: 8px; position: relative; overflow: hidden; display: flex; align-items: flex-end; padding: 0 10px 10px;">
-            ${filteredEvents.slice(0,10).map((e,i) => {
-               // Calculate a rough height based on an assumed max of 50
-               const count = allPeople.filter(p => attendanceGetter(e.id, p.id) === 'present').length;
-               const h = Math.max(10, Math.min(100, (count / (allPeople.length || 1)) * 100));
-               return `<div style="flex: 1; margin: 0 4px; background: ${brandColor}; height: ${h}%; border-radius: 4px 4px 0 0; opacity: 0.8;" title="${e.title}"></div>`;
-            }).join("")}
-          </div>
-        </div>
-      `;
-    }
-  }
-
-  if (template === "detailedAttendance" || template === "volunteerReport") {
-    htmlBody += `
-      <table style="width: 100%; border-collapse: collapse; font-size: 12px;">
-        <thead>
-          <tr style="background: ${brandColor}; color: #fff;">
-            <th style="padding: 10px; text-align: left; border: 1px solid ${brandColor};">Member</th>
-            ${includePhone ? `<th style="padding: 10px; text-align: left; border: 1px solid ${brandColor};">Phone</th>` : ""}
-            ${filteredEvents.map(e => `<th style="padding: 10px; text-align: center; border: 1px solid ${brandColor};" title="${e.title}">${new Date(e.date).toLocaleDateString('en-US', {month:'short', day:'numeric'})}</th>`).join("")}
-          </tr>
-        </thead>
-        <tbody>
-          ${peopleList.map((p, i) => `
-            <tr style="background: ${i % 2 === 0 ? '#fff' : '#f9fafb'};">
-              <td style="padding: 8px; border: 1px solid #e5e7eb; font-weight: 500;">${p.name}</td>
-              ${includePhone ? `<td style="padding: 8px; border: 1px solid #e5e7eb; color: #6b7280;">${p.phone || '-'}</td>` : ""}
-              ${filteredEvents.map(e => {
-                const s = getStatus(p, e.id);
-                return `<td style="padding: 8px; text-align: center; border: 1px solid #e5e7eb; color: ${s.color}; background: ${s.bg}80;">${s.icon}</td>`;
-              }).join("")}
-            </tr>
-          `).join("")}
-        </tbody>
-      </table>
-    `;
-  } else {
-    // Basic event list for monthly summary
-    htmlBody += `
-      <table style="width: 100%; border-collapse: collapse; font-size: 12px;">
-        <thead>
-          <tr style="background: ${brandColor}; color: #fff;">
-            <th style="padding: 10px; text-align: left; border: 1px solid ${brandColor};">Event Date & Title</th>
-            <th style="padding: 10px; text-align: center; border: 1px solid ${brandColor};">Present</th>
-            <th style="padding: 10px; text-align: center; border: 1px solid ${brandColor};">Absent</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${filteredEvents.map((e, i) => {
-            const pCount = allPeople.filter(p => attendanceGetter(e.id, p.id) === 'present').length;
-            const aCount = allPeople.filter(p => attendanceGetter(e.id, p.id) === 'absent').length;
-            return `
-              <tr style="background: ${i % 2 === 0 ? '#fff' : '#f9fafb'};">
-                <td style="padding: 8px; border: 1px solid #e5e7eb;"><strong>${new Date(e.date).toLocaleDateString()}</strong> - ${e.title}</td>
-                <td style="padding: 8px; text-align: center; border: 1px solid #e5e7eb; color: #15803d;">${pCount}</td>
-                <td style="padding: 8px; text-align: center; border: 1px solid #e5e7eb; color: #be123c;">${aCount}</td>
-              </tr>
-            `;
-          }).join("")}
-        </tbody>
-      </table>
-    `;
-  }
-
-  return `
-    <!DOCTYPE html>
-    <html>
-    <head>
-      <meta charset="utf-8">
-      <title>${TEMPLATES[template].title} - AYSG</title>
-      <style>
-        body { font-family: 'Inter', -apple-system, sans-serif; padding: 40px; margin: 0; color: #111827; }
-        @media print { body { padding: 0; } }
-      </style>
-    </head>
-    <body>
-      ${headerHtml}
-      ${htmlBody}
-      ${footerHtml}
-    </body>
-    </html>
-  `;
-}
-
-function LockedReports({ onUnlock }) {
-  const [pwd, setPwd] = React.useState("");
-  const [err, setErr] = React.useState(false);
-
-  const handleUnlock = (e) => {
-    e.preventDefault();
-    if (pwd === "ParamAYSG1008") {
-      onUnlock();
-    } else {
-      setErr(true);
-      setTimeout(() => setErr(false), 2000);
-    }
-  };
+  // Needs Attention logic
+  // Declining: last 3 events were worse than their average
+  const decliningMembers = active.filter(m => {
+    if (recentEvents.length < 3) return false;
+    const recentAtt = recentEvents.slice(-3).map(e => attendance[e.id]?.[m.id]);
+    const misses = recentAtt.filter(a => a === 'absent' || !a).length;
+    return misses >= 2 && getMemberStats(m.id).pct > 40; // Only flag if they were historically decent
+  });
 
   return (
-    <div className="locked-reports">
-      <div className="lock-icon" style={{ animation: err ? "shake 0.5s" : "none" }}>🔒</div>
-      <h2 style={{ marginBottom: "8px" }}>Admin Access Required</h2>
-      <p style={{ color: "var(--text2)", marginBottom: "24px", fontSize: "14px" }}>Please enter the administrator password to access the Reports Studio.</p>
-      <form onSubmit={handleUnlock}>
-        <input 
-          type="password" 
-          placeholder="Enter password..." 
-          value={pwd} 
-          onChange={e => setPwd(e.target.value)}
-          className="input mb-4" 
-          style={{ width: "100%", borderColor: err ? "var(--rose)" : "" }}
-          autoFocus
-        />
-        <button type="submit" className="btn btn-primary" style={{ width: "100%" }}>Unlock Reports</button>
-      </form>
+    <div className="ac-dashboard">
+      <div style={{ marginBottom: "20px" }}>
+        <h1 className="page-title" style={{ fontSize: "24px" }}>Analytics Intelligence Center</h1>
+        <p className="color-muted text-sm">Real-time insights and smart analysis of attendance patterns</p>
+      </div>
+
+      {/* Row 1: Top Stats */}
+      <div className="ac-grid">
+        <div className="ac-card col-2">
+          <div className="ac-card-title">Active Members <span className="icon">👥</span></div>
+          <div className="ac-stat-value">{active.length}</div>
+          <div className="ac-stat-trend trend-up">100% of total</div>
+        </div>
+        <div className="ac-card col-2">
+          <div className="ac-card-title">Events Conducted <span className="icon">📅</span></div>
+          <div className="ac-stat-value">{events.length}</div>
+          <div className="ac-stat-trend trend-up">↑ {events.length} this period</div>
+        </div>
+        <div className="ac-card col-2">
+          <div className="ac-card-title">Avg Attendance <span className="icon">📈</span></div>
+          <div className="ac-stat-value">{avgAttendance}%</div>
+          <div className={`ac-stat-trend ${trendDiff >= 0 ? 'trend-up' : 'trend-down'}`}>
+            {trendDiff >= 0 ? '↑' : '↓'} {Math.abs(trendDiff)}% vs last month
+          </div>
+        </div>
+        <div className="ac-card col-2">
+          <div className="ac-card-title">Total Attendances <span className="icon">✅</span></div>
+          <div className="ac-stat-value">{totalAttendances}</div>
+          <div className="ac-stat-trend" style={{ background: "transparent", padding: 0 }}>Across all events</div>
+        </div>
+        <div className="ac-card col-2">
+          <div className="ac-card-title">Consistent Rate <span className="icon">⭐</span></div>
+          <div className="ac-stat-value">{active.length ? Math.round((consistent.length / active.length)*100) : 0}%</div>
+          <div className="ac-stat-trend trend-up">High engagement</div>
+        </div>
+        <div className="ac-card col-2">
+          <div className="ac-card-title">Low Engagement <span className="icon">⚠️</span></div>
+          <div className="ac-stat-value">{inactive.length}</div>
+          <div className="ac-stat-trend trend-down">Needs attention</div>
+        </div>
+      </div>
+
+      {/* Row 2: Charts and Insights */}
+      <div className="ac-grid" style={{ marginTop: "8px" }}>
+        {/* Attendance Trend Line Chart */}
+        <div className="ac-card col-5" style={{ minHeight: "260px" }}>
+          <div className="ac-card-title">Attendance Trend <span className="color-muted text-xs">Monthly</span></div>
+          <div className="ac-chart-container" style={{ alignItems: "center" }}>
+            <svg viewBox="0 0 400 150" style={{ width: "100%", height: "100%", overflow: "visible" }}>
+              {/* Grid lines */}
+              <line x1="0" y1="0" x2="400" y2="0" stroke="var(--border)" strokeDasharray="4 4" />
+              <line x1="0" y1="50" x2="400" y2="50" stroke="var(--border)" strokeDasharray="4 4" />
+              <line x1="0" y1="100" x2="400" y2="100" stroke="var(--border)" strokeDasharray="4 4" />
+              <line x1="0" y1="150" x2="400" y2="150" stroke="var(--border)" strokeDasharray="4 4" />
+              {/* Labels */}
+              <text x="-10" y="5" fontSize="10" fill="var(--text2)" textAnchor="end">100%</text>
+              <text x="-10" y="150" fontSize="10" fill="var(--text2)" textAnchor="end">0%</text>
+              
+              {/* Line path */}
+              <path 
+                d={`M ${trendData.map((d, i) => `${(i / Math.max(1, trendData.length - 1)) * 400},${150 - (d.value / 100) * 150}`).join(" L ")}`} 
+                fill="none" stroke="var(--accent)" strokeWidth="3" 
+              />
+              {/* Data points */}
+              {trendData.map((d, i) => (
+                <g key={i} transform={`translate(${(i / Math.max(1, trendData.length - 1)) * 400}, ${150 - (d.value / 100) * 150})`}>
+                  <circle r="4" fill="var(--bg2)" stroke="var(--accent)" strokeWidth="2" />
+                  <text y="-10" fontSize="10" fill="var(--text)" textAnchor="middle">{d.value}%</text>
+                  <text y="165" fontSize="10" fill="var(--text2)" textAnchor="middle">{d.label}</text>
+                </g>
+              ))}
+            </svg>
+          </div>
+        </div>
+
+        {/* Monthly Comparison Bar Chart */}
+        <div className="ac-card col-4" style={{ minHeight: "260px" }}>
+          <div className="ac-card-title">Monthly Comparison <span className="color-muted text-xs">Avg %</span></div>
+          <div className="ac-chart-container" style={{ paddingBottom: "24px" }}>
+            {trendData.slice(-6).map((d, i) => (
+              <div key={i} className="ac-bar" style={{ height: `${d.value}%`, background: `var(${i === trendData.length-1 ? '--accent' : '--accent2'})` }}>
+                <span className="ac-bar-val">{d.value}%</span>
+                <span className="ac-bar-label" style={{ whiteSpace: "nowrap" }}>{d.label.split(" ")[0]}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Smart Insights */}
+        <div className="ac-card col-3">
+          <div className="ac-card-title">✨ Smart Insights</div>
+          <div style={{ flex: 1, overflowY: "auto" }}>
+            {insights.map((ins, i) => (
+              <div key={i} className="insight-item">
+                <div className="insight-icon" style={{ background: ins.bg, color: ins.color }}>{ins.icon}</div>
+                <div className="insight-content">
+                  <h4 style={{ color: ins.color }}>{ins.title}</h4>
+                  <p>{ins.desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Row 3: Heatmap, Donut, Categories */}
+      <div className="ac-grid" style={{ marginTop: "8px" }}>
+        
+        {/* Event Participation Heatmap */}
+        <div className="ac-card col-5">
+          <div className="ac-card-title">Event Participation Heatmap <span className="color-muted text-xs">Recent 5 Events</span></div>
+          <div className="heatmap-grid">
+            <div className="heatmap-row" style={{ marginBottom: "8px" }}>
+              <div className="heatmap-label" style={{ fontWeight: 600 }}>Member</div>
+              {recentEvents.map(e => (
+                <div key={e.id} className="heatmap-label" style={{ flex: 1, minWidth: "40px", textAlign: "center" }} title={e.title}>
+                  {new Date(e.date).toLocaleDateString('en-US', { day: 'numeric', month: 'short' })}
+                </div>
+              ))}
+            </div>
+            {sortedMembers.slice(0, 8).map(m => (
+              <div key={m.id} className="heatmap-row">
+                <div className="heatmap-label" title={m.name}>{m.name}</div>
+                {recentEvents.map(e => {
+                  const att = attendance[e.id]?.[m.id];
+                  const color = att === 'present' ? '#10d47e' : att === 'late' ? '#f0b429' : att === 'excused' ? '#06b6d4' : '#f43f5e';
+                  return <div key={e.id} className="heatmap-cell" style={{ background: att ? color : 'var(--bg4)' }} title={`${m.name}: ${att || 'Unknown'}`} />
+                })}
+              </div>
+            ))}
+            {sortedMembers.length > 8 && (
+              <div className="color-muted text-xs mt-2">... and {sortedMembers.length - 8} more</div>
+            )}
+            <div className="flex gap-4 mt-4 justify-center">
+              <span className="flex items-center gap-2 text-xs"><span style={{width:10,height:10,background:'#10d47e',borderRadius:2}}></span> Present</span>
+              <span className="flex items-center gap-2 text-xs"><span style={{width:10,height:10,background:'#f0b429',borderRadius:2}}></span> Late</span>
+              <span className="flex items-center gap-2 text-xs"><span style={{width:10,height:10,background:'#f43f5e',borderRadius:2}}></span> Absent</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Area-wise Participation */}
+        <div className="ac-card col-3">
+          <div className="ac-card-title">Area-wise Participation</div>
+          <div className="flex items-center justify-center gap-6" style={{ height: "100%" }}>
+            <div style={{ position: "relative", width: "120px", height: "120px" }}>
+              <svg viewBox="0 0 100 100" style={{ transform: "rotate(-90deg)", width: "100%", height: "100%" }}>
+                {(() => {
+                  let cum = 0;
+                  return areaData.map((a, i) => {
+                    const pct = a.count / active.length;
+                    const dashArray = `${pct * 314} 314`;
+                    const dashOffset = -(cum * 314);
+                    cum += pct;
+                    return (
+                      <circle key={a.name} cx="50" cy="50" r="40" fill="none" stroke={donutColors[i % donutColors.length]} strokeWidth="20" strokeDasharray={dashArray} strokeDashoffset={dashOffset} />
+                    );
+                  });
+                })()}
+              </svg>
+              <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
+                <span style={{ fontSize: "20px", fontWeight: "bold" }}>{active.length}</span>
+                <span style={{ fontSize: "9px", color: "var(--text2)" }}>Members</span>
+              </div>
+            </div>
+            <div className="flex flex-col gap-2">
+              {areaData.slice(0, 5).map((a, i) => (
+                <div key={a.name} className="flex items-center gap-2 text-xs">
+                  <span style={{ width: 10, height: 10, background: donutColors[i % donutColors.length], borderRadius: "50%" }}></span>
+                  <span style={{ width: 60, overflow: "hidden", textOverflow: "ellipsis" }}>{a.name}</span>
+                  <span className="font-bold">{a.count}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Attendance Categories */}
+        <div className="ac-card col-4">
+          <div className="ac-card-title">Attendance Categories</div>
+          <div className="flex flex-col gap-4" style={{ flex: 1, justifyContent: "center" }}>
+            <div>
+              <div className="flex justify-between text-xs mb-2">
+                <span style={{ color: "#10d47e", fontWeight: 600 }}>Consistent (≥80%)</span>
+                <span>{consistent.length} ({active.length ? Math.round((consistent.length/active.length)*100) : 0}%)</span>
+              </div>
+              <div style={{ height: 8, background: "var(--bg4)", borderRadius: 4, overflow: "hidden" }}>
+                <div style={{ height: "100%", width: `${active.length ? (consistent.length/active.length)*100 : 0}%`, background: "#10d47e" }} />
+              </div>
+            </div>
+            <div>
+              <div className="flex justify-between text-xs mb-2">
+                <span style={{ color: "#f0b429", fontWeight: 600 }}>Irregular (40% - 79%)</span>
+                <span>{irregular.length} ({active.length ? Math.round((irregular.length/active.length)*100) : 0}%)</span>
+              </div>
+              <div style={{ height: 8, background: "var(--bg4)", borderRadius: 4, overflow: "hidden" }}>
+                <div style={{ height: "100%", width: `${active.length ? (irregular.length/active.length)*100 : 0}%`, background: "#f0b429" }} />
+              </div>
+            </div>
+            <div>
+              <div className="flex justify-between text-xs mb-2">
+                <span style={{ color: "#f43f5e", fontWeight: 600 }}>Inactive (&lt;40%)</span>
+                <span>{inactive.length} ({active.length ? Math.round((inactive.length/active.length)*100) : 0}%)</span>
+              </div>
+              <div style={{ height: 8, background: "var(--bg4)", borderRadius: 4, overflow: "hidden" }}>
+                <div style={{ height: "100%", width: `${active.length ? (inactive.length/active.length)*100 : 0}%`, background: "#f43f5e" }} />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Row 4: Needs Attention & Top Performers */}
+      <div className="ac-grid" style={{ marginTop: "8px" }}>
+        
+        {/* Needs Attention */}
+        <div className="ac-card col-7">
+          <div className="ac-card-title" style={{ color: "var(--rose)" }}>⚠️ Needs Attention</div>
+          <div className="ac-tabs">
+            <div className={`ac-tab ${attentionTab === 'declining' ? 'active' : ''}`} onClick={() => setAttentionTab('declining')}>Declining Attendance ({decliningMembers.length})</div>
+            <div className={`ac-tab ${attentionTab === 'inactive' ? 'active' : ''}`} onClick={() => setAttentionTab('inactive')}>Repeated Absences ({inactive.length})</div>
+          </div>
+          
+          <div style={{ overflowX: "auto" }}>
+            <table className="ac-table">
+              <thead>
+                <tr>
+                  <th>Member</th>
+                  <th>Total Attendance</th>
+                  <th>Last 3 Events</th>
+                </tr>
+              </thead>
+              <tbody>
+                {(attentionTab === 'declining' ? decliningMembers : inactive).slice(0, 5).map(m => {
+                  const s = getMemberStats(m.id);
+                  return (
+                    <tr key={m.id}>
+                      <td style={{ fontWeight: 500 }}>{m.name}</td>
+                      <td style={{ color: "var(--rose)", fontWeight: 600 }}>{s.pct}%</td>
+                      <td>
+                        <div className="flex gap-2">
+                          {recentEvents.slice(0,3).reverse().map(e => {
+                             const att = attendance[e.id]?.[m.id];
+                             return <span key={e.id} style={{ fontSize: 14 }}>{att === 'present' ? '✅' : att === 'late' ? '⏱️' : '❌'}</span>
+                          })}
+                        </div>
+                      </td>
+                    </tr>
+                  )
+                })}
+                {(attentionTab === 'declining' ? decliningMembers : inactive).length === 0 && (
+                  <tr><td colSpan="3" style={{ textAlign: "center", padding: "20px", color: "var(--text2)" }}>No members currently flag for this condition. Great job!</td></tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* Top Performers */}
+        <div className="ac-card col-5">
+          <div className="ac-card-title">🏆 Top Performers</div>
+          <div className="flex flex-col gap-3">
+            {sortedMembers.slice(0, 5).map((m, i) => {
+              const s = getMemberStats(m.id);
+              return (
+                <div key={m.id} className="flex items-center gap-3">
+                  <div style={{ width: 20, fontSize: 11, color: "var(--text2)", fontWeight: 600 }}>{i + 1}</div>
+                  <div style={{ flex: 1, fontSize: 12, fontWeight: 500 }}>{m.name}</div>
+                  <div style={{ flex: 2, height: 6, background: "var(--bg4)", borderRadius: 3, overflow: "hidden" }}>
+                    <div style={{ height: "100%", width: `${s.pct}%`, background: "var(--emerald)" }} />
+                  </div>
+                  <div style={{ width: 30, textAlign: "right", fontSize: 11, fontWeight: 700, color: "var(--emerald)" }}>{s.pct}%</div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+      </div>
     </div>
   );
 }
