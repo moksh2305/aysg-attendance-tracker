@@ -594,7 +594,7 @@ export default function App() {
             {view === "New Joinees" && <NewJoinees newJoinees={newJoinees} setNewJoinees={setNewJoinees} showToast={showToast} isAdmin={isAdmin} />}
             {view === "Events" && <Events events={events} setEvents={setEvents} getEventStats={getEventStats} showToast={showToast} isAdmin={isAdmin} />}
             {view === "Attendance" && <Attendance events={events} members={members} newJoinees={newJoinees} attendance={attendance} setAttendance={setAttendance} newJoineeAttendance={newJoineeAttendance} setNewJoineeAttendance={setNewJoineeAttendance} showToast={showToast} isAdmin={isAdmin} />}
-            {view === "Analytics" && <Analytics members={members} events={events} getMemberStats={getMemberStats} attendance={attendance} newJoineeAttendance={newJoineeAttendance} />}
+            {view === "Analytics" && <Analytics members={members} events={events} getMemberStats={getMemberStats} attendance={attendance} newJoineeAttendance={newJoineeAttendance} isAdmin={isAdmin} />}
             {view === "Reports" && <Reports members={members} newJoinees={newJoinees} events={events} attendance={attendance} newJoineeAttendance={newJoineeAttendance} getEventStats={getEventStats} showToast={showToast} isAdmin={isAdmin} />}
           </div>
         </div>
@@ -1650,7 +1650,16 @@ function Attendance({ events, members, newJoinees, attendance, setAttendance, ne
   );
 }
 
-function Analytics({ members, events, getMemberStats, attendance, newJoineeAttendance }) {
+function Analytics({ members, events, getMemberStats, attendance, newJoineeAttendance, isAdmin }) {
+  if (!isAdmin) {
+    return (
+      <div className="empty-state">
+        <div className="empty-icon">🔒</div>
+        <h2 className="mb-2">Only for admins</h2>
+        <p className="color-muted text-sm">Please enable Admin Mode to access the Analytics Studio.</p>
+      </div>
+    );
+  }
   const active = members.filter(m => m.active);
   const totalAttendances = events.reduce((acc, e) => {
     return acc + active.filter(m => {
