@@ -595,7 +595,7 @@ export default function App() {
             {view === "Events" && <Events events={events} setEvents={setEvents} getEventStats={getEventStats} showToast={showToast} isAdmin={isAdmin} />}
             {view === "Attendance" && <Attendance events={events} members={members} newJoinees={newJoinees} attendance={attendance} setAttendance={setAttendance} newJoineeAttendance={newJoineeAttendance} setNewJoineeAttendance={setNewJoineeAttendance} showToast={showToast} isAdmin={isAdmin} />}
             {view === "Analytics" && <Analytics members={members} events={events} getMemberStats={getMemberStats} attendance={attendance} newJoineeAttendance={newJoineeAttendance} />}
-            {view === "Reports" && <Reports members={members} newJoinees={newJoinees} events={events} attendance={attendance} newJoineeAttendance={newJoineeAttendance} getEventStats={getEventStats} showToast={showToast} />}
+            {view === "Reports" && <Reports members={members} newJoinees={newJoinees} events={events} attendance={attendance} newJoineeAttendance={newJoineeAttendance} getEventStats={getEventStats} showToast={showToast} isAdmin={isAdmin} />}
           </div>
         </div>
       </div>
@@ -2018,27 +2018,7 @@ function Analytics({ members, events, getMemberStats, attendance, newJoineeAtten
   );
 }
 
-function Reports({ members, newJoinees, events, attendance, newJoineeAttendance, getEventStats, showToast }) {
-  // Compute data locally that was previously passed in
-  const active = (members || []).filter(m => m.active).map(m => ({ ...m, group: "Member", role: m.role || "Member" }));
-  const activeJoinees = (newJoinees || []).filter(j => j.active).map(j => ({ ...j, group: "New Joinee", role: "New Joiner" }));
-  const allPeople = [...active, ...activeJoinees];
-  
-  const attendanceGetter = (eId, pId) => {
-    return (attendance[eId] && attendance[eId][pId]) || (newJoineeAttendance[eId] && newJoineeAttendance[eId][pId]) || "absent";
-  };
-
-  const avgAtt = events.length ? events.reduce((acc, e) => {
-    const s = getEventStats(e.id);
-    return acc + (s ? (s.present + s.late) : 0);
-  }, 0) / events.length : 0;
-
-  const stats = {
-    active: allPeople.length,
-    avgAttendance: avgAtt
-  };
-
-  const [unlocked, setUnlocked] = React.useState(false);
+function Reports({ members, newJoinees, events, attendance, newJoineeAttendance, getEventStats, showToast, isAdmin }) {
   const [template, setTemplate] = React.useState("monthlySummary");
   const [zoom, setZoom] = React.useState(1);
   const [exportStep, setExportStep] = React.useState(0);
@@ -2058,19 +2038,38 @@ function Reports({ members, newJoinees, events, attendance, newJoineeAttendance,
   const [previewHtml, setPreviewHtml] = React.useState("");
 
   const updatePreview = React.useCallback(() => {
+    // Compute data inside to avoid infinite loops from dependency changes
+    const active = (members || []).filter(m => m.active).map(m => ({ ...m, group: "Member", role: m.role || "Member" }));
+    const activeJoinees = (newJoinees || []).filter(j => j.active).map(j => ({ ...j, group: "New Joinee", role: "New Joiner" }));
+    const allPeople = [...active, ...activeJoinees];
+    
+    const attendanceGetter = (eId, pId) => {
+      return (attendance[eId] && attendance[eId][pId]) || (newJoineeAttendance[eId] && newJoineeAttendance[eId][pId]) || "absent";
+    };
+
+    const avgAtt = events.length ? events.reduce((acc, e) => {
+      const s = getEventStats(e.id);
+      return acc + (s ? (s.present + s.late) : 0);
+    }, 0) / events.length : 0;
+
+    const stats = {
+      active: allPeople.length,
+      avgAttendance: avgAtt
+    };
+
     const html = buildReportHtml({
       template,
       data: { events, allPeople, attendanceGetter, stats, generatedAt: new Date().toLocaleString("en-IN") },
       options
     });
     setPreviewHtml(html);
-  }, [template, events, allPeople, attendanceGetter, stats, options]);
+  }, [template, events, members, newJoinees, attendance, newJoineeAttendance, options]); // removed getEventStats to avoid complex deps, or we can leave it
 
   React.useEffect(() => {
-    if (unlocked) {
+    if (isAdmin) {
       updatePreview();
     }
-  }, [unlocked, updatePreview]);
+  }, [isAdmin, updatePreview]);
 
   React.useEffect(() => {
     if (iframeRef.current && previewHtml) {
@@ -2105,8 +2104,14 @@ function Reports({ members, newJoinees, events, attendance, newJoineeAttendance,
     }, 1500);
   };
 
-  if (!unlocked) {
-    return <LockedReports onUnlock={() => setUnlocked(true)} />;
+  if (!isAdmin) {
+    return (
+      <div className="empty-state">
+        <div className="empty-icon">🔒</div>
+        <h2 className="mb-2">Only for admins</h2>
+        <p className="color-muted text-sm">Please enable Admin Mode to access the Reports Studio.</p>
+      </div>
+    );
   }
 
   return (
