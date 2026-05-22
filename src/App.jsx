@@ -1892,7 +1892,26 @@ function LockedReports({ onUnlock }) {
   );
 }
 
-function Reports({ events, allPeople, attendanceGetter, stats }) {
+function Reports({ members, newJoinees, events, attendance, newJoineeAttendance, getEventStats, showToast }) {
+  // Compute data locally that was previously passed in
+  const active = (members || []).filter(m => m.active).map(m => ({ ...m, group: "Member", role: m.role || "Member" }));
+  const activeJoinees = (newJoinees || []).filter(j => j.active).map(j => ({ ...j, group: "New Joinee", role: "New Joiner" }));
+  const allPeople = [...active, ...activeJoinees];
+  
+  const attendanceGetter = (eId, pId) => {
+    return (attendance[eId] && attendance[eId][pId]) || (newJoineeAttendance[eId] && newJoineeAttendance[eId][pId]) || "absent";
+  };
+
+  const avgAtt = events.length ? events.reduce((acc, e) => {
+    const s = getEventStats(e.id);
+    return acc + (s ? (s.present + s.late) : 0);
+  }, 0) / events.length : 0;
+
+  const stats = {
+    active: allPeople.length,
+    avgAttendance: avgAtt
+  };
+
   const [unlocked, setUnlocked] = React.useState(false);
   const [template, setTemplate] = React.useState("monthlySummary");
   const [zoom, setZoom] = React.useState(1);
