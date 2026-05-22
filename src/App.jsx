@@ -1718,7 +1718,7 @@ function Analytics({ members, events, getMemberStats, attendance, newJoineeAtten
       const att = attendance[e.id]?.[m.id];
       return att === 'present' || att === 'late';
     }).length;
-    return { title: e.title, pct: active.length ? Math.round((count/active.length)*100) : 0 };
+    return { title: e.name, pct: active.length ? Math.round((count/active.length)*100) : 0 };
   }).sort((a,b) => a.pct - b.pct);
   
   if (eventPcts.length > 0) {
@@ -1850,7 +1850,7 @@ function Analytics({ members, events, getMemberStats, attendance, newJoineeAtten
             <div className="heatmap-row" style={{ marginBottom: "8px" }}>
               <div className="heatmap-label" style={{ fontWeight: 600 }}>Member</div>
               {recentEvents.map(e => (
-                <div key={e.id} className="heatmap-label" style={{ flex: 1, minWidth: "40px", textAlign: "center" }} title={e.title}>
+                <div key={e.id} className="heatmap-label" style={{ flex: 1, minWidth: "40px", textAlign: "center" }} title={e.name}>
                   {new Date(e.date).toLocaleDateString('en-US', { day: 'numeric', month: 'short' })}
                 </div>
               ))}
@@ -2129,7 +2129,7 @@ function buildReportHtml({ template, data, options }) {
                // Calculate a rough height based on an assumed max of 50
                const count = allPeople.filter(p => attendanceGetter(e.id, p.id) === 'present').length;
                const h = Math.max(10, Math.min(100, (count / (allPeople.length || 1)) * 100));
-               return `<div style="flex: 1; margin: 0 4px; background: ${brandColor}; height: ${h}%; border-radius: 4px 4px 0 0; opacity: 0.8;" title="${e.title}"></div>`;
+               return `<div style="flex: 1; margin: 0 4px; background: ${brandColor}; height: ${h}%; border-radius: 4px 4px 0 0; opacity: 0.8;" title="${e.name}"></div>`;
             }).join("")}
           </div>
         </div>
@@ -2144,7 +2144,7 @@ function buildReportHtml({ template, data, options }) {
           <tr style="background: ${brandColor}; color: #fff;">
             <th style="padding: 10px; text-align: left; border: 1px solid ${brandColor};">Member</th>
             ${includePhone ? `<th style="padding: 10px; text-align: left; border: 1px solid ${brandColor};">Phone</th>` : ""}
-            ${filteredEvents.map(e => `<th style="padding: 10px; text-align: center; border: 1px solid ${brandColor};" title="${e.title}"><div style="font-size: 10.5px; font-weight: 600; margin-bottom: 4px; line-height: 1.2;">${e.title}</div><div>${new Date(e.date).toLocaleDateString('en-US', {month:'short', day:'numeric'})}</div></th>`).join("")}
+            ${filteredEvents.map(e => `<th style="padding: 10px; text-align: center; border: 1px solid ${brandColor};" title="${e.name}"><div style="font-size: 10.5px; font-weight: 600; margin-bottom: 4px; line-height: 1.2;">${e.name}</div><div>${new Date(e.date).toLocaleDateString('en-US', {month:'short', day:'numeric'})}</div></th>`).join("")}
           </tr>
         </thead>
         <tbody>
@@ -2178,7 +2178,7 @@ function buildReportHtml({ template, data, options }) {
             const aCount = allPeople.filter(p => attendanceGetter(e.id, p.id) === 'absent').length;
             return `
               <tr style="background: ${i % 2 === 0 ? '#fff' : '#f9fafb'};">
-                <td style="padding: 8px; border: 1px solid #e5e7eb;"><strong>${new Date(e.date).toLocaleDateString()}</strong> - ${e.title}</td>
+                <td style="padding: 8px; border: 1px solid #e5e7eb;"><strong>${new Date(e.date).toLocaleDateString()}</strong> - ${e.name}</td>
                 <td style="padding: 8px; text-align: center; border: 1px solid #e5e7eb; color: #15803d;">${pCount}</td>
                 <td style="padding: 8px; text-align: center; border: 1px solid #e5e7eb; color: #be123c;">${aCount}</td>
               </tr>
@@ -2361,7 +2361,7 @@ function Reports({ members, newJoinees, events, attendance, newJoineeAttendance,
                 onChange={e => setOptions({...options, eventId: e.target.value})}
               >
                 {events.map(ev => (
-                  <option key={ev.id} value={ev.id}>{new Date(ev.date).toLocaleDateString()} - {ev.title}</option>
+                  <option key={ev.id} value={ev.id}>{new Date(ev.date).toLocaleDateString()} - {ev.name}</option>
                 ))}
               </select>
             </div>
