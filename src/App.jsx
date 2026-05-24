@@ -1,4 +1,6 @@
-import React, { useCallback, useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
+import { doc, onSnapshot, setDoc } from "firebase/firestore";
+import { db } from "./firebase";
 
 const ADMIN_PASSWORD = "ParamAYSG1008";
 
@@ -142,6 +144,7 @@ const DEMO_ATTENDANCE = {
 };
 
 const INITIAL_ATTENDANCE = {};
+const passthrough = value => value;
 
 function normalizeName(name) {
   return String(name || "").trim().replace(/\s+/g, " ").toLowerCase();
@@ -185,7 +188,7 @@ function migrateAttendance(value) {
   return JSON.stringify(value) === JSON.stringify(DEMO_ATTENDANCE) ? INITIAL_ATTENDANCE : value;
 }
 
-function useLocalStorage(key, initial, migrate = value => value) {
+function useSyncedStorage(key, initial, migrate = passthrough) {
   const [val, setVal] = useState(() => {
     try {
       const s = localStorage.getItem(key);
@@ -194,12 +197,61 @@ function useLocalStorage(key, initial, migrate = value => value) {
       return migrate(initial);
     }
   });
+  const remoteReady = useRef(false);
+  const localCache = useRef(val);
+  const skipNextRemoteSave = useRef(false);
+
+  useEffect(() => {
+    localCache.current = val;
+  }, [val]);
+
+  useEffect(() => {
+    const ref = doc(db, "appState", key);
+    const unsubscribe = onSnapshot(
+      ref,
+      snapshot => {
+        if (snapshot.exists()) {
+          const remoteValue = migrate(snapshot.data().value);
+          remoteReady.current = true;
+          skipNextRemoteSave.current = true;
+          setVal(remoteValue);
+          try {
+            localStorage.setItem(key, JSON.stringify(remoteValue));
+          } catch {
+            // localStorage can be unavailable in private or restricted browser contexts.
+          }
+          return;
+        }
+
+        const seedValue = migrate(localCache.current ?? initial);
+        remoteReady.current = true;
+        setDoc(ref, { value: seedValue }, { merge: true }).catch(error => {
+          console.error(`Could not seed ${key} in Firebase`, error);
+        });
+      },
+      error => {
+        remoteReady.current = true;
+        console.error(`Could not sync ${key} from Firebase`, error);
+      }
+    );
+
+    return unsubscribe;
+  }, [key, initial, migrate]);
+
   useEffect(() => {
     try {
       localStorage.setItem(key, JSON.stringify(val));
     } catch {
       // localStorage can be unavailable in private or restricted browser contexts.
     }
+    if (!remoteReady.current) return;
+    if (skipNextRemoteSave.current) {
+      skipNextRemoteSave.current = false;
+      return;
+    }
+    setDoc(doc(db, "appState", key), { value: val }, { merge: true }).catch(error => {
+      console.error(`Could not save ${key} to Firebase`, error);
+    });
   }, [key, val]);
   return [val, setVal];
 }
@@ -511,11 +563,11 @@ const VIEW_ICONS = { Dashboard: "D", Members: "M", "New Joinees": "N", Events: "
 
 export default function App() {
   const [view, setView] = useState("Dashboard");
-  const [members, setMembers] = useLocalStorage("aysg_members", INITIAL_MEMBERS, migrateMembers);
-  const [newJoinees, setNewJoinees] = useLocalStorage("aysg_new_joinees", INITIAL_NEW_JOINEES);
-  const [events, setEvents] = useLocalStorage("aysg_events", INITIAL_EVENTS);
-  const [attendance, setAttendance] = useLocalStorage("aysg_attendance", INITIAL_ATTENDANCE, migrateAttendance);
-  const [newJoineeAttendance, setNewJoineeAttendance] = useLocalStorage("aysg_new_joinee_attendance", INITIAL_ATTENDANCE);
+  const [members, setMembers] = useSyncedStorage("aysg_members", INITIAL_MEMBERS, migrateMembers);
+  const [newJoinees, setNewJoinees] = useSyncedStorage("aysg_new_joinees", INITIAL_NEW_JOINEES);
+  const [events, setEvents] = useSyncedStorage("aysg_events", INITIAL_EVENTS);
+  const [attendance, setAttendance] = useSyncedStorage("aysg_attendance", INITIAL_ATTENDANCE, migrateAttendance);
+  const [newJoineeAttendance, setNewJoineeAttendance] = useSyncedStorage("aysg_new_joinee_attendance", INITIAL_ATTENDANCE);
   const [isAdmin, setIsAdmin] = useState(false);
   const [showAdminLogin, setShowAdminLogin] = useState(false);
   const [adminPw, setAdminPw] = useState("");
@@ -1651,6 +1703,8 @@ function Attendance({ events, members, newJoinees, attendance, setAttendance, ne
 }
 
 function Analytics({ members, events, getMemberStats, attendance, newJoineeAttendance, isAdmin }) {
+  const [attentionTab, setAttentionTab] = React.useState("declining");
+
   if (!isAdmin) {
     return (
       <div className="empty-state">
@@ -1704,6 +1758,18 @@ function Analytics({ members, events, getMemberStats, attendance, newJoineeAtten
   const areaCounts = active.reduce((acc, m) => { acc[m.area] = (acc[m.area] || 0) + 1; return acc; }, {});
   const areaData = Object.entries(areaCounts).map(([name, count]) => ({ name, count })).sort((a,b) => b.count - a.count);
   const donutColors = ["#7c6af8", "#10d47e", "#f0b429", "#ec4899", "#06b6d4"];
+  const donutSegments = areaData.map((area, index) => {
+    const pct = active.length ? area.count / active.length : 0;
+    const previousPct = active.length
+      ? areaData.slice(0, index).reduce((sum, item) => sum + item.count / active.length, 0)
+      : 0;
+    return {
+      ...area,
+      color: donutColors[index % donutColors.length],
+      dashArray: `${pct * 314} 314`,
+      dashOffset: -(previousPct * 314),
+    };
+  });
 
   // Heatmap logic (Top 5 events, top 8 people for brevity, or scrollable)
   const recentEvents = [...events].sort((a,b) => new Date(b.date) - new Date(a.date)).slice(0, 5).reverse();
@@ -1713,8 +1779,6 @@ function Analytics({ members, events, getMemberStats, attendance, newJoineeAtten
   const consistent = active.filter(m => getMemberStats(m.id).pct >= 80);
   const irregular = active.filter(m => getMemberStats(m.id).pct >= 40 && getMemberStats(m.id).pct < 80);
   const inactive = active.filter(m => getMemberStats(m.id).pct < 40 && getMemberStats(m.id).total > 0);
-
-  const [attentionTab, setAttentionTab] = React.useState("declining");
 
   // Insight Generation
   const insights = [];
@@ -1891,18 +1955,9 @@ function Analytics({ members, events, getMemberStats, attendance, newJoineeAtten
           <div className="flex items-center justify-center gap-6" style={{ height: "100%" }}>
             <div style={{ position: "relative", width: "120px", height: "120px" }}>
               <svg viewBox="0 0 100 100" style={{ transform: "rotate(-90deg)", width: "100%", height: "100%" }}>
-                {(() => {
-                  let cum = 0;
-                  return areaData.map((a, i) => {
-                    const pct = a.count / active.length;
-                    const dashArray = `${pct * 314} 314`;
-                    const dashOffset = -(cum * 314);
-                    cum += pct;
-                    return (
-                      <circle key={a.name} cx="50" cy="50" r="40" fill="none" stroke={donutColors[i % donutColors.length]} strokeWidth="20" strokeDasharray={dashArray} strokeDashoffset={dashOffset} />
-                    );
-                  });
-                })()}
+                {donutSegments.map(segment => (
+                  <circle key={segment.name} cx="50" cy="50" r="40" fill="none" stroke={segment.color} strokeWidth="20" strokeDasharray={segment.dashArray} strokeDashoffset={segment.dashOffset} />
+                ))}
               </svg>
               <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
                 <span style={{ fontSize: "20px", fontWeight: "bold" }}>{active.length}</span>
@@ -2134,7 +2189,7 @@ function buildReportHtml({ template, data, options }) {
         <div style="margin-bottom: 30px; page-break-inside: avoid;">
           <h3 style="margin: 0 0 12px; font-size: 16px;">Attendance Trend</h3>
           <div style="height: 120px; background: #f3f4f6; border-radius: 8px; position: relative; overflow: hidden; display: flex; align-items: flex-end; padding: 0 10px 10px;">
-            ${filteredEvents.slice(0,10).map((e,i) => {
+            ${filteredEvents.slice(0,10).map((e) => {
                // Calculate a rough height based on an assumed max of 50
                const count = allPeople.filter(p => attendanceGetter(e.id, p.id) === 'present').length;
                const h = Math.max(10, Math.min(100, (count / (allPeople.length || 1)) * 100));
@@ -2219,7 +2274,7 @@ function buildReportHtml({ template, data, options }) {
 }
 
 
-function Reports({ members, newJoinees, events, attendance, newJoineeAttendance, getEventStats, showToast, isAdmin }) {
+function Reports({ members, newJoinees, events, attendance, newJoineeAttendance, getEventStats, isAdmin }) {
   const [template, setTemplate] = React.useState("monthlySummary");
   const [zoom, setZoom] = React.useState(1);
   const [exportStep, setExportStep] = React.useState(0);
@@ -2236,10 +2291,7 @@ function Reports({ members, newJoinees, events, attendance, newJoineeAttendance,
   });
 
   const iframeRef = React.useRef(null);
-  const [previewHtml, setPreviewHtml] = React.useState("");
-
-  const updatePreview = React.useCallback(() => {
-    // Compute data inside to avoid infinite loops from dependency changes
+  const previewHtml = React.useMemo(() => {
     const active = (members || []).filter(m => m.active).map(m => ({ ...m, group: "Member", role: m.role || "Member" }));
     const activeJoinees = (newJoinees || []).filter(j => j.active).map(j => ({ ...j, group: "New Joinee", role: "New Joiner" }));
     const allPeople = [...active, ...activeJoinees];
@@ -2258,19 +2310,12 @@ function Reports({ members, newJoinees, events, attendance, newJoineeAttendance,
       avgAttendance: avgAtt
     };
 
-    const html = buildReportHtml({
+    return buildReportHtml({
       template,
       data: { events, allPeople, attendanceGetter, stats, generatedAt: new Date().toLocaleString("en-IN") },
       options
     });
-    setPreviewHtml(html);
-  }, [template, events, members, newJoinees, attendance, newJoineeAttendance, options]); // removed getEventStats to avoid complex deps, or we can leave it
-
-  React.useEffect(() => {
-    if (isAdmin) {
-      updatePreview();
-    }
-  }, [isAdmin, updatePreview]);
+  }, [template, events, members, newJoinees, attendance, newJoineeAttendance, getEventStats, options]);
 
   React.useEffect(() => {
     if (iframeRef.current && previewHtml) {
