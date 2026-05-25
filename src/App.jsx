@@ -1,8 +1,17 @@
 import React, { useState, useEffect, useRef } from "react";
-import { doc, onSnapshot, setDoc } from "firebase/firestore";
+import { doc, onSnapshot, serverTimestamp, setDoc } from "firebase/firestore";
 import { db } from "./firebase";
 
 const ADMIN_PASSWORD = "ParamAYSG1008";
+const FIRESTORE_STATE_COLLECTION = "appState";
+const DATA_SCHEMA_VERSION = 1;
+const PERSISTED_DATA_KEYS = Object.freeze({
+  members: "aysg_members",
+  newJoinees: "aysg_new_joinees",
+  events: "aysg_events",
+  attendance: "aysg_attendance",
+  newJoineeAttendance: "aysg_new_joinee_attendance",
+});
 
 const MEMBER_NAMES = [
   "Dhairya Nandu",
@@ -146,6 +155,10 @@ const DEMO_ATTENDANCE = {
 const INITIAL_ATTENDANCE = {};
 const passthrough = value => value;
 
+function stateDoc(key) {
+  return doc(db, FIRESTORE_STATE_COLLECTION, key);
+}
+
 function normalizeName(name) {
   return String(name || "").trim().replace(/\s+/g, " ").toLowerCase();
 }
@@ -206,14 +219,16 @@ function useSyncedStorage(key, initial, migrate = passthrough) {
   }, [val]);
 
   useEffect(() => {
-    const ref = doc(db, "appState", key);
+    const ref = stateDoc(key);
     const unsubscribe = onSnapshot(
       ref,
       snapshot => {
         if (snapshot.exists()) {
-          const remoteValue = migrate(snapshot.data().value);
+          const remoteData = snapshot.data();
+          const remoteValue = migrate(remoteData.value);
+          const shouldPersistMigration = JSON.stringify(remoteValue) !== JSON.stringify(remoteData.value);
           remoteReady.current = true;
-          skipNextRemoteSave.current = true;
+          skipNextRemoteSave.current = !shouldPersistMigration;
           setVal(remoteValue);
           try {
             localStorage.setItem(key, JSON.stringify(remoteValue));
@@ -225,7 +240,12 @@ function useSyncedStorage(key, initial, migrate = passthrough) {
 
         const seedValue = migrate(localCache.current ?? initial);
         remoteReady.current = true;
-        setDoc(ref, { value: seedValue }, { merge: true }).catch(error => {
+        setDoc(ref, {
+          value: seedValue,
+          schemaVersion: DATA_SCHEMA_VERSION,
+          createdAt: serverTimestamp(),
+          updatedAt: serverTimestamp(),
+        }, { merge: true }).catch(error => {
           console.error(`Could not seed ${key} in Firebase`, error);
         });
       },
@@ -249,7 +269,11 @@ function useSyncedStorage(key, initial, migrate = passthrough) {
       skipNextRemoteSave.current = false;
       return;
     }
-    setDoc(doc(db, "appState", key), { value: val }, { merge: true }).catch(error => {
+    setDoc(stateDoc(key), {
+      value: val,
+      schemaVersion: DATA_SCHEMA_VERSION,
+      updatedAt: serverTimestamp(),
+    }, { merge: true }).catch(error => {
       console.error(`Could not save ${key} to Firebase`, error);
     });
   }, [key, val]);
@@ -563,11 +587,11 @@ const VIEW_ICONS = { Dashboard: "D", Members: "M", "New Joinees": "N", Events: "
 
 export default function App() {
   const [view, setView] = useState("Dashboard");
-  const [members, setMembers] = useSyncedStorage("aysg_members", INITIAL_MEMBERS, migrateMembers);
-  const [newJoinees, setNewJoinees] = useSyncedStorage("aysg_new_joinees", INITIAL_NEW_JOINEES);
-  const [events, setEvents] = useSyncedStorage("aysg_events", INITIAL_EVENTS);
-  const [attendance, setAttendance] = useSyncedStorage("aysg_attendance", INITIAL_ATTENDANCE, migrateAttendance);
-  const [newJoineeAttendance, setNewJoineeAttendance] = useSyncedStorage("aysg_new_joinee_attendance", INITIAL_ATTENDANCE);
+  const [members, setMembers] = useSyncedStorage(PERSISTED_DATA_KEYS.members, INITIAL_MEMBERS, migrateMembers);
+  const [newJoinees, setNewJoinees] = useSyncedStorage(PERSISTED_DATA_KEYS.newJoinees, INITIAL_NEW_JOINEES);
+  const [events, setEvents] = useSyncedStorage(PERSISTED_DATA_KEYS.events, INITIAL_EVENTS);
+  const [attendance, setAttendance] = useSyncedStorage(PERSISTED_DATA_KEYS.attendance, INITIAL_ATTENDANCE, migrateAttendance);
+  const [newJoineeAttendance, setNewJoineeAttendance] = useSyncedStorage(PERSISTED_DATA_KEYS.newJoineeAttendance, INITIAL_ATTENDANCE);
   const [isAdmin, setIsAdmin] = useState(false);
   const [showAdminLogin, setShowAdminLogin] = useState(false);
   const [adminPw, setAdminPw] = useState("");

@@ -1,16 +1,30 @@
-# React + Vite
+# AYSG Attendance Tracker
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## Data persistence
 
-Currently, two official plugins are available:
+User-entered attendance system data is stored in Firebase Firestore, not in the deployed app files. This means rebuilding, redeploying, or updating the React code should not delete members, events, or attendance records.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+Persistent data lives in the Firestore collection `appState` under these stable document IDs:
 
-## React Compiler
+- `aysg_members`
+- `aysg_new_joinees`
+- `aysg_events`
+- `aysg_attendance`
+- `aysg_new_joinee_attendance`
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+Important rule for future updates: do not rename these document IDs or replace Firebase data with new local defaults. New app versions should read existing Firestore data first, then only apply additive migrations when needed.
 
-## Expanding the ESLint configuration
+Local browser storage is only used as a cache/fallback. Firestore is the source of truth for shared data across devices and app versions.
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## Development
+
+```bash
+npm install
+npm run dev
+```
+
+## Build
+
+```bash
+npm run build
+```
