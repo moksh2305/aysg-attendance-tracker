@@ -693,8 +693,80 @@ function PublicCheckIn({ event }) {
   );
 }
 
+function PendingRow({ docId, data, members, onApprove, onReject }) {
+  const [matchId, setMatchId] = useState("");
+  React.useEffect(() => {
+    if (!matchId) {
+      const m = members.find(x => x.name.toLowerCase() === data.name.toLowerCase());
+      if (m) setMatchId(m.id);
+    }
+  }, [members, data.name]);
+  return (
+    <div style={{border: '1px solid var(--border)', padding: 12, borderRadius: 8, background: "white"}} className="flex items-center justify-between gap-4">
+      <div style={{flex: 1}}>
+        <div style={{fontWeight: 600, fontSize: 14}}>{data.name}</div>
+        <div style={{fontSize: 12, color: 'var(--text2)'}}>{data.mobile || "No mobile"}</div>
+      </div>
+      <select value={matchId} onChange={e=>setMatchId(e.target.value)} className="input" style={{flex: 1}}>
+        <option value="">-- Match Member --</option>
+        <option value="NEW_JOINEE">+ Add as New Joinee</option>
+        <optgroup label="Members">
+          {members.map(m => <option key={m.id} value={m.id}>{m.name}</option>)}
+        </optgroup>
+      </select>
+      <div className="flex gap-2">
+        <button disabled={!matchId} className="btn" style={{padding: "6px 12px", background: "var(--emerald)", color: "white", border: "none", opacity: matchId ? 1 : 0.5}} onClick={() => onApprove(docId, data, matchId)}>Approve</button>
+        <button className="btn" style={{padding: "6px 12px", background: "#f3f4f6", color: "var(--rose)", border: "none"}} onClick={() => onReject(docId)}>Reject</button>
+      </div>
+    </div>
+  );
+}
+
+function PendingCheckinsModal({ eventId, members, onClose, onApprove, showToast }) {
+  const [pending, setPending] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  React.useEffect(() => {
+    const q = query(collection(db, "pending_checkins"), where("eventId", "==", eventId));
+    const unsub = onSnapshot(q, (snap) => {
+      setPending(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+      setLoading(false);
+    });
+    return unsub;
+  }, [eventId]);
+
+  const handleApprove = async (docId, pendingData, matchedMemberId) => {
+    onApprove(matchedMemberId, pendingData);
+    await deleteDoc(doc(db, "pending_checkins", docId));
+    showToast("Check-in approved", "success");
+  };
+
+  const handleReject = async (docId) => {
+    await deleteDoc(doc(db, "pending_checkins", docId));
+    showToast("Check-in rejected", "info");
+  };
+
+  return (
+    <div style={{position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center'}} onClick={onClose}>
+      <div style={{background: '#f9fafb', padding: 32, borderRadius: 16, width: '100%', maxWidth: 600, maxHeight: '80vh', overflowY: 'auto'}} onClick={e=>e.stopPropagation()}>
+        <div className="flex justify-between items-center mb-6">
+          <h2 style={{fontSize: 20, fontWeight: 700}}>Pending Scans ({pending.length})</h2>
+          <button onClick={onClose} style={{background: 'none', border: 'none', cursor: 'pointer', fontSize: 24}}>&times;</button>
+        </div>
+        {loading ? <p>Loading...</p> : pending.length === 0 ? <p className="color-muted">No pending check-ins for this event.</p> : (
+          <div className="flex flex-col gap-3">
+            {pending.map(p => <PendingRow key={p.id} docId={p.id} data={p} members={members} onApprove={handleApprove} onReject={handleReject} />)}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export default function App() {
   const [view, setView] = useState("Dashboard");
+  const urlParams = new URLSearchParams(window.location.search);
+  const checkinEventId = urlParams.get("checkin");
   const [members, setMembers] = useSyncedStorage(PERSISTED_DATA_KEYS.members, INITIAL_MEMBERS, migrateMembers);
   const [newJoinees, setNewJoinees] = useSyncedStorage(PERSISTED_DATA_KEYS.newJoinees, INITIAL_NEW_JOINEES);
   const [events, setEvents] = useSyncedStorage(PERSISTED_DATA_KEYS.events, INITIAL_EVENTS);
@@ -749,6 +821,13 @@ export default function App() {
     setAdminErr("");
     showToast("Admin mode disabled");
   };
+
+  if (checkinEventId) {
+    if (events.length === 0) return <div style={{padding: 40, textAlign: 'center'}}>Loading event details...</div>;
+    const checkinEvent = events.find(e => e.id === checkinEventId);
+    if (!checkinEvent) return <div style={{padding: 40, textAlign: 'center'}}>Event Not Found</div>;
+    return <><style>{css}</style><PublicCheckIn event={checkinEvent} /></>;
+  }
   const getMemberStats = (memberId) => {
     let total = 0, present = 0;
     Object.values(attendance).forEach(rec => { total++; if (isAttendedStatus(rec[memberId])) present++; });
@@ -1596,6 +1675,8 @@ function Events({ events, setEvents, getEventStats, showToast, isAdmin }) {
 
 function Attendance({ events, members, newJoinees, attendance, setAttendance, newJoineeAttendance, setNewJoineeAttendance, setNewJoinees, showToast, isAdmin }) {
   const [selEvent, setSelEvent] = useState(events[0]?.id || "");
+  const [showQR, setShowQR] = useState(false);
+  const [showPending, setShowPending] = useState(false);
   const [search, setSearch] = useState("");
   const [group, setGroup] = useState("members");
   const [statusFilter, setStatusFilter] = useState("");
@@ -1780,6 +1861,12 @@ function Attendance({ events, members, newJoinees, attendance, setAttendance, ne
                 <option key={e.id} value={e.id}>{e.name} ({fmtDate(e.date)})</option>
               ))}
             </select>
+            {isAdmin && selEvent && (
+              <div className="flex gap-2" style={{marginTop: 8}}>
+                <button className="btn" style={{flex: 1, padding: "8px", background: "white", color: "var(--text)", border: "1px solid var(--border)"}} onClick={() => setShowQR(true)}>Generate QR</button>
+                <button className="btn" style={{flex: 1, padding: "8px", background: "white", color: "var(--text)", border: "1px solid var(--border)"}} onClick={() => setShowPending(true)}>Pending Scans</button>
+              </div>
+            )}
           </div>
           {selEvent && (
             <div className="flex items-center gap-4">
@@ -1930,6 +2017,37 @@ function Attendance({ events, members, newJoinees, attendance, setAttendance, ne
             </div>
           </div>
         </div>
+      )}
+      {showQR && selEvent && (
+        <div style={{position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center'}} onClick={() => setShowQR(false)}>
+          <div style={{background: 'white', padding: 32, borderRadius: 16, textAlign: 'center', maxWidth: 400}} onClick={e => e.stopPropagation()}>
+            <h2 className="mb-2">Event Check-In QR</h2>
+            <p className="color-muted mb-6 text-sm">Members scan this to submit attendance.</p>
+            <div style={{ display: 'inline-block', padding: 16, background: '#f9fafb', borderRadius: 12 }}>
+              <QRCodeCanvas value={`${window.location.origin}/?checkin=${selEvent}`} size={240} />
+            </div>
+            <div className="mt-6">
+              <button className="btn" style={{width: '100%', padding: "10px", background: "#f3f4f6", color: "var(--text)", border: "none"}} onClick={() => setShowQR(false)}>Close</button>
+            </div>
+          </div>
+        </div>
+      )}
+      {showPending && selEvent && (
+        <PendingCheckinsModal 
+          eventId={selEvent} 
+          members={members} 
+          onClose={() => setShowPending(false)} 
+          onApprove={(matchedMemberId, data) => {
+            if (matchedMemberId === "NEW_JOINEE") {
+              const nid = "NJ_" + Math.random().toString(36).substr(2, 9);
+              setNewJoinees([...newJoinees, { id: nid, name: data.name, mobile: data.mobile, active: true }]);
+              setNewJoineeAttendance({ ...newJoineeAttendance, [selEvent]: { ...(newJoineeAttendance[selEvent] || {}), [nid]: "present" } });
+            } else {
+              setAttendance({ ...attendance, [selEvent]: { ...(attendance[selEvent] || {}), [matchedMemberId]: "present" } });
+            }
+          }} 
+          showToast={showToast} 
+        />
       )}
     </div>
   );
