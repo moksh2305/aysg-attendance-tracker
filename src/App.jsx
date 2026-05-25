@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { doc, onSnapshot, serverTimestamp, setDoc } from "firebase/firestore";
+import readXlsxFile from "read-excel-file/browser";
 import { db } from "./firebase";
 
 const ADMIN_PASSWORD = "ParamAYSG1008";
@@ -293,6 +294,28 @@ function normalizeAttendanceStatus(value) {
 function isAttendedStatus(value) {
   const status = normalizeAttendanceStatus(value);
   return status === "present" || status === "late";
+}
+
+function parseBulkNames(text) {
+  return String(text || "")
+    .split(/[\n,;\t]+/)
+    .map(name => name.trim())
+    .filter(Boolean);
+}
+
+function namesFromWorksheetRows(rows) {
+  if (!Array.isArray(rows) || rows.length === 0) return [];
+  const firstRow = rows[0] || [];
+  const nameHeaderIndex = firstRow.findIndex(cell => {
+    const label = normalizeName(cell);
+    return ["name", "full name", "member name", "names"].includes(label);
+  });
+  const nameColumnIndex = nameHeaderIndex >= 0 ? nameHeaderIndex : 0;
+  const dataRows = nameHeaderIndex >= 0 ? rows.slice(1) : rows;
+  return dataRows
+    .map(row => row?.[nameColumnIndex])
+    .map(name => String(name || "").trim())
+    .filter(Boolean);
 }
 
 const css = `
@@ -1484,6 +1507,9 @@ function Attendance({ events, members, newJoinees, attendance, setAttendance, ne
   const [statusFilter, setStatusFilter] = useState("");
   const [areaFilter, setAreaFilter] = useState("");
   const [smartFilter, setSmartFilter] = useState("");
+  const [showBulkNames, setShowBulkNames] = useState(false);
+  const [bulkNames, setBulkNames] = useState("");
+  const fileInputRef = useRef(null);
   const isNewJoineeGroup = group === "newJoinees";
   const activePeople = (isNewJoineeGroup ? newJoinees : members).filter(p => p.active);
   const store = isNewJoineeGroup ? newJoineeAttendance : attendance;
@@ -1532,6 +1558,60 @@ function Attendance({ events, members, newJoinees, attendance, setAttendance, ne
       (smartFilter === "missing" && status === "absent");
     return matchesSearch && matchesStatus && matchesArea && matchesSmart;
   });
+
+  const applyPresentByNames = (names, sourceLabel) => {
+    if (!isAdmin || !selEvent) return;
+    const uniqueNames = [...new Set(names.map(normalizeName).filter(Boolean))];
+    if (uniqueNames.length === 0) {
+      showToast(`No names found in ${sourceLabel}`, "error");
+      return;
+    }
+
+    const peopleByName = new Map(activePeople.map(person => [normalizeName(person.name), person]));
+    const matched = [];
+    const unmatched = [];
+    uniqueNames.forEach(name => {
+      const person = peopleByName.get(name);
+      if (person) matched.push(person);
+      else unmatched.push(name);
+    });
+
+    if (matched.length === 0) {
+      showToast(`No matching ${groupLabel.toLowerCase()} found`, "error");
+      return;
+    }
+
+    const updatedRec = { ...rec };
+    matched.forEach(person => {
+      updatedRec[person.id] = "present";
+    });
+    setStore({ ...store, [selEvent]: updatedRec });
+
+    const missedText = unmatched.length ? `, ${unmatched.length} not found` : "";
+    showToast(`${matched.length} ${groupLabel.toLowerCase()} marked present${missedText}`, unmatched.length ? "info" : "success");
+  };
+
+  const handleExcelImport = async (event) => {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+    if (!file) return;
+
+    try {
+      const rows = file.name.toLowerCase().endsWith(".csv")
+        ? (await file.text()).split(/\r?\n/).map(line => line.split(","))
+        : await readXlsxFile(file);
+      applyPresentByNames(namesFromWorksheetRows(rows), file.name);
+    } catch (error) {
+      console.error("Could not import attendance Excel file", error);
+      showToast("Could not read this Excel file", "error");
+    }
+  };
+
+  const submitBulkNames = () => {
+    applyPresentByNames(parseBulkNames(bulkNames), "typed names");
+    setBulkNames("");
+    setShowBulkNames(false);
+  };
 
   const setPersonStatus = (personId, status) => {
     if (!isAdmin) return;
@@ -1657,8 +1737,17 @@ function Attendance({ events, members, newJoinees, attendance, setAttendance, ne
               <div className="flex gap-2 wrap">
                 <button className="btn btn-success btn-sm" onClick={() => markAll("present")}>Mark All Present</button>
                 <button className="btn btn-danger btn-sm" onClick={() => markAll("absent")}>Mark All Absent</button>
+                <button className="btn btn-sm" onClick={() => fileInputRef.current?.click()}>Import Excel Names</button>
+                <button className="btn btn-sm" onClick={() => setShowBulkNames(true)}>Enter Names</button>
                 <button className="btn btn-sm" onClick={importPrevious}>Import Previous Attendance</button>
                 <button className="btn btn-sm btn-danger" onClick={resetAttendance}>Reset Attendance</button>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept=".xlsx,.csv"
+                  onChange={handleExcelImport}
+                  style={{ display: "none" }}
+                />
               </div>
             )}
           </div>
@@ -1721,6 +1810,32 @@ function Attendance({ events, members, newJoinees, attendance, setAttendance, ne
             </div>
           )}
         </>
+      )}
+      {showBulkNames && (
+        <div className="modal-bg" onClick={e => e.target === e.currentTarget && setShowBulkNames(false)}>
+          <div className="modal" style={{ maxWidth: 520 }}>
+            <h2>Mark {groupLabel} Present</h2>
+            <div className="field">
+              <label>Names</label>
+              <textarea
+                className="input"
+                value={bulkNames}
+                onChange={e => setBulkNames(e.target.value)}
+                placeholder="Enter one name per line, or separate names with commas"
+                rows={8}
+                autoFocus
+                style={{ resize: "vertical", minHeight: 160 }}
+              />
+            </div>
+            <p className="color-muted text-xs" style={{ marginTop: -6, marginBottom: 12 }}>
+              This marks matching {groupLabel.toLowerCase()} as present for the selected event only.
+            </p>
+            <div className="flex gap-3 mt-4">
+              <button className="btn btn-primary flex-1" style={{ justifyContent: "center" }} onClick={submitBulkNames}>OK</button>
+              <button className="btn" onClick={() => setShowBulkNames(false)}>Cancel</button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
