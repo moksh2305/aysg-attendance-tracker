@@ -16,6 +16,12 @@ Important rule for future updates: do not rename these document IDs or replace F
 
 Local browser storage is only used as a cache/fallback. Firestore is the source of truth for shared data across devices and app versions.
 
+## Admin access
+
+Admin editing uses Firebase Google sign-in. Only Google accounts whose Firebase display name is exactly `Moksh Shah` or `Dheer Sheth` are allowed to unlock admin mode.
+
+Enable the Google provider in Firebase Authentication, then publish `firestore.rules` so Firestore writes are protected server-side too.
+
 ## Development
 
 ```bash

@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useRef } from "react";
+import { onAuthStateChanged, signInWithPopup, signOut } from "firebase/auth";
 import { doc, onSnapshot, serverTimestamp, setDoc } from "firebase/firestore";
 import readXlsxFile from "read-excel-file/browser";
-import { db } from "./firebase";
+import { auth, db, googleProvider } from "./firebase";
 
-const ADMIN_PASSWORD = "ParamAYSG1008";
+const ALLOWED_ADMIN_NAMES = new Set(["moksh shah", "dheer sheth"]);
 const FIRESTORE_STATE_COLLECTION = "appState";
 const DATA_SCHEMA_VERSION = 1;
 const PERSISTED_DATA_KEYS = Object.freeze({
@@ -162,6 +163,10 @@ function stateDoc(key) {
 
 function normalizeName(name) {
   return String(name || "").trim().replace(/\s+/g, " ").toLowerCase();
+}
+
+function isAllowedAdminUser(user) {
+  return user && ALLOWED_ADMIN_NAMES.has(normalizeName(user.displayName));
 }
 
 function isDemoMemberList(members) {
@@ -632,13 +637,13 @@ export default function App() {
   const [events, setEvents] = useSyncedStorage(PERSISTED_DATA_KEYS.events, INITIAL_EVENTS);
   const [attendance, setAttendance] = useSyncedStorage(PERSISTED_DATA_KEYS.attendance, INITIAL_ATTENDANCE, migrateAttendance);
   const [newJoineeAttendance, setNewJoineeAttendance] = useSyncedStorage(PERSISTED_DATA_KEYS.newJoineeAttendance, INITIAL_ATTENDANCE);
-  const [isAdmin, setIsAdmin] = useState(false);
-  const [showAdminLogin, setShowAdminLogin] = useState(false);
-  const [adminPw, setAdminPw] = useState("");
+  const [adminUser, setAdminUser] = useState(null);
+  const [authReady, setAuthReady] = useState(false);
   const [adminErr, setAdminErr] = useState("");
   const [toast, setToast] = useState(null);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const toastTimer = useRef();
+  const isAdmin = isAllowedAdminUser(adminUser);
 
   const showToast = (msg, type = "info") => {
     setToast({ msg, type });
@@ -646,23 +651,40 @@ export default function App() {
     toastTimer.current = setTimeout(() => setToast(null), 3000);
   };
 
-  const openAdminLogin = () => {
-    setAdminPw("");
+  useEffect(() => {
+    return onAuthStateChanged(auth, user => {
+      setAdminUser(user);
+      setAuthReady(true);
+      if (user && !isAllowedAdminUser(user)) {
+        setAdminErr(`${user.displayName || user.email || "This account"} is not allowed to edit.`);
+        signOut(auth).catch(error => console.error("Could not sign out unauthorized admin", error));
+      }
+    });
+  }, []);
+
+  const openAdminLogin = async () => {
     setAdminErr("");
-    setShowAdminLogin(true);
+    try {
+      const result = await signInWithPopup(auth, googleProvider);
+      if (isAllowedAdminUser(result.user)) {
+        showToast(`Admin mode enabled for ${result.user.displayName}`, "success");
+        return;
+      }
+      setAdminErr(`${result.user.displayName || result.user.email || "This account"} is not allowed to edit.`);
+      await signOut(auth);
+      showToast("Only Moksh Shah and Dheer Sheth can unlock admin mode", "error");
+    } catch (error) {
+      if (error?.code === "auth/popup-closed-by-user" || error?.code === "auth/cancelled-popup-request") return;
+      console.error("Admin sign-in failed", error);
+      setAdminErr("Google sign-in failed. Please try again.");
+      showToast("Google sign-in failed", "error");
+    }
   };
 
-  const handleAdminLogin = () => {
-    if (adminPw === ADMIN_PASSWORD) {
-      setIsAdmin(true);
-      setShowAdminLogin(false);
-      setAdminPw("");
-      setAdminErr("");
-      showToast("Admin mode enabled", "success");
-    } else {
-      setAdminErr("Wrong admin password.");
-      setAdminPw("");
-    }
+  const handleAdminLogout = async () => {
+    await signOut(auth);
+    setAdminErr("");
+    showToast("Admin mode disabled");
   };
   const getMemberStats = (memberId) => {
     let total = 0, present = 0;
@@ -691,7 +713,7 @@ export default function App() {
           isAdmin={isAdmin}
           collapsed={sidebarCollapsed}
           setCollapsed={setSidebarCollapsed}
-          onAdminClick={isAdmin ? () => { setIsAdmin(false); showToast("Admin mode disabled"); } : openAdminLogin}
+          onAdminClick={isAdmin ? handleAdminLogout : openAdminLogin}
         />
         <div className="main">
           <Topbar
@@ -702,7 +724,9 @@ export default function App() {
             events={events}
             isAdmin={isAdmin}
             onAdminClick={openAdminLogin}
-            onAdminExit={() => { setIsAdmin(false); showToast("Admin mode disabled"); }}
+            onAdminExit={handleAdminLogout}
+            adminUser={adminUser}
+            authReady={authReady}
           />
           <div className="content scroll-area">
             {view === "Dashboard" && <Dashboard members={members} events={events} attendance={attendance} getEventStats={getEventStats} getMemberStats={getMemberStats} setView={setView} isAdmin={isAdmin} />}
@@ -715,33 +739,14 @@ export default function App() {
           </div>
         </div>
       </div>
-      {showAdminLogin && (
-        <div className="modal-bg" onClick={e => e.target === e.currentTarget && setShowAdminLogin(false)}>
-          <div className="modal" style={{ maxWidth: 420 }}>
-            <h2>Admin Login</h2>
-            <div className="field">
-              <label>Admin Password</label>
-              <input
-                type="password"
-                className="input"
-                value={adminPw}
-                onChange={e => setAdminPw(e.target.value)}
-                onKeyDown={e => e.key === "Enter" && handleAdminLogin()}
-                placeholder="Enter admin password"
-                autoFocus
-              />
-            </div>
-            {adminErr && <p style={{ color: "var(--rose)", fontSize: 12.5, marginBottom: 12 }}>{adminErr}</p>}
-            <div className="flex gap-3 mt-4">
-              <button className="btn btn-primary flex-1" style={{ justifyContent: "center" }} onClick={handleAdminLogin}>Unlock Admin</button>
-              <button className="btn" onClick={() => setShowAdminLogin(false)}>Cancel</button>
-            </div>
-          </div>
-        </div>
-      )}
       {toast && (
         <div className="toast" style={{ borderColor: toast.type === "success" ? "rgba(16,212,126,0.3)" : toast.type === "error" ? "rgba(244,63,94,0.3)" : "var(--border2)" }}>
           {toast.type === "success" ? "✅ " : toast.type === "error" ? "❌ " : "ℹ️ "}{toast.msg}
+        </div>
+      )}
+      {adminErr && (
+        <div className="toast" style={{ bottom: 82, borderColor: "rgba(244,63,94,0.3)" }}>
+          Unauthorized admin account: {adminErr}
         </div>
       )}
       <AttendanceAssistant
@@ -796,7 +801,7 @@ function Sidebar({ view, setView, members, newJoinees, events, isAdmin, collapse
   );
 }
 
-function Topbar({ view, setView, members, newJoinees, events, isAdmin, onAdminClick, onAdminExit }) {
+function Topbar({ view, setView, members, newJoinees, events, isAdmin, onAdminClick, onAdminExit, adminUser, authReady }) {
   const [query, setQuery] = useState("");
   const [showNotifications, setShowNotifications] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
@@ -812,7 +817,7 @@ function Topbar({ view, setView, members, newJoinees, events, isAdmin, onAdminCl
   const notifications = [
     `${events.length} events tracked`,
     `${members.filter(m => m.active).length} active members`,
-    isAdmin ? "Admin editing is enabled" : "View-only mode is active",
+    isAdmin ? `Admin editing is enabled for ${adminUser?.displayName || "admin"}` : "View-only mode is active",
   ];
   return (
     <div className={`topbar ${isAdmin ? "admin" : "view"}`}>
@@ -836,7 +841,7 @@ function Topbar({ view, setView, members, newJoinees, events, isAdmin, onAdminCl
       <button className="btn btn-sm quick-top-action" onClick={() => setView("Attendance")}>A Mark</button>
       <button className="btn btn-sm quick-top-action" onClick={() => setView("Reports")}>R Export</button>
       <span className={`mode-chip ${isAdmin ? "admin" : "view"}`}>{isAdmin ? "◉ Unlocked Admin" : "◎ View Only"}</span>
-      {!isAdmin && <button className="btn btn-sm" onClick={onAdminClick}>Unlock</button>}
+      {!isAdmin && <button className="btn btn-sm" onClick={onAdminClick} disabled={!authReady}>{authReady ? "Google Login" : "Checking..."}</button>}
       {isAdmin && <button className="btn btn-sm btn-danger" onClick={onAdminExit}>Lock</button>}
       <div className="flex items-center gap-2 topbar-date" style={{ fontSize: 12, color: "var(--text2)" }}><span className="sync-dot" />Synced now</div>
       <div className="top-menu">
@@ -853,8 +858,8 @@ function Topbar({ view, setView, members, newJoinees, events, isAdmin, onAdminCl
         {showProfile && (
           <div className="top-popover">
             <div style={{ fontWeight: 800 }}>AYSG Console</div>
-            <div className="text-xs color-muted mb-3">{isAdmin ? "Admin profile" : "Viewer profile"}</div>
-            <button className="btn btn-sm" style={{ width: "100%", justifyContent: "center" }} onClick={isAdmin ? onAdminExit : onAdminClick}>{isAdmin ? "Lock Admin" : "Unlock Admin"}</button>
+            <div className="text-xs color-muted mb-3">{isAdmin ? adminUser?.displayName || "Admin profile" : "Viewer profile"}</div>
+            <button className="btn btn-sm" style={{ width: "100%", justifyContent: "center" }} onClick={isAdmin ? onAdminExit : onAdminClick}>{isAdmin ? "Sign Out" : "Admin Google Login"}</button>
           </div>
         )}
       </div>
