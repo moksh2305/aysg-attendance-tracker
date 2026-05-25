@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { onAuthStateChanged, signInWithPopup, signOut } from "firebase/auth";
-import { doc, onSnapshot, serverTimestamp, setDoc } from "firebase/firestore";
+import { doc, onSnapshot, serverTimestamp, setDoc, collection, addDoc, query, where, deleteDoc } from "firebase/firestore";
+import { QRCodeCanvas } from "qrcode.react";
 import readXlsxFile from "read-excel-file/browser";
 import { auth, db, googleProvider } from "./firebase";
 
@@ -630,6 +631,66 @@ select.input{cursor:pointer}
 const VIEWS = ["Dashboard", "Members", "New Joinees", "Events", "Attendance", "Analytics", "Reports"];
 const VIEW_ICONS = { Dashboard: "D", Members: "M", "New Joinees": "N", Events: "E", Attendance: "A", Analytics: "Y", Reports: "R" };
 
+
+function PublicCheckIn({ event }) {
+  const [name, setName] = useState("");
+  const [mobile, setMobile] = useState("");
+  const [submitted, setSubmitted] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!name.trim()) return;
+    setLoading(true);
+    try {
+      await addDoc(collection(db, "pending_checkins"), {
+        eventId: event.id,
+        name: name.trim(),
+        mobile: mobile.trim(),
+        timestamp: Date.now()
+      });
+      setSubmitted(true);
+    } catch (err) {
+      console.error(err);
+      alert("Failed to submit check-in. Please try again.");
+    }
+    setLoading(false);
+  };
+
+  if (submitted) {
+    return (
+      <div style={{ height: "100vh", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", background: "#f9fafb", padding: 20, textAlign: "center" }}>
+        <div style={{ fontSize: 64, marginBottom: 16 }}>✅</div>
+        <h1 style={{ fontSize: 24, fontWeight: "bold", marginBottom: 8, color: "#111827" }}>Checked In!</h1>
+        <p style={{ color: "#4b5563" }}>Your attendance for <strong>{event.name}</strong> has been submitted. The admin will verify it shortly.</p>
+      </div>
+    );
+  }
+
+  return (
+    <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "#f3f4f6", padding: 20 }}>
+      <div style={{ background: "white", padding: 32, borderRadius: 16, width: "100%", maxWidth: 400, boxShadow: "0 10px 25px -5px rgba(0,0,0,0.1)" }}>
+        <h1 style={{ fontSize: 22, fontWeight: "bold", marginBottom: 4, color: "#111827" }}>Event Check-In</h1>
+        <p style={{ color: "#4b5563", marginBottom: 24, fontSize: 14 }}>{event.name} • {new Date(event.date).toLocaleDateString()}</p>
+        
+        <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+          <div>
+            <label style={{ display: "block", fontSize: 13, fontWeight: 600, color: "#374151", marginBottom: 4 }}>Full Name *</label>
+            <input type="text" value={name} onChange={e=>setName(e.target.value)} required style={{ width: "100%", padding: "10px 12px", borderRadius: 8, border: "1px solid #d1d5db" }} placeholder="Enter your full name" />
+          </div>
+          <div>
+            <label style={{ display: "block", fontSize: 13, fontWeight: 600, color: "#374151", marginBottom: 4 }}>Mobile Number (Optional)</label>
+            <input type="tel" value={mobile} onChange={e=>setMobile(e.target.value)} style={{ width: "100%", padding: "10px 12px", borderRadius: 8, border: "1px solid #d1d5db" }} placeholder="Enter mobile number" />
+          </div>
+          <button disabled={loading} style={{ background: "#7c6af8", color: "white", padding: "12px", borderRadius: 8, fontWeight: 600, border: "none", marginTop: 8, cursor: loading ? "not-allowed" : "pointer" }}>
+            {loading ? "Submitting..." : "Submit Check-In"}
+          </button>
+        </form>
+      </div>
+    </div>
+  );
+}
+
 export default function App() {
   const [view, setView] = useState("Dashboard");
   const [members, setMembers] = useSyncedStorage(PERSISTED_DATA_KEYS.members, INITIAL_MEMBERS, migrateMembers);
@@ -733,7 +794,7 @@ export default function App() {
             {view === "Members" && <Members members={members} setMembers={setMembers} events={events} attendance={attendance} getMemberStats={getMemberStats} showToast={showToast} isAdmin={isAdmin} setView={setView} />}
             {view === "New Joinees" && <NewJoinees newJoinees={newJoinees} setNewJoinees={setNewJoinees} showToast={showToast} isAdmin={isAdmin} />}
             {view === "Events" && <Events events={events} setEvents={setEvents} getEventStats={getEventStats} showToast={showToast} isAdmin={isAdmin} />}
-            {view === "Attendance" && <Attendance events={events} members={members} newJoinees={newJoinees} attendance={attendance} setAttendance={setAttendance} newJoineeAttendance={newJoineeAttendance} setNewJoineeAttendance={setNewJoineeAttendance} showToast={showToast} isAdmin={isAdmin} />}
+            {view === "Attendance" && <Attendance events={events} members={members} newJoinees={newJoinees} attendance={attendance} setAttendance={setAttendance} newJoineeAttendance={newJoineeAttendance} setNewJoineeAttendance={setNewJoineeAttendance} setNewJoinees={setNewJoinees} showToast={showToast} isAdmin={isAdmin} />}
             {view === "Analytics" && <Analytics members={members} events={events} getMemberStats={getMemberStats} attendance={attendance} newJoineeAttendance={newJoineeAttendance} isAdmin={isAdmin} />}
             {view === "Reports" && <Reports members={members} newJoinees={newJoinees} events={events} attendance={attendance} newJoineeAttendance={newJoineeAttendance} getEventStats={getEventStats} showToast={showToast} isAdmin={isAdmin} />}
           </div>
@@ -1531,7 +1592,7 @@ function Events({ events, setEvents, getEventStats, showToast, isAdmin }) {
   );
 }
 
-function Attendance({ events, members, newJoinees, attendance, setAttendance, newJoineeAttendance, setNewJoineeAttendance, showToast, isAdmin }) {
+function Attendance({ events, members, newJoinees, attendance, setAttendance, newJoineeAttendance, setNewJoineeAttendance, setNewJoinees, showToast, isAdmin }) {
   const [selEvent, setSelEvent] = useState(events[0]?.id || "");
   const [search, setSearch] = useState("");
   const [group, setGroup] = useState("members");
