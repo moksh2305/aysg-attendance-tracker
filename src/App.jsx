@@ -329,7 +329,7 @@ function namesFromWorksheetRows(rows) {
 const css = `
 @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap');
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'DM Sans',sans-serif;background:#09090f;color:#e2e2f0;min-height:100vh;overflow-x:hidden}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
 :root{
   --bg:#09090f;--bg2:#0f0f1a;--bg3:#151525;--bg4:#1c1c30;
   --border:#ffffff12;--border2:#ffffff20;
@@ -339,7 +339,7 @@ body{font-family:'DM Sans',sans-serif;background:#09090f;color:#e2e2f0;min-heigh
   --card:rgba(255,255,255,0.03);--cardh:rgba(255,255,255,0.06);
   --glass:rgba(124,106,248,0.08);--glow:rgba(124,106,248,0.15);
 }
-.app.light{
+html.light{
   --bg:#f0f2f8;--bg2:#ffffff;--bg3:#f5f6fa;--bg4:#eaecf4;
   --border:#e2e4ef;--border2:#c8cce0;
   --accent:#6254e8;--accent2:#7c6af8;--accent3:#4f3fd4;
@@ -348,9 +348,10 @@ body{font-family:'DM Sans',sans-serif;background:#09090f;color:#e2e2f0;min-heigh
   --card:rgba(0,0,0,0.02);--cardh:rgba(0,0,0,0.04);
   --glass:rgba(98,84,232,0.06);--glow:rgba(98,84,232,0.12);
 }
-.app.light .sidebar::before{background:radial-gradient(ellipse at 50% 0%,rgba(98,84,232,0.06) 0%,transparent 60%)}
-.app.light .attendance-card{box-shadow:0 1px 4px rgba(0,0,0,0.06)}
-.app.light .stat-card{box-shadow:0 1px 4px rgba(0,0,0,0.06)}
+html.light body{background:var(--bg);color:var(--text)}
+html.light .sidebar::before{background:radial-gradient(ellipse at 50% 0%,rgba(98,84,232,0.06) 0%,transparent 60%)}
+html.light .attendance-card{box-shadow:0 1px 4px rgba(0,0,0,0.06)}
+html.light .stat-card{box-shadow:0 1px 4px rgba(0,0,0,0.06)}
 .app{display:flex;height:100vh;overflow:hidden}
 .app.admin-mode .topbar,.app.admin-mode .sidebar{box-shadow:inset 0 0 0 1px rgba(16,212,126,0.12),0 0 28px rgba(16,212,126,0.05)}
 .app.view-mode .topbar,.app.view-mode .sidebar{box-shadow:inset 0 0 0 1px rgba(124,106,248,0.08)}
@@ -781,13 +782,25 @@ export default function App() {
   const checkinEventId = urlParams.get("checkin");
   const [darkMode, setDarkMode] = useState(() => {
     const saved = localStorage.getItem("aysg_theme");
-    return saved ? saved === "dark" : true;
+    const isDark = saved ? saved === "dark" : true;
+    // Apply immediately to avoid flash of wrong theme
+    if (!isDark) document.documentElement.classList.add("light");
+    else document.documentElement.classList.remove("light");
+    return isDark;
   });
   const toggleDark = () => setDarkMode(prev => {
     const next = !prev;
     localStorage.setItem("aysg_theme", next ? "dark" : "light");
     return next;
   });
+  // Apply theme class to <html> so CSS variables cascade to body and all elements
+  useEffect(() => {
+    if (darkMode) {
+      document.documentElement.classList.remove("light");
+    } else {
+      document.documentElement.classList.add("light");
+    }
+  }, [darkMode]);
   const [members, setMembers] = useSyncedStorage(PERSISTED_DATA_KEYS.members, INITIAL_MEMBERS, migrateMembers);
   const [newJoinees, setNewJoinees] = useSyncedStorage(PERSISTED_DATA_KEYS.newJoinees, INITIAL_NEW_JOINEES);
   const [events, setEvents] = useSyncedStorage(PERSISTED_DATA_KEYS.events, INITIAL_EVENTS);
@@ -866,7 +879,7 @@ export default function App() {
   return (
     <>
       <style>{css}</style>
-      <div className={`app ${isAdmin ? "admin-mode" : "view-mode"} ${darkMode ? "" : "light"}`}>
+      <div className={`app ${isAdmin ? "admin-mode" : "view-mode"}`}>
         <Sidebar
           view={view}
           setView={setView}
