@@ -876,7 +876,7 @@ export default function App() {
             {view === "New Joinees" && <NewJoinees newJoinees={newJoinees} setNewJoinees={setNewJoinees} showToast={showToast} isAdmin={isAdmin} />}
             {view === "Events" && <Events events={events} setEvents={setEvents} getEventStats={getEventStats} showToast={showToast} isAdmin={isAdmin} />}
             {view === "Attendance" && <Attendance events={events} members={members} newJoinees={newJoinees} attendance={attendance} setAttendance={setAttendance} newJoineeAttendance={newJoineeAttendance} setNewJoineeAttendance={setNewJoineeAttendance} setNewJoinees={setNewJoinees} showToast={showToast} isAdmin={isAdmin} />}
-            {view === "Analytics" && <Analytics members={members} events={events} getMemberStats={getMemberStats} attendance={attendance} newJoineeAttendance={newJoineeAttendance} isAdmin={isAdmin} />}
+            {view === "Analytics" && <Analytics members={members} newJoinees={newJoinees} events={events} getMemberStats={getMemberStats} attendance={attendance} newJoineeAttendance={newJoineeAttendance} isAdmin={isAdmin} />}
             {view === "Reports" && <Reports members={members} newJoinees={newJoinees} events={events} attendance={attendance} newJoineeAttendance={newJoineeAttendance} getEventStats={getEventStats} showToast={showToast} isAdmin={isAdmin} />}
           </div>
         </div>
@@ -2053,7 +2053,7 @@ function Attendance({ events, members, newJoinees, attendance, setAttendance, ne
   );
 }
 
-function Analytics({ members, events, getMemberStats, attendance, newJoineeAttendance, isAdmin }) {
+function Analytics({ members, newJoinees, events, getMemberStats, attendance, newJoineeAttendance, isAdmin }) {
   const [smartTab, setSmartTab] = React.useState("missed3");
 
   if (!isAdmin) {
@@ -2158,7 +2158,7 @@ function Analytics({ members, events, getMemberStats, attendance, newJoineeAtten
 
   const below40 = active.filter(m => getMemberStats(m.id).pct < 40 && getMemberStats(m.id).total > 0);
 
-  const firstTimers = [...active, ...newJoinees.filter(j=>j.active)].filter(m => {
+  const firstTimers = [...active, ...(newJoinees || []).filter(j=>j.active)].filter(m => {
     const s = getMemberStats(m.id);
     if (s.present === 1 && recentEvents.length > 0) {
       const att = attendance[recentEvents[0].id]?.[m.id] || newJoineeAttendance[recentEvents[0].id]?.[m.id];
