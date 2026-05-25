@@ -2395,37 +2395,40 @@ function Analytics({ members, newJoinees, events, getMemberStats, attendance, ne
         </div>
       </div>
 
-      {/* Row 4: Needs Attention & Top Performers */}
+      {/* Row 4: Smart Alerts & Top Performers */}
       <div className="ac-grid" style={{ marginTop: "8px" }}>
         
-        {/* Needs Attention */}
+        {/* Smart Alerts */}
         <div className="ac-card col-7">
-          <div className="ac-card-title" style={{ color: "var(--rose)" }}>⚠️ Needs Attention</div>
-          <div className="ac-tabs">
-            <div className={`ac-tab ${attentionTab === 'declining' ? 'active' : ''}`} onClick={() => setAttentionTab('declining')}>Declining Attendance ({decliningMembers.length})</div>
-            <div className={`ac-tab ${attentionTab === 'inactive' ? 'active' : ''}`} onClick={() => setAttentionTab('inactive')}>Repeated Absences ({inactive.length})</div>
+          <div className="ac-card-title" style={{ color: "var(--accent)" }}>💡 Smart Alerts</div>
+          <div className="ac-tabs" style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
+            <div className={`ac-tab ${smartTab === 'missed3' ? 'active' : ''}`} onClick={() => setSmartTab('missed3')}>Missed Last 3 ({missedLast3.length})</div>
+            <div className={`ac-tab ${smartTab === 'below40' ? 'active' : ''}`} onClick={() => setSmartTab('below40')}>Below 40% ({below40.length})</div>
+            <div className={`ac-tab ${smartTab === 'firstTimers' ? 'active' : ''}`} onClick={() => setSmartTab('firstTimers')}>First Timers ({firstTimers.length})</div>
+            <div className={`ac-tab ${smartTab === 'inactive60' ? 'active' : ''}`} onClick={() => setSmartTab('inactive60')}>Inactive 60 Days ({inactive60.length})</div>
+            <div className={`ac-tab ${smartTab === 'highPerformers' ? 'active' : ''}`} onClick={() => setSmartTab('highPerformers')}>High Performers ({highPerformersList.length})</div>
           </div>
           
           <div style={{ overflowX: "auto" }}>
             <table className="ac-table">
               <thead>
                 <tr>
-                  <th>Member</th>
-                  <th>Total Attendance</th>
-                  <th>Last 3 Events</th>
+                  <th>Member Name</th>
+                  <th>Attendance %</th>
+                  <th>Recent Activity</th>
                 </tr>
               </thead>
               <tbody>
-                {(attentionTab === 'declining' ? decliningMembers : inactive).slice(0, 5).map(m => {
+                {currentSmartList.slice(0, 8).map(m => {
                   const s = getMemberStats(m.id);
                   return (
                     <tr key={m.id}>
                       <td style={{ fontWeight: 500 }}>{m.name}</td>
-                      <td style={{ color: "var(--rose)", fontWeight: 600 }}>{s.pct}%</td>
+                      <td style={{ color: s.pct >= 75 ? "var(--emerald)" : s.pct >= 40 ? "var(--gold)" : "var(--rose)", fontWeight: 600 }}>{s.pct}%</td>
                       <td>
                         <div className="flex gap-2">
                           {recentEvents.slice(0,3).reverse().map(e => {
-                             const att = attendance[e.id]?.[m.id];
+                             const att = attendance[e.id]?.[m.id] || newJoineeAttendance[e.id]?.[m.id];
                              return <span key={e.id} style={{ fontSize: 14 }}>{att === 'present' ? '✅' : att === 'late' ? '⏱️' : '❌'}</span>
                           })}
                         </div>
@@ -2433,8 +2436,8 @@ function Analytics({ members, newJoinees, events, getMemberStats, attendance, ne
                     </tr>
                   )
                 })}
-                {(attentionTab === 'declining' ? decliningMembers : inactive).length === 0 && (
-                  <tr><td colSpan="3" style={{ textAlign: "center", padding: "20px", color: "var(--text2)" }}>No members currently flag for this condition. Great job!</td></tr>
+                {currentSmartList.length === 0 && (
+                  <tr><td colSpan="3" style={{ textAlign: "center", padding: "20px", color: "var(--text2)" }}>No members in this category right now.</td></tr>
                 )}
               </tbody>
             </table>
