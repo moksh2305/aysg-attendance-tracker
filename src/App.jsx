@@ -603,6 +603,23 @@ select.input{cursor:pointer}
 .ac-table { width: 100%; border-collapse: collapse; text-align: left; }
 .ac-table th { font-size: 11px; color: var(--text2); font-weight: 600; padding: 8px; border-bottom: 1px solid var(--border); }
 .ac-table td { font-size: 12px; color: var(--text); padding: 10px 8px; border-bottom: 1px solid var(--border); }
+
+/* Assistant */
+.assistant-launcher{position:fixed;right:22px;bottom:22px;width:52px;height:52px;border-radius:16px;border:1px solid rgba(124,106,248,0.42);background:linear-gradient(135deg,var(--accent3),var(--accent));color:#fff;font-weight:900;box-shadow:0 12px 38px rgba(0,0,0,0.44),0 0 28px rgba(124,106,248,0.28);z-index:190;cursor:pointer}
+.assistant-panel{position:fixed;right:22px;bottom:86px;width:min(390px,calc(100vw - 28px));height:min(560px,calc(100vh - 110px));background:var(--bg2);border:1px solid var(--border2);border-radius:16px;box-shadow:0 18px 60px rgba(0,0,0,0.52);z-index:190;display:flex;flex-direction:column;overflow:hidden}
+.assistant-head{padding:14px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:10px;background:linear-gradient(180deg,rgba(124,106,248,0.12),transparent)}
+.assistant-title{font-family:'Syne',sans-serif;font-weight:800;font-size:14px}
+.assistant-sub{font-size:11.5px;color:var(--text2);margin-top:2px}
+.assistant-close{width:30px;height:30px;border-radius:8px;border:1px solid var(--border);background:var(--bg3);color:var(--text);cursor:pointer}
+.assistant-messages{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:10px}
+.assistant-msg{max-width:88%;padding:10px 12px;border-radius:13px;font-size:12.5px;line-height:1.45;white-space:pre-wrap}
+.assistant-msg.bot{align-self:flex-start;background:var(--bg3);border:1px solid var(--border);color:var(--text)}
+.assistant-msg.user{align-self:flex-end;background:rgba(124,106,248,0.22);border:1px solid rgba(124,106,248,0.28);color:var(--text)}
+.assistant-suggestions{display:flex;gap:7px;flex-wrap:wrap;padding:0 14px 10px}
+.assistant-suggestions button{border:1px solid var(--border);background:var(--bg3);color:var(--text2);border-radius:999px;padding:6px 9px;font-size:11.5px;cursor:pointer}
+.assistant-form{padding:12px;border-top:1px solid var(--border);display:flex;gap:8px}
+.assistant-form input{flex:1;min-width:0}
+.assistant-form button{min-width:64px;justify-content:center}
 `;
 
 const VIEWS = ["Dashboard", "Members", "New Joinees", "Events", "Attendance", "Analytics", "Reports"];
@@ -727,6 +744,15 @@ export default function App() {
           {toast.type === "success" ? "✅ " : toast.type === "error" ? "❌ " : "ℹ️ "}{toast.msg}
         </div>
       )}
+      <AttendanceAssistant
+        members={members}
+        newJoinees={newJoinees}
+        events={events}
+        attendance={attendance}
+        newJoineeAttendance={newJoineeAttendance}
+        getMemberStats={getMemberStats}
+        getEventStats={getEventStats}
+      />
     </>
   );
 }
@@ -2673,6 +2699,146 @@ function Reports({ members, newJoinees, events, attendance, newJoineeAttendance,
       </div>
     </div>
   );
+}
+
+function AttendanceAssistant({ members, newJoinees, events, attendance, newJoineeAttendance, getMemberStats, getEventStats }) {
+  const [open, setOpen] = useState(false);
+  const [input, setInput] = useState("");
+  const [messages, setMessages] = useState([
+    { from: "bot", text: "Hi, I can answer questions about attendance, events, members, new joinees, and who needs attention." },
+  ]);
+
+  const suggestions = [
+    "Overall attendance summary",
+    "Top attendance members",
+    "Low attendance members",
+    "Latest event stats",
+  ];
+
+  const ask = (question) => {
+    const clean = question.trim();
+    if (!clean) return;
+    const answer = answerAttendanceQuestion(clean, { members, newJoinees, events, attendance, newJoineeAttendance, getMemberStats, getEventStats });
+    setMessages(prev => [...prev, { from: "user", text: clean }, { from: "bot", text: answer }]);
+    setInput("");
+  };
+
+  return (
+    <>
+      {open && (
+        <div className="assistant-panel">
+          <div className="assistant-head">
+            <div>
+              <div className="assistant-title">AYSG Assistant</div>
+              <div className="assistant-sub">Answers from live attendance data</div>
+            </div>
+            <button className="assistant-close" onClick={() => setOpen(false)}>x</button>
+          </div>
+          <div className="assistant-messages">
+            {messages.map((msg, index) => (
+              <div key={`${msg.from}-${index}`} className={`assistant-msg ${msg.from}`}>{msg.text}</div>
+            ))}
+          </div>
+          <div className="assistant-suggestions">
+            {suggestions.map(item => <button key={item} onClick={() => ask(item)}>{item}</button>)}
+          </div>
+          <form className="assistant-form" onSubmit={e => { e.preventDefault(); ask(input); }}>
+            <input className="input" value={input} onChange={e => setInput(e.target.value)} placeholder="Ask about attendance..." />
+            <button className="btn btn-primary" type="submit">Ask</button>
+          </form>
+        </div>
+      )}
+      <button className="assistant-launcher" onClick={() => setOpen(value => !value)} title="Ask AYSG Assistant">AI</button>
+    </>
+  );
+}
+
+function answerAttendanceQuestion(question, data) {
+  const q = normalizeName(question);
+  const activeMembers = data.members.filter(member => member.active);
+  const activeJoinees = data.newJoinees.filter(joinee => joinee.active);
+  const allPeople = [
+    ...activeMembers.map(person => ({ ...person, group: "Member", store: data.attendance })),
+    ...activeJoinees.map(person => ({ ...person, group: "New Joinee", store: data.newJoineeAttendance })),
+  ];
+  const sortedEvents = [...data.events].sort((a, b) => new Date(b.date) - new Date(a.date));
+  const event = findMentionedEvent(q, sortedEvents) || (q.includes("latest") || q.includes("last") || q.includes("recent") ? sortedEvents[0] : null);
+  const person = allPeople.find(item => q.includes(normalizeName(item.name)));
+
+  if (q.includes("help") || q.includes("what can you")) {
+    return "Try questions like:\n- What is Moksh Shah attendance?\n- Who was present in Chaas Vitran?\n- Who has low attendance?\n- Latest event stats\n- How many members and new joinees are active?";
+  }
+
+  if (person) {
+    const stats = person.group === "Member" ? data.getMemberStats(person.id) : getPersonStatsFromStore(person.id, data.newJoineeAttendance);
+    const last = sortedEvents.find(item => isAttendedStatus(person.store[item.id]?.[person.id]));
+    return `${person.name} (${person.group})\nAttendance: ${stats.present}/${stats.total} events (${stats.pct}%).\nLast attended: ${last ? `${last.name} on ${fmtDate(last.date)}` : "No recorded attendance yet."}`;
+  }
+
+  if (event) {
+    const stats = data.getEventStats(event.id);
+    const presentPeople = peopleForEvent(allPeople, event.id, status => isAttendedStatus(status));
+    const absentPeople = peopleForEvent(allPeople, event.id, status => normalizeAttendanceStatus(status) === "absent");
+    if (q.includes("present") || q.includes("attended")) {
+      return `${event.name} present list (${presentPeople.length}):\n${formatNameList(presentPeople)}`;
+    }
+    if (q.includes("absent") || q.includes("missing")) {
+      return `${event.name} absent list (${absentPeople.length}):\n${formatNameList(absentPeople)}`;
+    }
+    return `${event.name} (${fmtDate(event.date)})\nPresent/Late: ${stats.present}\nAbsent: ${stats.absent}\nTotal active people: ${stats.total}\nAttendance: ${stats.pct}%`;
+  }
+
+  if (q.includes("top") || q.includes("best") || q.includes("highest")) {
+    const top = activeMembers
+      .map(member => ({ ...member, stats: data.getMemberStats(member.id) }))
+      .sort((a, b) => b.stats.pct - a.stats.pct || b.stats.present - a.stats.present)
+      .slice(0, 5);
+    return `Top attendance members:\n${top.map((member, index) => `${index + 1}. ${member.name}: ${member.stats.pct}% (${member.stats.present}/${member.stats.total})`).join("\n") || "No attendance data yet."}`;
+  }
+
+  if (q.includes("low") || q.includes("poor") || q.includes("attention") || q.includes("inactive")) {
+    const low = activeMembers
+      .map(member => ({ ...member, stats: data.getMemberStats(member.id) }))
+      .filter(member => member.stats.total > 0)
+      .sort((a, b) => a.stats.pct - b.stats.pct || a.stats.present - b.stats.present)
+      .slice(0, 8);
+    return `Members needing attention:\n${low.map(member => `${member.name}: ${member.stats.pct}% (${member.stats.present}/${member.stats.total})`).join("\n") || "No attendance data yet."}`;
+  }
+
+  if (q.includes("member") || q.includes("new joinee") || q.includes("people") || q.includes("count")) {
+    return `Active members: ${activeMembers.length}\nActive new joinees: ${activeJoinees.length}\nTotal active people: ${activeMembers.length + activeJoinees.length}\nEvents tracked: ${data.events.length}`;
+  }
+
+  const overallPct = activeMembers.length
+    ? Math.round(activeMembers.reduce((sum, member) => sum + data.getMemberStats(member.id).pct, 0) / activeMembers.length)
+    : 0;
+  const latest = sortedEvents[0];
+  return `Overall summary:\nEvents tracked: ${data.events.length}\nActive members: ${activeMembers.length}\nActive new joinees: ${activeJoinees.length}\nAverage member attendance: ${overallPct}%\nLatest event: ${latest ? `${latest.name} (${fmtDate(latest.date)})` : "No events yet."}`;
+}
+
+function findMentionedEvent(question, events) {
+  return events.find(event => {
+    const name = normalizeName(event.name);
+    return name && (question.includes(name) || name.split(" ").some(part => part.length > 3 && question.includes(part)));
+  });
+}
+
+function peopleForEvent(people, eventId, predicate) {
+  return people.filter(person => predicate(person.store[eventId]?.[person.id]));
+}
+
+function getPersonStatsFromStore(personId, store) {
+  let total = 0, present = 0;
+  Object.values(store).forEach(rec => {
+    total += 1;
+    if (isAttendedStatus(rec[personId])) present += 1;
+  });
+  return { total, present, pct: total ? Math.round((present / total) * 100) : 0 };
+}
+
+function formatNameList(people) {
+  if (people.length === 0) return "No matching records.";
+  return people.slice(0, 30).map(person => `- ${person.name} (${person.group})`).join("\n") + (people.length > 30 ? `\n...and ${people.length - 30} more` : "");
 }
 
 function Avatar({ name, size = 34, color }) {
