@@ -5,7 +5,7 @@ import { QRCodeCanvas } from "qrcode.react";
 import readXlsxFile from "read-excel-file/browser";
 import { auth, db, googleProvider } from "./firebase";
 
-const ALLOWED_ADMIN_NAMES = new Set(["moksh shah", "dheer sheth"]);
+const ALLOWED_ADMIN_NAMES = new Set(["moksh","moksh shah", "dheer sheth"]);
 const FIRESTORE_STATE_COLLECTION = "appState";
 const DATA_SCHEMA_VERSION = 1;
 const PERSISTED_DATA_KEYS = Object.freeze({

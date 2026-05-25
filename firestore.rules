@@ -4,7 +4,7 @@ service cloud.firestore {
   match /databases/{database}/documents {
     function isAllowedAdmin() {
       return request.auth != null
-        && request.auth.token.name in ["Moksh Shah", "Dheer Sheth"];
+        && request.auth.token.name in ["Moksh","Moksh Shah", "Dheer Sheth"];
     }
 
     match /appState/{documentId} {
