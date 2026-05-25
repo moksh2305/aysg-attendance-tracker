@@ -1863,8 +1863,8 @@ function Attendance({ events, members, newJoinees, attendance, setAttendance, ne
             </select>
             {isAdmin && selEvent && (
               <div className="flex gap-2" style={{marginTop: 8}}>
-                <button className="btn" style={{flex: 1, padding: "8px", background: "white", color: "var(--text)", border: "1px solid var(--border)"}} onClick={() => setShowQR(true)}>Generate QR</button>
-                <button className="btn" style={{flex: 1, padding: "8px", background: "white", color: "var(--text)", border: "1px solid var(--border)"}} onClick={() => setShowPending(true)}>Pending Scans</button>
+                <button className="btn" style={{flex: 1, padding: "8px", background: "green", color: "var(--text)", border: "1px solid var(--border)"}} onClick={() => setShowQR(true)}>Generate QR</button>
+                <button className="btn" style={{flex: 1, padding: "8px", background: "green", color: "var(--text)", border: "1px solid var(--border)"}} onClick={() => setShowPending(true)}>Pending Scans</button>
               </div>
             )}
           </div>
@@ -2054,7 +2054,7 @@ function Attendance({ events, members, newJoinees, attendance, setAttendance, ne
 }
 
 function Analytics({ members, events, getMemberStats, attendance, newJoineeAttendance, isAdmin }) {
-  const [attentionTab, setAttentionTab] = React.useState("declining");
+  const [smartTab, setSmartTab] = React.useState("missed3");
 
   if (!isAdmin) {
     return (
@@ -2149,14 +2149,47 @@ function Analytics({ members, events, getMemberStats, attendance, newJoineeAtten
     insights.push({ type: 'warning', title: 'Low Engagement Event', desc: `${eventPcts[0].title} had the lowest participation (${eventPcts[0].pct}%).`, color: '#f0b429', bg: '#fef3c7', icon: '📉' });
   }
 
-  // Needs Attention logic
-  // Declining: last 3 events were worse than their average
-  const decliningMembers = active.filter(m => {
+  // Smart Alerts Logic
+  const missedLast3 = active.filter(m => {
     if (recentEvents.length < 3) return false;
-    const recentAtt = recentEvents.slice(-3).map(e => attendance[e.id]?.[m.id]);
-    const misses = recentAtt.filter(a => a === 'absent' || !a).length;
-    return misses >= 2 && getMemberStats(m.id).pct > 40; // Only flag if they were historically decent
+    const recentAtt = recentEvents.slice(0, 3).map(e => attendance[e.id]?.[m.id]);
+    return recentAtt.every(a => a === 'absent' || !a);
   });
+
+  const below40 = active.filter(m => getMemberStats(m.id).pct < 40 && getMemberStats(m.id).total > 0);
+
+  const firstTimers = [...active, ...newJoinees.filter(j=>j.active)].filter(m => {
+    const s = getMemberStats(m.id);
+    if (s.present === 1 && recentEvents.length > 0) {
+      const att = attendance[recentEvents[0].id]?.[m.id] || newJoineeAttendance[recentEvents[0].id]?.[m.id];
+      return att === 'present' || att === 'late';
+    }
+    return false;
+  });
+
+  const inactive60 = active.filter(m => {
+    const attendedEvents = events.filter(e => {
+       const att = attendance[e.id]?.[m.id] || newJoineeAttendance[e.id]?.[m.id];
+       return att === 'present' || att === 'late';
+    }).sort((a,b) => new Date(b.date) - new Date(a.date));
+    if (attendedEvents.length === 0) return false;
+    const diffDays = Math.ceil(Math.abs(new Date() - new Date(attendedEvents[0].date)) / (1000 * 60 * 60 * 24));
+    return diffDays > 60;
+  });
+
+  const highPerformersList = active.filter(m => getMemberStats(m.id).pct >= 85 && getMemberStats(m.id).total >= 3);
+  
+  const getSmartTabData = () => {
+    switch (smartTab) {
+      case 'missed3': return missedLast3;
+      case 'below40': return below40;
+      case 'firstTimers': return firstTimers;
+      case 'inactive60': return inactive60;
+      case 'highPerformers': return highPerformersList;
+      default: return [];
+    }
+  };
+  const currentSmartList = getSmartTabData();
 
   return (
     <div className="ac-dashboard">
