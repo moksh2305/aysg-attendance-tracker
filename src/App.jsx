@@ -339,6 +339,18 @@ body{font-family:'DM Sans',sans-serif;background:#09090f;color:#e2e2f0;min-heigh
   --card:rgba(255,255,255,0.03);--cardh:rgba(255,255,255,0.06);
   --glass:rgba(124,106,248,0.08);--glow:rgba(124,106,248,0.15);
 }
+.app.light{
+  --bg:#f0f2f8;--bg2:#ffffff;--bg3:#f5f6fa;--bg4:#eaecf4;
+  --border:#e2e4ef;--border2:#c8cce0;
+  --accent:#6254e8;--accent2:#7c6af8;--accent3:#4f3fd4;
+  --gold:#d97706;--emerald:#059669;--rose:#e11d48;--cyan:#0891b2;
+  --text:#0f1023;--text2:#525570;--text3:#9698b0;
+  --card:rgba(0,0,0,0.02);--cardh:rgba(0,0,0,0.04);
+  --glass:rgba(98,84,232,0.06);--glow:rgba(98,84,232,0.12);
+}
+.app.light .sidebar::before{background:radial-gradient(ellipse at 50% 0%,rgba(98,84,232,0.06) 0%,transparent 60%)}
+.app.light .attendance-card{box-shadow:0 1px 4px rgba(0,0,0,0.06)}
+.app.light .stat-card{box-shadow:0 1px 4px rgba(0,0,0,0.06)}
 .app{display:flex;height:100vh;overflow:hidden}
 .app.admin-mode .topbar,.app.admin-mode .sidebar{box-shadow:inset 0 0 0 1px rgba(16,212,126,0.12),0 0 28px rgba(16,212,126,0.05)}
 .app.view-mode .topbar,.app.view-mode .sidebar{box-shadow:inset 0 0 0 1px rgba(124,106,248,0.08)}
@@ -767,6 +779,15 @@ export default function App() {
   const [view, setView] = useState("Dashboard");
   const urlParams = new URLSearchParams(window.location.search);
   const checkinEventId = urlParams.get("checkin");
+  const [darkMode, setDarkMode] = useState(() => {
+    const saved = localStorage.getItem("aysg_theme");
+    return saved ? saved === "dark" : true;
+  });
+  const toggleDark = () => setDarkMode(prev => {
+    const next = !prev;
+    localStorage.setItem("aysg_theme", next ? "dark" : "light");
+    return next;
+  });
   const [members, setMembers] = useSyncedStorage(PERSISTED_DATA_KEYS.members, INITIAL_MEMBERS, migrateMembers);
   const [newJoinees, setNewJoinees] = useSyncedStorage(PERSISTED_DATA_KEYS.newJoinees, INITIAL_NEW_JOINEES);
   const [events, setEvents] = useSyncedStorage(PERSISTED_DATA_KEYS.events, INITIAL_EVENTS);
@@ -845,7 +866,7 @@ export default function App() {
   return (
     <>
       <style>{css}</style>
-      <div className={`app ${isAdmin ? "admin-mode" : "view-mode"}`}>
+      <div className={`app ${isAdmin ? "admin-mode" : "view-mode"} ${darkMode ? "" : "light"}`}>
         <Sidebar
           view={view}
           setView={setView}
@@ -856,6 +877,8 @@ export default function App() {
           collapsed={sidebarCollapsed}
           setCollapsed={setSidebarCollapsed}
           onAdminClick={isAdmin ? handleAdminLogout : openAdminLogin}
+          darkMode={darkMode}
+          toggleDark={toggleDark}
         />
         <div className="main">
           <Topbar
@@ -904,7 +927,7 @@ export default function App() {
   );
 }
 
-function Sidebar({ view, setView, members, newJoinees, events, isAdmin, collapsed, setCollapsed, onAdminClick }) {
+function Sidebar({ view, setView, members, newJoinees, events, isAdmin, collapsed, setCollapsed, onAdminClick, darkMode, toggleDark }) {
   const activeCount = members.filter(m => m.active).length;
   return (
     <div className={`sidebar ${collapsed ? "collapsed" : ""} ${isAdmin ? "admin" : "view"}`}>
@@ -934,6 +957,16 @@ function Sidebar({ view, setView, members, newJoinees, events, isAdmin, collapse
         <div className="nav-item" data-tip={isAdmin ? "Exit Admin" : "Unlock Admin"} onClick={onAdminClick} style={{ color: isAdmin ? "var(--emerald)" : "var(--accent2)", borderColor: isAdmin ? "rgba(16,212,126,0.28)" : "var(--border)" }}>
           <div className="nav-icon">{isAdmin ? "U" : "L"}</div>
           <span className="nav-label">{isAdmin ? "Exit Admin" : "Admin"}</span>
+        </div>
+        <div
+          className="nav-item"
+          data-tip={darkMode ? "Light Mode" : "Dark Mode"}
+          onClick={toggleDark}
+          style={{ marginTop: 4, color: "var(--text2)", borderColor: "var(--border)" }}
+          title={darkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}
+        >
+          <div className="nav-icon" style={{ fontSize: 16 }}>{darkMode ? "☀️" : "🌙"}</div>
+          <span className="nav-label" style={{ fontSize: 13 }}>{darkMode ? "Light Mode" : "Dark Mode"}</span>
         </div>
         <div className="sb-mode-copy" style={{ marginTop: 8, fontSize: 11, color: isAdmin ? "var(--emerald)" : "var(--text3)", padding: "0 10px" }}>
           {isAdmin ? "Unlocked editing" : "Locked view-only"}
