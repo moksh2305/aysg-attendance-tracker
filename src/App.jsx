@@ -5,7 +5,7 @@ import { QRCodeCanvas } from "qrcode.react";
 import readXlsxFile from "read-excel-file/browser";
 import { auth, db, googleProvider } from "./firebase";
 
-const ALLOWED_ADMIN_NAMES = new Set(["moksh","moksh shah", "dheer sheth"]);
+const ALLOWED_ADMIN_NAMES = new Set(["moksh", "moksh shah", "dheer sheth"]);
 const FIRESTORE_STATE_COLLECTION = "appState";
 const DATA_SCHEMA_VERSION = 1;
 const PERSISTED_DATA_KEYS = Object.freeze({
@@ -687,15 +687,15 @@ function PublicCheckIn({ event }) {
       <div style={{ background: "white", padding: 32, borderRadius: 16, width: "100%", maxWidth: 400, boxShadow: "0 10px 25px -5px rgba(0,0,0,0.1)" }}>
         <h1 style={{ fontSize: 22, fontWeight: "bold", marginBottom: 4, color: "#111827" }}>Event Check-In</h1>
         <p style={{ color: "#4b5563", marginBottom: 24, fontSize: 14 }}>{event.name} • {new Date(event.date).toLocaleDateString()}</p>
-        
+
         <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 16 }}>
           <div>
             <label style={{ display: "block", fontSize: 13, fontWeight: 600, color: "#374151", marginBottom: 4 }}>Full Name *</label>
-            <input type="text" value={name} onChange={e=>setName(e.target.value)} required style={{ width: "100%", padding: "10px 12px", borderRadius: 8, border: "1px solid #d1d5db" }} placeholder="Enter your full name" />
+            <input type="text" value={name} onChange={e => setName(e.target.value)} required style={{ width: "100%", padding: "10px 12px", borderRadius: 8, border: "1px solid #d1d5db" }} placeholder="Enter your full name" />
           </div>
           <div>
             <label style={{ display: "block", fontSize: 13, fontWeight: 600, color: "#374151", marginBottom: 4 }}>Mobile Number (Optional)</label>
-            <input type="tel" value={mobile} onChange={e=>setMobile(e.target.value)} style={{ width: "100%", padding: "10px 12px", borderRadius: 8, border: "1px solid #d1d5db" }} placeholder="Enter mobile number" />
+            <input type="tel" value={mobile} onChange={e => setMobile(e.target.value)} style={{ width: "100%", padding: "10px 12px", borderRadius: 8, border: "1px solid #d1d5db" }} placeholder="Enter mobile number" />
           </div>
           <button disabled={loading} style={{ background: "#7c6af8", color: "white", padding: "12px", borderRadius: 8, fontWeight: 600, border: "none", marginTop: 8, cursor: loading ? "not-allowed" : "pointer" }}>
             {loading ? "Submitting..." : "Submit Check-In"}
@@ -715,12 +715,12 @@ function PendingRow({ docId, data, members, onApprove, onReject }) {
     }
   }, [members, data.name]);
   return (
-    <div style={{border: '1px solid var(--border)', padding: 12, borderRadius: 8, background: "white"}} className="flex items-center justify-between gap-4">
-      <div style={{flex: 1}}>
-        <div style={{fontWeight: 600, fontSize: 14}}>{data.name}</div>
-        <div style={{fontSize: 12, color: 'var(--text2)'}}>{data.mobile || "No mobile"}</div>
+    <div style={{ border: '1px solid var(--border)', padding: 12, borderRadius: 8, background: "white" }} className="flex items-center justify-between gap-4">
+      <div style={{ flex: 1 }}>
+        <div style={{ fontWeight: 600, fontSize: 14 }}>{data.name}</div>
+        <div style={{ fontSize: 12, color: 'var(--text2)' }}>{data.mobile || "No mobile"}</div>
       </div>
-      <select value={matchId} onChange={e=>setMatchId(e.target.value)} className="input" style={{flex: 1}}>
+      <select value={matchId} onChange={e => setMatchId(e.target.value)} className="input" style={{ flex: 1 }}>
         <option value="">-- Match Member --</option>
         <option value="NEW_JOINEE">+ Add as New Joinee</option>
         <optgroup label="Members">
@@ -728,8 +728,8 @@ function PendingRow({ docId, data, members, onApprove, onReject }) {
         </optgroup>
       </select>
       <div className="flex gap-2">
-        <button disabled={!matchId} className="btn" style={{padding: "6px 12px", background: "var(--emerald)", color: "white", border: "none", opacity: matchId ? 1 : 0.5}} onClick={() => onApprove(docId, data, matchId)}>Approve</button>
-        <button className="btn" style={{padding: "6px 12px", background: "#f3f4f6", color: "var(--rose)", border: "none"}} onClick={() => onReject(docId)}>Reject</button>
+        <button disabled={!matchId} className="btn" style={{ padding: "6px 12px", background: "var(--emerald)", color: "white", border: "none", opacity: matchId ? 1 : 0.5 }} onClick={() => onApprove(docId, data, matchId)}>Approve</button>
+        <button className="btn" style={{ padding: "6px 12px", background: "#f3f4f6", color: "var(--rose)", border: "none" }} onClick={() => onReject(docId)}>Reject</button>
       </div>
     </div>
   );
@@ -760,11 +760,11 @@ function PendingCheckinsModal({ eventId, members, onClose, onApprove, showToast 
   };
 
   return (
-    <div style={{position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center'}} onClick={onClose}>
-      <div style={{background: '#f9fafb', padding: 32, borderRadius: 16, width: '100%', maxWidth: 600, maxHeight: '80vh', overflowY: 'auto'}} onClick={e=>e.stopPropagation()}>
+    <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center' }} onClick={onClose}>
+      <div style={{ background: '#f9fafb', padding: 32, borderRadius: 16, width: '100%', maxWidth: 600, maxHeight: '80vh', overflowY: 'auto' }} onClick={e => e.stopPropagation()}>
         <div className="flex justify-between items-center mb-6">
-          <h2 style={{fontSize: 20, fontWeight: 700}}>Pending Scans ({pending.length})</h2>
-          <button onClick={onClose} style={{background: 'none', border: 'none', cursor: 'pointer', fontSize: 24}}>&times;</button>
+          <h2 style={{ fontSize: 20, fontWeight: 700 }}>Pending Scans ({pending.length})</h2>
+          <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 24 }}>&times;</button>
         </div>
         {loading ? <p>Loading...</p> : pending.length === 0 ? <p className="color-muted">No pending check-ins for this event.</p> : (
           <div className="flex flex-col gap-3">
@@ -857,9 +857,9 @@ export default function App() {
   };
 
   if (checkinEventId) {
-    if (events.length === 0) return <div style={{padding: 40, textAlign: 'center'}}>Loading event details...</div>;
+    if (events.length === 0) return <div style={{ padding: 40, textAlign: 'center' }}>Loading event details...</div>;
     const checkinEvent = events.find(e => e.id === checkinEventId);
-    if (!checkinEvent) return <div style={{padding: 40, textAlign: 'center'}}>Event Not Found</div>;
+    if (!checkinEvent) return <div style={{ padding: 40, textAlign: 'center' }}>Event Not Found</div>;
     return <><style>{css}</style><PublicCheckIn event={checkinEvent} /></>;
   }
   const getMemberStats = (memberId) => {
@@ -1355,43 +1355,43 @@ function Members({ members, setMembers, events, attendance, getMemberStats, show
       <div className="card" style={{ padding: 0, overflow: "hidden" }}>
         {filtered.length === 0 ? <EmptyState icon="👥" msg="No members found" /> : (
           <div style={{ overflowX: "auto" }}>
-          <table className="table dense-table" style={{ minWidth: 1040 }}>
-            <thead><tr><th>Member</th><th>Attendance</th><th>Streak</th><th>Last Attended</th><th>Role</th><th>Area</th><th>Activity</th><th></th></tr></thead>
-            <tbody>
-              {filtered.map(m => {
-                const insight = memberInsights(m);
-                const s = insight.stats;
-                const bucket = performanceBucket(s.pct);
-                return (
-                  <tr key={m.id} className="member-row" onClick={() => setSelectedMember(m)}>
-                    <td><div className="flex items-center gap-3"><Avatar name={m.name} size={30} /><div><div style={{ fontWeight: 700, fontSize: 13 }}>{m.name}</div><div className="text-xs color-muted">{m.id} · {m.mobile || "No mobile"}</div></div></div></td>
-                    <td>
-                      <div className="attendance-meter">
-                        <div className="attendance-ring" style={{ background: `conic-gradient(${pctColor(s.pct)} ${s.pct * 3.6}deg, var(--bg4) 0deg)` }}><span style={{ color: pctColor(s.pct) }}>{s.pct}%</span></div>
-                        <div className="flex-1">
-                          <div className="progress-bar"><div className="progress-fill" style={{ width: s.pct + "%", background: pctColor(s.pct) }} /></div>
-                          <div className="text-xs color-muted" style={{ marginTop: 4 }}>{s.present}/{s.total || events.length} events · {bucket === "strong" ? "Strong" : bucket === "steady" ? "Steady" : "Needs focus"}</div>
+            <table className="table dense-table" style={{ minWidth: 1040 }}>
+              <thead><tr><th>Member</th><th>Attendance</th><th>Streak</th><th>Last Attended</th><th>Role</th><th>Area</th><th>Activity</th><th></th></tr></thead>
+              <tbody>
+                {filtered.map(m => {
+                  const insight = memberInsights(m);
+                  const s = insight.stats;
+                  const bucket = performanceBucket(s.pct);
+                  return (
+                    <tr key={m.id} className="member-row" onClick={() => setSelectedMember(m)}>
+                      <td><div className="flex items-center gap-3"><Avatar name={m.name} size={30} /><div><div style={{ fontWeight: 700, fontSize: 13 }}>{m.name}</div><div className="text-xs color-muted">{m.id} · {m.mobile || "No mobile"}</div></div></div></td>
+                      <td>
+                        <div className="attendance-meter">
+                          <div className="attendance-ring" style={{ background: `conic-gradient(${pctColor(s.pct)} ${s.pct * 3.6}deg, var(--bg4) 0deg)` }}><span style={{ color: pctColor(s.pct) }}>{s.pct}%</span></div>
+                          <div className="flex-1">
+                            <div className="progress-bar"><div className="progress-fill" style={{ width: s.pct + "%", background: pctColor(s.pct) }} /></div>
+                            <div className="text-xs color-muted" style={{ marginTop: 4 }}>{s.present}/{s.total || events.length} events · {bucket === "strong" ? "Strong" : bucket === "steady" ? "Steady" : "Needs focus"}</div>
+                          </div>
                         </div>
-                      </div>
-                    </td>
-                    <td><span className="streak-badge">🔥 {insight.streak}</span></td>
-                    <td style={{ fontSize: 12.5, color: "var(--text2)" }}>{insight.lastAttended ? <><span style={{ color: "var(--text)" }}>{insight.lastAttended.name}</span><br />{fmtDate(insight.lastAttended.date)}</> : "No attendance yet"}</td>
-                    <td><span className="tag tag-purple">{roleOf(m)}</span></td>
-                    <td style={{ color: "var(--text2)", fontSize: 12.5 }}>{m.area || "—"}</td>
-                    <td><span className={`tag ${m.active ? "tag-present" : "tag-absent"}`}>{m.active ? "Active" : "Inactive"}</span>{insight.joinedRecently && <span className="tag tag-purple" style={{ marginLeft: 6 }}>New</span>}</td>
-                    <td>
-                      <div className="row-actions">
-                        <button className="btn btn-sm" onClick={e => { e.stopPropagation(); setSelectedMember(m); }}>Profile</button>
-                        <button className="btn btn-sm" onClick={e => { e.stopPropagation(); setSelectedMember(m); setView("Attendance"); }}>History</button>
-                        {isAdmin && <button className="btn btn-sm" onClick={e => { e.stopPropagation(); openEdit(m); }}>Edit</button>}
-                        {isAdmin && <button className="btn btn-sm btn-danger" onClick={e => { e.stopPropagation(); deleteMember(m.id); }}>Delete</button>}
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+                      </td>
+                      <td><span className="streak-badge">🔥 {insight.streak}</span></td>
+                      <td style={{ fontSize: 12.5, color: "var(--text2)" }}>{insight.lastAttended ? <><span style={{ color: "var(--text)" }}>{insight.lastAttended.name}</span><br />{fmtDate(insight.lastAttended.date)}</> : "No attendance yet"}</td>
+                      <td><span className="tag tag-purple">{roleOf(m)}</span></td>
+                      <td style={{ color: "var(--text2)", fontSize: 12.5 }}>{m.area || "—"}</td>
+                      <td><span className={`tag ${m.active ? "tag-present" : "tag-absent"}`}>{m.active ? "Active" : "Inactive"}</span>{insight.joinedRecently && <span className="tag tag-purple" style={{ marginLeft: 6 }}>New</span>}</td>
+                      <td>
+                        <div className="row-actions">
+                          <button className="btn btn-sm" onClick={e => { e.stopPropagation(); setSelectedMember(m); }}>Profile</button>
+                          <button className="btn btn-sm" onClick={e => { e.stopPropagation(); setSelectedMember(m); setView("Attendance"); }}>History</button>
+                          {isAdmin && <button className="btn btn-sm" onClick={e => { e.stopPropagation(); openEdit(m); }}>Edit</button>}
+                          {isAdmin && <button className="btn btn-sm btn-danger" onClick={e => { e.stopPropagation(); deleteMember(m.id); }}>Delete</button>}
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
           </div>
         )}
       </div>
@@ -1908,9 +1908,9 @@ function Attendance({ events, members, newJoinees, attendance, setAttendance, ne
               ))}
             </select>
             {isAdmin && selEvent && (
-              <div className="flex gap-2" style={{marginTop: 8}}>
-                <button className="btn" style={{flex: 1, padding: "8px", background: "green", color: "var(--text)", border: "1px solid var(--border)"}} onClick={() => setShowQR(true)}>Generate QR</button>
-                <button className="btn" style={{flex: 1, padding: "8px", background: "green", color: "var(--text)", border: "1px solid var(--border)"}} onClick={() => setShowPending(true)}>Pending Scans</button>
+              <div className="flex gap-2" style={{ marginTop: 8 }}>
+                <button className="btn" style={{ flex: 1, padding: "8px", background: "green", color: "var(--text)", border: "1px solid var(--border)" }} onClick={() => setShowQR(true)}>Generate QR</button>
+                <button className="btn" style={{ flex: 1, padding: "8px", background: "green", color: "var(--text)", border: "1px solid var(--border)" }} onClick={() => setShowPending(true)}>Pending Scans</button>
               </div>
             )}
           </div>
@@ -2065,24 +2065,24 @@ function Attendance({ events, members, newJoinees, attendance, setAttendance, ne
         </div>
       )}
       {showQR && selEvent && (
-        <div style={{position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center'}} onClick={() => setShowQR(false)}>
-          <div style={{background: 'white', padding: 32, borderRadius: 16, textAlign: 'center', maxWidth: 400}} onClick={e => e.stopPropagation()}>
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center' }} onClick={() => setShowQR(false)}>
+          <div style={{ background: 'white', padding: 32, borderRadius: 16, textAlign: 'center', maxWidth: 400 }} onClick={e => e.stopPropagation()}>
             <h2 className="mb-2">Event Check-In QR</h2>
             <p className="color-muted mb-6 text-sm">Members scan this to submit attendance.</p>
             <div style={{ display: 'inline-block', padding: 16, background: '#f9fafb', borderRadius: 12 }}>
               <QRCodeCanvas value={`${window.location.origin}/?checkin=${selEvent}`} size={240} />
             </div>
             <div className="mt-6">
-              <button className="btn" style={{width: '100%', padding: "10px", background: "#f3f4f6", color: "var(--text)", border: "none"}} onClick={() => setShowQR(false)}>Close</button>
+              <button className="btn" style={{ width: '100%', padding: "10px", background: "#f3f4f6", color: "var(--text)", border: "none" }} onClick={() => setShowQR(false)}>Close</button>
             </div>
           </div>
         </div>
       )}
       {showPending && selEvent && (
-        <PendingCheckinsModal 
-          eventId={selEvent} 
-          members={members} 
-          onClose={() => setShowPending(false)} 
+        <PendingCheckinsModal
+          eventId={selEvent}
+          members={members}
+          onClose={() => setShowPending(false)}
           onApprove={(matchedMemberId, data) => {
             if (matchedMemberId === "NEW_JOINEE") {
               const nid = "NJ_" + Math.random().toString(36).substr(2, 9);
@@ -2091,8 +2091,8 @@ function Attendance({ events, members, newJoinees, attendance, setAttendance, ne
             } else {
               setAttendance({ ...attendance, [selEvent]: { ...(attendance[selEvent] || {}), [matchedMemberId]: "present" } });
             }
-          }} 
-          showToast={showToast} 
+          }}
+          showToast={showToast}
         />
       )}
     </div>
@@ -2120,14 +2120,14 @@ function Analytics({ members, newJoinees, events, getMemberStats, attendance, ne
   }, 0);
 
   const avgAttendance = active.length ? Math.round(active.reduce((s, m) => s + getMemberStats(m.id).pct, 0) / active.length) : 0;
-  
+
   // Group events by month for trends
   const monthGroups = {};
   events.forEach(e => {
     const d = new Date(e.date);
-    const key = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+    const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
     const label = d.toLocaleString('default', { month: 'short' }) + " '" + String(d.getFullYear()).slice(2);
-    if(!monthGroups[key]) monthGroups[key] = { label, events: [], totalPct: 0 };
+    if (!monthGroups[key]) monthGroups[key] = { label, events: [], totalPct: 0 };
     monthGroups[key].events.push(e);
   });
 
@@ -2153,7 +2153,7 @@ function Analytics({ members, newJoinees, events, getMemberStats, attendance, ne
 
   // Donut chart logic
   const areaCounts = active.reduce((acc, m) => { acc[m.area] = (acc[m.area] || 0) + 1; return acc; }, {});
-  const areaData = Object.entries(areaCounts).map(([name, count]) => ({ name, count })).sort((a,b) => b.count - a.count);
+  const areaData = Object.entries(areaCounts).map(([name, count]) => ({ name, count })).sort((a, b) => b.count - a.count);
   const donutColors = ["#7c6af8", "#10d47e", "#f0b429", "#ec4899", "#06b6d4"];
   const donutSegments = areaData.map((area, index) => {
     const pct = active.length ? area.count / active.length : 0;
@@ -2169,9 +2169,9 @@ function Analytics({ members, newJoinees, events, getMemberStats, attendance, ne
   });
 
   // Heatmap logic (Top 5 events, top 8 people for brevity, or scrollable)
-  const recentEvents = [...events].sort((a,b) => new Date(b.date) - new Date(a.date)).slice(0, 5).reverse();
-  const sortedMembers = [...active].sort((a,b) => getMemberStats(b.id).pct - getMemberStats(a.id).pct);
-  
+  const recentEvents = [...events].sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 5).reverse();
+  const sortedMembers = [...active].sort((a, b) => getMemberStats(b.id).pct - getMemberStats(a.id).pct);
+
   // Categorization
   const consistent = active.filter(m => getMemberStats(m.id).pct >= 80);
   const irregular = active.filter(m => getMemberStats(m.id).pct >= 40 && getMemberStats(m.id).pct < 80);
@@ -2181,16 +2181,16 @@ function Analytics({ members, newJoinees, events, getMemberStats, attendance, ne
   const insights = [];
   if (trendDiff > 0) insights.push({ type: 'positive', title: 'Positive Trend', desc: `Overall attendance improved by ${Math.abs(trendDiff)}% compared to last month.`, color: '#10d47e', bg: '#dcfce7', icon: '↗' });
   else if (trendDiff < 0) insights.push({ type: 'negative', title: 'Attention Required', desc: `Overall attendance dropped by ${Math.abs(trendDiff)}% compared to last month.`, color: '#f43f5e', bg: '#ffe4e6', icon: '↘' });
-  
+
   // Find low engagement event
   const eventPcts = events.map(e => {
     const count = active.filter(m => {
       const att = attendance[e.id]?.[m.id];
       return att === 'present' || att === 'late';
     }).length;
-    return { title: e.name, pct: active.length ? Math.round((count/active.length)*100) : 0 };
-  }).sort((a,b) => a.pct - b.pct);
-  
+    return { title: e.name, pct: active.length ? Math.round((count / active.length) * 100) : 0 };
+  }).sort((a, b) => a.pct - b.pct);
+
   if (eventPcts.length > 0) {
     insights.push({ type: 'warning', title: 'Low Engagement Event', desc: `${eventPcts[0].title} had the lowest participation (${eventPcts[0].pct}%).`, color: '#f0b429', bg: '#fef3c7', icon: '📉' });
   }
@@ -2204,7 +2204,7 @@ function Analytics({ members, newJoinees, events, getMemberStats, attendance, ne
 
   const below40 = active.filter(m => getMemberStats(m.id).pct < 40 && getMemberStats(m.id).total > 0);
 
-  const firstTimers = [...active, ...(newJoinees || []).filter(j=>j.active)].filter(m => {
+  const firstTimers = [...active, ...(newJoinees || []).filter(j => j.active)].filter(m => {
     const s = getMemberStats(m.id);
     if (s.present === 1 && recentEvents.length > 0) {
       const att = attendance[recentEvents[0].id]?.[m.id] || newJoineeAttendance[recentEvents[0].id]?.[m.id];
@@ -2215,16 +2215,16 @@ function Analytics({ members, newJoinees, events, getMemberStats, attendance, ne
 
   const inactive60 = active.filter(m => {
     const attendedEvents = events.filter(e => {
-       const att = attendance[e.id]?.[m.id] || newJoineeAttendance[e.id]?.[m.id];
-       return att === 'present' || att === 'late';
-    }).sort((a,b) => new Date(b.date) - new Date(a.date));
+      const att = attendance[e.id]?.[m.id] || newJoineeAttendance[e.id]?.[m.id];
+      return att === 'present' || att === 'late';
+    }).sort((a, b) => new Date(b.date) - new Date(a.date));
     if (attendedEvents.length === 0) return false;
     const diffDays = Math.ceil(Math.abs(new Date() - new Date(attendedEvents[0].date)) / (1000 * 60 * 60 * 24));
     return diffDays > 60;
   });
 
   const highPerformersList = active.filter(m => getMemberStats(m.id).pct >= 85 && getMemberStats(m.id).total >= 3);
-  
+
   const getSmartTabData = () => {
     switch (smartTab) {
       case 'missed3': return missedLast3;
@@ -2270,7 +2270,7 @@ function Analytics({ members, newJoinees, events, getMemberStats, attendance, ne
         </div>
         <div className="ac-card col-2">
           <div className="ac-card-title">Consistent Rate <span className="icon">⭐</span></div>
-          <div className="ac-stat-value">{active.length ? Math.round((consistent.length / active.length)*100) : 0}%</div>
+          <div className="ac-stat-value">{active.length ? Math.round((consistent.length / active.length) * 100) : 0}%</div>
           <div className="ac-stat-trend trend-up">High engagement</div>
         </div>
         <div className="ac-card col-2">
@@ -2295,11 +2295,11 @@ function Analytics({ members, newJoinees, events, getMemberStats, attendance, ne
               {/* Labels */}
               <text x="-10" y="5" fontSize="10" fill="var(--text2)" textAnchor="end">100%</text>
               <text x="-10" y="150" fontSize="10" fill="var(--text2)" textAnchor="end">0%</text>
-              
+
               {/* Line path */}
-              <path 
-                d={`M ${trendData.map((d, i) => `${(i / Math.max(1, trendData.length - 1)) * 400},${150 - (d.value / 100) * 150}`).join(" L ")}`} 
-                fill="none" stroke="var(--accent)" strokeWidth="3" 
+              <path
+                d={`M ${trendData.map((d, i) => `${(i / Math.max(1, trendData.length - 1)) * 400},${150 - (d.value / 100) * 150}`).join(" L ")}`}
+                fill="none" stroke="var(--accent)" strokeWidth="3"
               />
               {/* Data points */}
               {trendData.map((d, i) => (
@@ -2318,7 +2318,7 @@ function Analytics({ members, newJoinees, events, getMemberStats, attendance, ne
           <div className="ac-card-title">Monthly Comparison <span className="color-muted text-xs">Avg %</span></div>
           <div className="ac-chart-container" style={{ paddingBottom: "24px" }}>
             {trendData.slice(-6).map((d, i) => (
-              <div key={i} className="ac-bar" style={{ height: `${d.value}%`, background: `var(${i === trendData.length-1 ? '--accent' : '--accent2'})` }}>
+              <div key={i} className="ac-bar" style={{ height: `${d.value}%`, background: `var(${i === trendData.length - 1 ? '--accent' : '--accent2'})` }}>
                 <span className="ac-bar-val">{d.value}%</span>
                 <span className="ac-bar-label" style={{ whiteSpace: "nowrap" }}>{d.label.split(" ")[0]}</span>
               </div>
@@ -2345,7 +2345,7 @@ function Analytics({ members, newJoinees, events, getMemberStats, attendance, ne
 
       {/* Row 3: Heatmap, Donut, Categories */}
       <div className="ac-grid" style={{ marginTop: "8px" }}>
-        
+
         {/* Event Participation Heatmap */}
         <div className="ac-card col-5">
           <div className="ac-card-title">Event Participation Heatmap <span className="color-muted text-xs">Recent 5 Events</span></div>
@@ -2372,9 +2372,9 @@ function Analytics({ members, newJoinees, events, getMemberStats, attendance, ne
               <div className="color-muted text-xs mt-2">... and {sortedMembers.length - 8} more</div>
             )}
             <div className="flex gap-4 mt-4 justify-center">
-              <span className="flex items-center gap-2 text-xs"><span style={{width:10,height:10,background:'#10d47e',borderRadius:2}}></span> Present</span>
-              <span className="flex items-center gap-2 text-xs"><span style={{width:10,height:10,background:'#f0b429',borderRadius:2}}></span> Late</span>
-              <span className="flex items-center gap-2 text-xs"><span style={{width:10,height:10,background:'#f43f5e',borderRadius:2}}></span> Absent</span>
+              <span className="flex items-center gap-2 text-xs"><span style={{ width: 10, height: 10, background: '#10d47e', borderRadius: 2 }}></span> Present</span>
+              <span className="flex items-center gap-2 text-xs"><span style={{ width: 10, height: 10, background: '#f0b429', borderRadius: 2 }}></span> Late</span>
+              <span className="flex items-center gap-2 text-xs"><span style={{ width: 10, height: 10, background: '#f43f5e', borderRadius: 2 }}></span> Absent</span>
             </div>
           </div>
         </div>
@@ -2413,28 +2413,28 @@ function Analytics({ members, newJoinees, events, getMemberStats, attendance, ne
             <div>
               <div className="flex justify-between text-xs mb-2">
                 <span style={{ color: "#10d47e", fontWeight: 600 }}>Consistent (≥80%)</span>
-                <span>{consistent.length} ({active.length ? Math.round((consistent.length/active.length)*100) : 0}%)</span>
+                <span>{consistent.length} ({active.length ? Math.round((consistent.length / active.length) * 100) : 0}%)</span>
               </div>
               <div style={{ height: 8, background: "var(--bg4)", borderRadius: 4, overflow: "hidden" }}>
-                <div style={{ height: "100%", width: `${active.length ? (consistent.length/active.length)*100 : 0}%`, background: "#10d47e" }} />
+                <div style={{ height: "100%", width: `${active.length ? (consistent.length / active.length) * 100 : 0}%`, background: "#10d47e" }} />
               </div>
             </div>
             <div>
               <div className="flex justify-between text-xs mb-2">
                 <span style={{ color: "#f0b429", fontWeight: 600 }}>Irregular (40% - 79%)</span>
-                <span>{irregular.length} ({active.length ? Math.round((irregular.length/active.length)*100) : 0}%)</span>
+                <span>{irregular.length} ({active.length ? Math.round((irregular.length / active.length) * 100) : 0}%)</span>
               </div>
               <div style={{ height: 8, background: "var(--bg4)", borderRadius: 4, overflow: "hidden" }}>
-                <div style={{ height: "100%", width: `${active.length ? (irregular.length/active.length)*100 : 0}%`, background: "#f0b429" }} />
+                <div style={{ height: "100%", width: `${active.length ? (irregular.length / active.length) * 100 : 0}%`, background: "#f0b429" }} />
               </div>
             </div>
             <div>
               <div className="flex justify-between text-xs mb-2">
                 <span style={{ color: "#f43f5e", fontWeight: 600 }}>Inactive (&lt;40%)</span>
-                <span>{inactive.length} ({active.length ? Math.round((inactive.length/active.length)*100) : 0}%)</span>
+                <span>{inactive.length} ({active.length ? Math.round((inactive.length / active.length) * 100) : 0}%)</span>
               </div>
               <div style={{ height: 8, background: "var(--bg4)", borderRadius: 4, overflow: "hidden" }}>
-                <div style={{ height: "100%", width: `${active.length ? (inactive.length/active.length)*100 : 0}%`, background: "#f43f5e" }} />
+                <div style={{ height: "100%", width: `${active.length ? (inactive.length / active.length) * 100 : 0}%`, background: "#f43f5e" }} />
               </div>
             </div>
           </div>
@@ -2443,7 +2443,7 @@ function Analytics({ members, newJoinees, events, getMemberStats, attendance, ne
 
       {/* Row 4: Smart Alerts & Top Performers */}
       <div className="ac-grid" style={{ marginTop: "8px" }}>
-        
+
         {/* Smart Alerts */}
         <div className="ac-card col-7">
           <div className="ac-card-title" style={{ color: "var(--accent)" }}>💡 Smart Alerts</div>
@@ -2454,7 +2454,7 @@ function Analytics({ members, newJoinees, events, getMemberStats, attendance, ne
             <div className={`ac-tab ${smartTab === 'inactive60' ? 'active' : ''}`} onClick={() => setSmartTab('inactive60')}>Inactive 60 Days ({inactive60.length})</div>
             <div className={`ac-tab ${smartTab === 'highPerformers' ? 'active' : ''}`} onClick={() => setSmartTab('highPerformers')}>High Performers ({highPerformersList.length})</div>
           </div>
-          
+
           <div style={{ overflowX: "auto" }}>
             <table className="ac-table">
               <thead>
@@ -2473,9 +2473,9 @@ function Analytics({ members, newJoinees, events, getMemberStats, attendance, ne
                       <td style={{ color: s.pct >= 75 ? "var(--emerald)" : s.pct >= 40 ? "var(--gold)" : "var(--rose)", fontWeight: 600 }}>{s.pct}%</td>
                       <td>
                         <div className="flex gap-2">
-                          {recentEvents.slice(0,3).reverse().map(e => {
-                             const att = attendance[e.id]?.[m.id] || newJoineeAttendance[e.id]?.[m.id];
-                             return <span key={e.id} style={{ fontSize: 14 }}>{att === 'present' ? '✅' : att === 'late' ? '⏱️' : '❌'}</span>
+                          {recentEvents.slice(0, 3).reverse().map(e => {
+                            const att = attendance[e.id]?.[m.id] || newJoineeAttendance[e.id]?.[m.id];
+                            return <span key={e.id} style={{ fontSize: 14 }}>{att === 'present' ? '✅' : att === 'late' ? '⏱️' : '❌'}</span>
                           })}
                         </div>
                       </td>
@@ -2526,7 +2526,7 @@ const TEMPLATES = {
 function buildReportHtml({ template, data, options }) {
   const { allPeople, attendanceGetter, stats, generatedAt } = data;
   const { brandColor, includePhone, includeSignatures, includeCharts, includeAbsent, dateRange } = options;
-  
+
   const statusMeta = {
     present: { label: "Present", icon: "✓", color: "#dcfce7", bg: "#15803d" },
     late: { label: "Late", icon: "◔", color: "#b45309", bg: "#fef3c7" },
@@ -2558,25 +2558,25 @@ function buildReportHtml({ template, data, options }) {
   if (template === "volunteerReport") {
     peopleList = peopleList.filter(p => /volunteer/i.test(p.role || p.notes || ""));
   }
-  
+
   // Apply absent filter (if a template is detailed and includeAbsent is false, we could filter out those with 0 attendance)
   if (!includeAbsent && template === "detailedAttendance") {
-     peopleList = peopleList.filter(p => {
-       const hasAttendance = filteredEvents.some(e => {
-         const s = attendanceGetter(e.id, p.id);
-         return s === 'present' || s === 'late';
-       });
-       return hasAttendance;
-     });
+    peopleList = peopleList.filter(p => {
+      const hasAttendance = filteredEvents.some(e => {
+        const s = attendanceGetter(e.id, p.id);
+        return s === 'present' || s === 'late';
+      });
+      return hasAttendance;
+    });
   }
 
-  peopleList.sort((a,b) => a.name.localeCompare(b.name));
+  peopleList.sort((a, b) => a.name.localeCompare(b.name));
 
   let htmlBody = "";
 
   const headerHtml = `
     <header style="border-bottom: 2px solid ${brandColor}; padding-bottom: 20px; margin-bottom: 30px;">
-      <h1 style="margin: 0; color: #111827; font-size: 28px;">AYSG Attendance Report</h1>
+      <h1 style="margin: 0; color: #111827; font-size: 28px;">AYSG Ghatkopar Attendance Report</h1>
       <p style="margin: 4px 0 0; color: #6b7280; font-size: 14px;">${TEMPLATES[template].title}</p>
       <div style="margin-top: 16px; font-size: 12px; color: #4b5563; display: flex; justify-content: space-between;">
         <span>Generated: ${generatedAt}</span>
@@ -2615,19 +2615,19 @@ function buildReportHtml({ template, data, options }) {
         </div>
       </div>
     `;
-    
+
     if (includeCharts) {
       // Mock chart representation
       htmlBody += `
         <div style="margin-bottom: 30px; page-break-inside: avoid;">
           <h3 style="margin: 0 0 12px; font-size: 16px;">Attendance Trend</h3>
           <div style="height: 120px; background: #f3f4f6; border-radius: 8px; position: relative; overflow: hidden; display: flex; align-items: flex-end; padding: 0 10px 10px;">
-            ${filteredEvents.slice(0,10).map((e) => {
-               // Calculate a rough height based on an assumed max of 50
-               const count = allPeople.filter(p => attendanceGetter(e.id, p.id) === 'present').length;
-               const h = Math.max(10, Math.min(100, (count / (allPeople.length || 1)) * 100));
-               return `<div style="flex: 1; margin: 0 4px; background: ${brandColor}; height: ${h}%; border-radius: 4px 4px 0 0; opacity: 0.8;" title="${e.name}"></div>`;
-            }).join("")}
+            ${filteredEvents.slice(0, 10).map((e) => {
+        // Calculate a rough height based on an assumed max of 50
+        const count = allPeople.filter(p => attendanceGetter(e.id, p.id) === 'present').length;
+        const h = Math.max(10, Math.min(100, (count / (allPeople.length || 1)) * 100));
+        return `<div style="flex: 1; margin: 0 4px; background: ${brandColor}; height: ${h}%; border-radius: 4px 4px 0 0; opacity: 0.8;" title="${e.name}"></div>`;
+      }).join("")}
           </div>
         </div>
       `;
@@ -2641,7 +2641,7 @@ function buildReportHtml({ template, data, options }) {
           <tr style="background: ${brandColor}; color: #fff;">
             <th style="padding: 10px; text-align: left; border: 1px solid ${brandColor};">Member</th>
             ${includePhone ? `<th style="padding: 10px; text-align: left; border: 1px solid ${brandColor};">Phone</th>` : ""}
-            ${filteredEvents.map(e => `<th style="padding: 10px; text-align: center; border: 1px solid ${brandColor};" title="${e.name}"><div style="font-size: 10.5px; font-weight: 600; margin-bottom: 4px; line-height: 1.2;">${e.name}</div><div>${new Date(e.date).toLocaleDateString('en-US', {month:'short', day:'numeric'})}</div></th>`).join("")}
+            ${filteredEvents.map(e => `<th style="padding: 10px; text-align: center; border: 1px solid ${brandColor};" title="${e.name}"><div style="font-size: 10.5px; font-weight: 600; margin-bottom: 4px; line-height: 1.2;">${e.name}</div><div>${new Date(e.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</div></th>`).join("")}
           </tr>
         </thead>
         <tbody>
@@ -2650,9 +2650,9 @@ function buildReportHtml({ template, data, options }) {
               <td style="padding: 8px; border: 1px solid #e5e7eb; font-weight: 500;">${p.name}</td>
               ${includePhone ? `<td style="padding: 8px; border: 1px solid #e5e7eb; color: #6b7280;">${p.phone || '-'}</td>` : ""}
               ${filteredEvents.map(e => {
-                const s = getStatus(p, e.id);
-                return `<td style="padding: 8px; text-align: center; border: 1px solid #e5e7eb; color: ${s.color}; background: ${s.bg}80;">${s.icon}</td>`;
-              }).join("")}
+      const s = getStatus(p, e.id);
+      return `<td style="padding: 8px; text-align: center; border: 1px solid #e5e7eb; color: ${s.color}; background: ${s.bg}80;">${s.icon}</td>`;
+    }).join("")}
             </tr>
           `).join("")}
         </tbody>
@@ -2671,16 +2671,16 @@ function buildReportHtml({ template, data, options }) {
         </thead>
         <tbody>
           ${filteredEvents.map((e, i) => {
-            const pCount = allPeople.filter(p => attendanceGetter(e.id, p.id) === 'present').length;
-            const aCount = allPeople.filter(p => attendanceGetter(e.id, p.id) === 'absent').length;
-            return `
+      const pCount = allPeople.filter(p => attendanceGetter(e.id, p.id) === 'present').length;
+      const aCount = allPeople.filter(p => attendanceGetter(e.id, p.id) === 'absent').length;
+      return `
               <tr style="background: ${i % 2 === 0 ? '#fff' : '#f9fafb'};">
                 <td style="padding: 8px; border: 1px solid #e5e7eb;"><strong>${new Date(e.date).toLocaleDateString()}</strong> - ${e.name}</td>
                 <td style="padding: 8px; text-align: center; border: 1px solid #e5e7eb; color: #15803d;">${pCount}</td>
                 <td style="padding: 8px; text-align: center; border: 1px solid #e5e7eb; color: #be123c;">${aCount}</td>
               </tr>
             `;
-          }).join("")}
+    }).join("")}
         </tbody>
       </table>
     `;
@@ -2712,7 +2712,7 @@ function Reports({ members, newJoinees, events, attendance, newJoineeAttendance,
   const [zoom, setZoom] = React.useState(1);
   const [exportStep, setExportStep] = React.useState(0);
   const [isExporting, setIsExporting] = React.useState(false);
-  
+
   // Customization Options
   const [options, setOptions] = React.useState({
     brandColor: "#7c6af8",
@@ -2728,7 +2728,7 @@ function Reports({ members, newJoinees, events, attendance, newJoineeAttendance,
     const active = (members || []).filter(m => m.active).map(m => ({ ...m, group: "Member", role: m.role || "Member" }));
     const activeJoinees = (newJoinees || []).filter(j => j.active).map(j => ({ ...j, group: "New Joinee", role: "New Joiner" }));
     const allPeople = [...active, ...activeJoinees];
-    
+
     const attendanceGetter = (eId, pId) => {
       return (attendance[eId] && attendance[eId][pId]) || (newJoineeAttendance[eId] && newJoineeAttendance[eId][pId]) || "absent";
     };
@@ -2764,10 +2764,10 @@ function Reports({ members, newJoinees, events, attendance, newJoineeAttendance,
   const handleExport = () => {
     setIsExporting(true);
     setExportStep(1); // Generating PDF
-    
+
     setTimeout(() => {
       setExportStep(2); // Finalizing
-      
+
       setTimeout(() => {
         const win = window.open("", "_blank");
         win.document.write(previewHtml);
@@ -2797,13 +2797,13 @@ function Reports({ members, newJoinees, events, attendance, newJoineeAttendance,
     <div className="reports-studio">
       <div className="settings-panel">
         <h2 className="mb-6 font-bold" style={{ fontSize: "22px" }}>Report Studio</h2>
-        
+
         <div className="section mb-6">
           <h3 className="mb-4 font-semi" style={{ fontSize: "14px" }}>1. Select Template</h3>
           <div className="report-template-grid">
             {Object.values(TEMPLATES).map(tpl => (
-              <div 
-                key={tpl.id} 
+              <div
+                key={tpl.id}
                 className={`template-card ${template === tpl.id ? 'active' : ''}`}
                 onClick={() => setTemplate(tpl.id)}
               >
@@ -2816,23 +2816,23 @@ function Reports({ members, newJoinees, events, attendance, newJoineeAttendance,
 
         <div className="section mb-6" style={{ background: "var(--bg2)", padding: "20px", borderRadius: "16px", border: "1px solid var(--border)" }}>
           <h3 className="mb-4 font-semi" style={{ fontSize: "14px" }}>2. Customization</h3>
-          
+
           <div className="mb-4">
             <label className="text-xs color-muted font-semi block mb-2">Brand Color</label>
             <div className="flex gap-2">
               {['#7c6af8', '#ec4899', '#14b8a6', '#f59e0b', '#ef4444', '#111827'].map(c => (
-                <div 
+                <div
                   key={c}
                   className="color-swatch"
                   style={{ background: c, borderColor: options.brandColor === c ? 'var(--text)' : 'transparent' }}
-                  onClick={() => setOptions({...options, brandColor: c})}
+                  onClick={() => setOptions({ ...options, brandColor: c })}
                 />
               ))}
               <div className="color-swatch" style={{ background: options.brandColor }}>
-                <input 
-                  type="color" 
-                  value={options.brandColor} 
-                  onChange={e => setOptions({...options, brandColor: e.target.value})} 
+                <input
+                  type="color"
+                  value={options.brandColor}
+                  onChange={e => setOptions({ ...options, brandColor: e.target.value })}
                 />
               </div>
             </div>
@@ -2841,11 +2841,11 @@ function Reports({ members, newJoinees, events, attendance, newJoineeAttendance,
           {template === "singleEvent" ? (
             <div className="mb-4">
               <label className="text-xs color-muted font-semi block mb-2">Select Activity</label>
-              <select 
-                className="input" 
+              <select
+                className="input"
                 style={{ width: "100%" }}
                 value={options.eventId}
-                onChange={e => setOptions({...options, eventId: e.target.value})}
+                onChange={e => setOptions({ ...options, eventId: e.target.value })}
               >
                 {events.map(ev => (
                   <option key={ev.id} value={ev.id}>{new Date(ev.date).toLocaleDateString()} - {ev.name}</option>
@@ -2855,8 +2855,8 @@ function Reports({ members, newJoinees, events, attendance, newJoineeAttendance,
           ) : (
             <div className="mb-4">
               <label className="text-xs color-muted font-semi block mb-2">Report Period</label>
-              <select 
-                className="input mb-3" 
+              <select
+                className="input mb-3"
                 style={{ width: "100%" }}
                 value={options.datePreset}
                 onChange={e => {
@@ -2873,7 +2873,7 @@ function Reports({ members, newJoinees, events, attendance, newJoineeAttendance,
                     start = new Date(d.getFullYear(), 0, 1).toISOString().split('T')[0];
                     end = new Date(d.getFullYear(), 11, 31).toISOString().split('T')[0];
                   }
-                  setOptions({...options, datePreset: val, dateRange: { start, end }});
+                  setOptions({ ...options, datePreset: val, dateRange: { start, end } });
                 }}
               >
                 <option value="allTime">All Time</option>
@@ -2887,11 +2887,11 @@ function Reports({ members, newJoinees, events, attendance, newJoineeAttendance,
                 <div className="grid-2 gap-4" style={{ gridTemplateColumns: '1fr 1fr' }}>
                   <div>
                     <label className="text-xs color-muted font-semi block mb-2">Start Date</label>
-                    <input type="date" className="input" style={{ width: "100%" }} value={options.dateRange.start} onChange={e => setOptions({...options, dateRange: {...options.dateRange, start: e.target.value}})} />
+                    <input type="date" className="input" style={{ width: "100%" }} value={options.dateRange.start} onChange={e => setOptions({ ...options, dateRange: { ...options.dateRange, start: e.target.value } })} />
                   </div>
                   <div>
                     <label className="text-xs color-muted font-semi block mb-2">End Date</label>
-                    <input type="date" className="input" style={{ width: "100%" }} value={options.dateRange.end} onChange={e => setOptions({...options, dateRange: {...options.dateRange, end: e.target.value}})} />
+                    <input type="date" className="input" style={{ width: "100%" }} value={options.dateRange.end} onChange={e => setOptions({ ...options, dateRange: { ...options.dateRange, end: e.target.value } })} />
                   </div>
                 </div>
               )}
@@ -2899,19 +2899,19 @@ function Reports({ members, newJoinees, events, attendance, newJoineeAttendance,
           )}
 
           <label className="option-checkbox">
-            <input type="checkbox" checked={options.includeSignatures} onChange={e => setOptions({...options, includeSignatures: e.target.checked})} />
+            <input type="checkbox" checked={options.includeSignatures} onChange={e => setOptions({ ...options, includeSignatures: e.target.checked })} />
             Include Signature Blocks
           </label>
           <label className="option-checkbox">
-            <input type="checkbox" checked={options.includeCharts} onChange={e => setOptions({...options, includeCharts: e.target.checked})} />
+            <input type="checkbox" checked={options.includeCharts} onChange={e => setOptions({ ...options, includeCharts: e.target.checked })} />
             Include Analytics Charts
           </label>
           <label className="option-checkbox">
-            <input type="checkbox" checked={options.includePhone} onChange={e => setOptions({...options, includePhone: e.target.checked})} />
+            <input type="checkbox" checked={options.includePhone} onChange={e => setOptions({ ...options, includePhone: e.target.checked })} />
             Include Phone Numbers
           </label>
           <label className="option-checkbox">
-            <input type="checkbox" checked={options.includeAbsent} onChange={e => setOptions({...options, includeAbsent: e.target.checked})} />
+            <input type="checkbox" checked={options.includeAbsent} onChange={e => setOptions({ ...options, includeAbsent: e.target.checked })} />
             Include Absent Members
           </label>
         </div>
@@ -2927,7 +2927,7 @@ function Reports({ members, newJoinees, events, attendance, newJoineeAttendance,
             <button onClick={() => setZoom(Math.min(1.5, zoom + 0.1))} title="Zoom In">+</button>
           </div>
         </div>
-        
+
         <div className="preview-device">
           <div className="preview-page" style={{ transform: `scale(${zoom})`, marginBottom: `${(zoom - 1) * 1123}px` }}>
             <iframe ref={iframeRef} title="Report Preview" />
@@ -2955,9 +2955,9 @@ function Reports({ members, newJoinees, events, attendance, newJoineeAttendance,
               <span className="text-xs color-muted">Report auto-updates as you change settings.</span>
             )}
           </div>
-          <button 
-            className="btn btn-primary" 
-            onClick={handleExport} 
+          <button
+            className="btn btn-primary"
+            onClick={handleExport}
             disabled={isExporting}
             style={{ marginLeft: "16px", minWidth: "140px" }}
           >
