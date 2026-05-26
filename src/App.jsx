@@ -2587,7 +2587,6 @@ function buildReportHtml({ template, data, options }) {
           <div class="meta-item"><span class="meta-label">Generated:</span> ${generatedAt}</div>
           <div class="meta-item"><span class="meta-label">Total Events:</span> ${filteredEvents.length}</div>
           ${dateRange && dateRange.start ? `<div class="meta-item"><span class="meta-label">Period:</span> ${dateRange.start} to ${dateRange.end || 'Now'}</div>` : ''}
-          <div class="meta-item"><span class="meta-label">Prepared By:</span> System</div>
         </div>
       </div>
     </header>
