@@ -2636,12 +2636,12 @@ function buildReportHtml({ template, data, options }) {
 
   if (template === "detailedAttendance" || template === "volunteerReport" || template === "singleEvent") {
     htmlBody += `
-      <table style="width: 100%; border-collapse: collapse; font-size: 12px;">
+      <table style="width: 100%; border-collapse: collapse; font-size: 12px; table-layout: fixed;">
         <thead>
           <tr style="background: ${brandColor}; color: #fff;">
             <th style="padding: 10px; text-align: left; border: 1px solid ${brandColor};">Member</th>
             ${includePhone ? `<th style="padding: 10px; text-align: left; border: 1px solid ${brandColor};">Phone</th>` : ""}
-            ${filteredEvents.map(e => `<th style="padding: 10px; text-align: center; border: 1px solid ${brandColor};" title="${e.name}"><div style="font-size: 10.5px; font-weight: 600; margin-bottom: 4px; line-height: 1.2;">${e.name}</div><div>${new Date(e.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</div></th>`).join("")}
+            ${filteredEvents.map(e => `<th style="padding: 10px; text-align: center; border: 1px solid ${brandColor}; word-break: break-word; overflow-wrap: break-word;" title="${e.name}"><div style="font-size: 10px; font-weight: 600; margin-bottom: 4px; line-height: 1.3; text-align: center;">${e.name}</div><div style="font-size: 10px; opacity: 0.85; text-align: center;">${new Date(e.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</div></th>`).join("")}
           </tr>
         </thead>
         <tbody>
@@ -2651,7 +2651,7 @@ function buildReportHtml({ template, data, options }) {
               ${includePhone ? `<td style="padding: 8px; border: 1px solid #e5e7eb; color: #6b7280;">${p.phone || '-'}</td>` : ""}
               ${filteredEvents.map(e => {
       const s = getStatus(p, e.id);
-      return `<td style="padding: 8px; text-align: center; border: 1px solid #e5e7eb; color: ${s.color}; background: ${s.bg}80;">${s.icon}</td>`;
+      return `<td style="padding: 8px; text-align: center; border: 1px solid #e5e7eb; color: ${s.color}; background: ${s.bg}; font-weight: bold; font-size: 14px;">${s.icon}</td>`;
     }).join("")}
             </tr>
           `).join("")}
@@ -2661,7 +2661,7 @@ function buildReportHtml({ template, data, options }) {
   } else {
     // Basic event list for monthly summary
     htmlBody += `
-      <table style="width: 100%; border-collapse: collapse; font-size: 12px;">
+      <table style="width: 100%; border-collapse: collapse; font-size: 12px; table-layout: fixed;">
         <thead>
           <tr style="background: ${brandColor}; color: #fff;">
             <th style="padding: 10px; text-align: left; border: 1px solid ${brandColor};">Event Date & Title</th>
@@ -2691,7 +2691,7 @@ function buildReportHtml({ template, data, options }) {
     <html>
     <head>
       <meta charset="utf-8">
-      <title>${TEMPLATES[template].title} - AYSG</title>
+      <title>AYSG Ghatkopar Attendance Report - ${TEMPLATES[template].title}</title>
       <style>
         body { font-family: 'Inter', -apple-system, sans-serif; padding: 40px; margin: 0; color: #111827; }
         @media print { body { padding: 0; } }
@@ -2720,13 +2720,21 @@ function Reports({ members, newJoinees, events, attendance, newJoineeAttendance,
     includeSignatures: true,
     includeCharts: true,
     includeAbsent: true,
-    dateRange: { start: "", end: "" }
+    dateRange: { start: "", end: "" },
+    memberGroup: "all"
   });
 
   const iframeRef = React.useRef(null);
   const previewHtml = React.useMemo(() => {
-    const active = (members || []).filter(m => m.active).map(m => ({ ...m, group: "Member", role: m.role || "Member" }));
-    const activeJoinees = (newJoinees || []).filter(j => j.active).map(j => ({ ...j, group: "New Joinee", role: "New Joiner" }));
+    let active = (members || []).filter(m => m.active).map(m => ({ ...m, group: "Member", role: m.role || "Member" }));
+    let activeJoinees = (newJoinees || []).filter(j => j.active).map(j => ({ ...j, group: "New Joinee", role: "New Joiner" }));
+
+    if (options.memberGroup === "members") {
+      activeJoinees = [];
+    } else if (options.memberGroup === "newJoinees") {
+      active = [];
+    }
+
     const allPeople = [...active, ...activeJoinees];
 
     const attendanceGetter = (eId, pId) => {
@@ -2897,6 +2905,20 @@ function Reports({ members, newJoinees, events, attendance, newJoineeAttendance,
               )}
             </div>
           )}
+
+          <div className="mb-4">
+            <label className="text-xs color-muted font-semi block mb-2">Member Group</label>
+            <select
+              className="input mb-3"
+              style={{ width: "100%" }}
+              value={options.memberGroup}
+              onChange={e => setOptions({ ...options, memberGroup: e.target.value })}
+            >
+              <option value="all">All Members & Joinees</option>
+              <option value="members">Main Members Only</option>
+              <option value="newJoinees">New Joinees Only</option>
+            </select>
+          </div>
 
           <label className="option-checkbox">
             <input type="checkbox" checked={options.includeSignatures} onChange={e => setOptions({ ...options, includeSignatures: e.target.checked })} />
