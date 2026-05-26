@@ -2528,10 +2528,10 @@ function buildReportHtml({ template, data, options }) {
   const { brandColor, includePhone, includeSignatures, includeCharts, includeAbsent, dateRange } = options;
 
   const statusMeta = {
-    present: { label: "Present", icon: "✓", color: "#dcfce7", bg: "#15803d" },
-    late: { label: "Late", icon: "◔", color: "#b45309", bg: "#fef3c7" },
-    excused: { label: "Excused", icon: "•", color: "#0f766e", bg: "#ccfbf1" },
-    absent: { label: "Absent", icon: "✕", color: "#ffe4e6", bg: "#be123c" }
+    present: { label: "Present", icon: "✓", color: "#10b981", bg: "#d1fae5" },
+    late: { label: "Late", icon: "◔", color: "#f59e0b", bg: "#fef3c7" },
+    excused: { label: "Excused", icon: "•", color: "#0ea5e9", bg: "#e0f2fe" },
+    absent: { label: "Absent", icon: "✕", color: "#ef4444", bg: "#fee2e2" }
   };
 
   const getStatus = (person, eventId) => {
@@ -2575,59 +2575,65 @@ function buildReportHtml({ template, data, options }) {
   let htmlBody = "";
 
   const headerHtml = `
-    <header style="border-bottom: 2px solid ${brandColor}; padding-bottom: 20px; margin-bottom: 30px;">
-      <h1 style="margin: 0; color: #111827; font-size: 28px;">AYSG Ghatkopar Attendance Report</h1>
-      <p style="margin: 4px 0 0; color: #6b7280; font-size: 14px;">${TEMPLATES[template].title}</p>
-      <div style="margin-top: 16px; font-size: 12px; color: #4b5563; display: flex; justify-content: space-between;">
-        <span>Generated: ${generatedAt}</span>
-        ${dateRange && dateRange.start ? `<span>Period: ${dateRange.start} to ${dateRange.end || 'Now'}</span>` : ''}
+    <header class="report-header">
+      <div class="header-logo-container">
+        <!-- Logo cropped to exclude the bottom text -->
+        <img src="/aysg-logo.jpg" alt="AYSG Logo" class="header-logo" onerror="this.style.display='none'" />
+      </div>
+      <div class="header-details">
+        <h1 class="report-title">AYSG Ghatkopar Attendance Report</h1>
+        <p class="report-subtitle">${TEMPLATES[template].title} &mdash; Detailed Attendance Analytics</p>
+        <div class="metadata-grid">
+          <div class="meta-item"><span class="meta-label">Generated:</span> ${generatedAt}</div>
+          <div class="meta-item"><span class="meta-label">Total Events:</span> ${filteredEvents.length}</div>
+          ${dateRange && dateRange.start ? `<div class="meta-item"><span class="meta-label">Period:</span> ${dateRange.start} to ${dateRange.end || 'Now'}</div>` : ''}
+          <div class="meta-item"><span class="meta-label">Prepared By:</span> System</div>
+        </div>
       </div>
     </header>
   `;
 
   const footerHtml = includeSignatures ? `
-    <div style="margin-top: 60px; display: flex; justify-content: space-between; page-break-inside: avoid;">
-      <div style="text-align: center; width: 200px;">
-        <div style="border-bottom: 1px solid #000; height: 40px; margin-bottom: 8px;"></div>
-        <div style="font-size: 12px;">Prepared By</div>
+    <div class="signature-section">
+      <div class="sig-block">
+        <div class="sig-line"></div>
+        <div class="sig-title">Prepared By</div>
       </div>
-      <div style="text-align: center; width: 200px;">
-        <div style="border-bottom: 1px solid #000; height: 40px; margin-bottom: 8px;"></div>
-        <div style="font-size: 12px;">Approved By</div>
+      <div class="sig-block">
+        <div class="sig-line"></div>
+        <div class="sig-title">Approved By</div>
       </div>
     </div>
   ` : "";
 
   if (template === "monthlySummary" || template === "executiveReport") {
     htmlBody += `
-      <div style="display: flex; gap: 20px; margin-bottom: 30px;">
-        <div style="flex: 1; padding: 20px; background: #f9fafb; border-radius: 8px; text-align: center;">
-          <div style="font-size: 32px; font-weight: bold; color: ${brandColor};">${stats.active}</div>
-          <div style="font-size: 12px; color: #6b7280;">Active Members</div>
+      <div class="summary-cards">
+        <div class="card">
+          <div class="card-value" style="color: #4f46e5;">${stats.active}</div>
+          <div class="card-label">Active Members</div>
         </div>
-        <div style="flex: 1; padding: 20px; background: #f9fafb; border-radius: 8px; text-align: center;">
-          <div style="font-size: 32px; font-weight: bold; color: ${brandColor};">${filteredEvents.length}</div>
-          <div style="font-size: 12px; color: #6b7280;">Events in Period</div>
+        <div class="card">
+          <div class="card-value" style="color: #4f46e5;">${filteredEvents.length}</div>
+          <div class="card-label">Events in Period</div>
         </div>
-        <div style="flex: 1; padding: 20px; background: #f9fafb; border-radius: 8px; text-align: center;">
-          <div style="font-size: 32px; font-weight: bold; color: #15803d;">${Math.round(stats.avgAttendance)}</div>
-          <div style="font-size: 12px; color: #6b7280;">Avg. Attendance</div>
+        <div class="card">
+          <div class="card-value" style="color: #10b981;">${Math.round(stats.avgAttendance)}</div>
+          <div class="card-label">Avg. Attendance</div>
         </div>
       </div>
     `;
 
     if (includeCharts) {
-      // Mock chart representation
       htmlBody += `
-        <div style="margin-bottom: 30px; page-break-inside: avoid;">
-          <h3 style="margin: 0 0 12px; font-size: 16px;">Attendance Trend</h3>
-          <div style="height: 120px; background: #f3f4f6; border-radius: 8px; position: relative; overflow: hidden; display: flex; align-items: flex-end; padding: 0 10px 10px;">
+        <div class="chart-section">
+          <h3>Attendance Trend</h3>
+          <div class="chart-container">
             ${filteredEvents.slice(0, 10).map((e) => {
-        // Calculate a rough height based on an assumed max of 50
-        const count = allPeople.filter(p => attendanceGetter(e.id, p.id) === 'present').length;
-        const h = Math.max(10, Math.min(100, (count / (allPeople.length || 1)) * 100));
-        return `<div style="flex: 1; margin: 0 4px; background: ${brandColor}; height: ${h}%; border-radius: 4px 4px 0 0; opacity: 0.8;" title="${e.name}"></div>`;
-      }).join("")}
+              const count = allPeople.filter(p => attendanceGetter(e.id, p.id) === 'present' || attendanceGetter(e.id, p.id) === 'late').length;
+              const h = Math.max(10, Math.min(100, (count / (allPeople.length || 1)) * 100));
+              return \`<div class="chart-bar" style="height: \${h}%;" title="\${e.name}"></div>\`;
+            }).join("")}
           </div>
         </div>
       `;
@@ -2636,51 +2642,73 @@ function buildReportHtml({ template, data, options }) {
 
   if (template === "detailedAttendance" || template === "volunteerReport" || template === "singleEvent") {
     htmlBody += `
-      <table style="width: 100%; border-collapse: collapse; font-size: 12px; table-layout: fixed;">
+      <table class="data-table">
         <thead>
-          <tr style="background: ${brandColor}; color: #fff;">
-            <th style="padding: 10px; text-align: left; border: 1px solid ${brandColor};">Member</th>
-            ${includePhone ? `<th style="padding: 10px; text-align: left; border: 1px solid ${brandColor};">Phone</th>` : ""}
-            ${filteredEvents.map(e => `<th style="padding: 10px; text-align: center; border: 1px solid ${brandColor}; word-break: break-word; overflow-wrap: break-word;" title="${e.name}"><div style="font-size: 10px; font-weight: 600; margin-bottom: 4px; line-height: 1.3; text-align: center;">${e.name}</div><div style="font-size: 10px; opacity: 0.85; text-align: center;">${new Date(e.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</div></th>`).join("")}
+          <tr>
+            <th style="text-align: left;">Member</th>
+            ${includePhone ? \`<th style="text-align: left;">Phone</th>\` : ""}
+            ${filteredEvents.map(e => \`
+              <th style="text-align: center; word-break: break-word; overflow-wrap: break-word;" title="\${e.name}">
+                <div style="font-size: 10px; font-weight: 600; margin-bottom: 4px; line-height: 1.3;">\${e.name}</div>
+                <div style="font-size: 10px; opacity: 0.85;">\${new Date(e.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</div>
+              </th>
+            \`).join("")}
+            <th style="text-align: center; width: 80px;">Attendance %</th>
           </tr>
         </thead>
         <tbody>
-          ${peopleList.map((p, i) => `
-            <tr style="background: ${i % 2 === 0 ? '#fff' : '#f9fafb'};">
-              <td style="padding: 8px; border: 1px solid #e5e7eb; font-weight: 500;">${p.name}</td>
-              ${includePhone ? `<td style="padding: 8px; border: 1px solid #e5e7eb; color: #6b7280;">${p.phone || '-'}</td>` : ""}
-              ${filteredEvents.map(e => {
-      const s = getStatus(p, e.id);
-      return `<td style="padding: 8px; text-align: center; border: 1px solid #e5e7eb; color: ${s.color}; background: ${s.bg}; font-weight: bold; font-size: 14px;">${s.icon}</td>`;
-    }).join("")}
+          ${peopleList.map((p, i) => {
+            let presentCount = 0;
+            const eventHtml = filteredEvents.map(e => {
+              const s = getStatus(p, e.id);
+              if (s.label === "Present" || s.label === "Late") presentCount++;
+              return \`<td style="text-align: center; color: \${s.color}; font-weight: bold; font-size: 14px;">\${s.icon}</td>\`;
+            }).join("");
+            
+            const attendancePct = filteredEvents.length > 0 ? Math.round((presentCount / filteredEvents.length) * 100) : 0;
+            const pctColor = attendancePct >= 80 ? "#10b981" : attendancePct >= 50 ? "#f59e0b" : "#ef4444";
+
+            return \`
+            <tr>
+              <td style="font-weight: 500;">\${p.name}</td>
+              \${includePhone ? \`<td style="color: #6b7280;">\${p.phone || '-'}</td>\` : ""}
+              \${eventHtml}
+              <td style="text-align: center; font-weight: bold; color: \${pctColor}; background: \${pctColor}15;">\${attendancePct}%</td>
             </tr>
-          `).join("")}
+            \`;
+          }).join("")}
         </tbody>
       </table>
     `;
   } else {
     // Basic event list for monthly summary
     htmlBody += `
-      <table style="width: 100%; border-collapse: collapse; font-size: 12px; table-layout: fixed;">
+      <table class="data-table">
         <thead>
-          <tr style="background: ${brandColor}; color: #fff;">
-            <th style="padding: 10px; text-align: left; border: 1px solid ${brandColor};">Event Date & Title</th>
-            <th style="padding: 10px; text-align: center; border: 1px solid ${brandColor};">Present</th>
-            <th style="padding: 10px; text-align: center; border: 1px solid ${brandColor};">Absent</th>
+          <tr>
+            <th style="text-align: left;">Event Date & Title</th>
+            <th style="text-align: center;">Present</th>
+            <th style="text-align: center;">Absent</th>
+            <th style="text-align: center; width: 80px;">Attendance %</th>
           </tr>
         </thead>
         <tbody>
           ${filteredEvents.map((e, i) => {
-      const pCount = allPeople.filter(p => attendanceGetter(e.id, p.id) === 'present').length;
-      const aCount = allPeople.filter(p => attendanceGetter(e.id, p.id) === 'absent').length;
-      return `
-              <tr style="background: ${i % 2 === 0 ? '#fff' : '#f9fafb'};">
-                <td style="padding: 8px; border: 1px solid #e5e7eb;"><strong>${new Date(e.date).toLocaleDateString()}</strong> - ${e.name}</td>
-                <td style="padding: 8px; text-align: center; border: 1px solid #e5e7eb; color: #15803d;">${pCount}</td>
-                <td style="padding: 8px; text-align: center; border: 1px solid #e5e7eb; color: #be123c;">${aCount}</td>
+            const pCount = allPeople.filter(p => attendanceGetter(e.id, p.id) === 'present' || attendanceGetter(e.id, p.id) === 'late').length;
+            const aCount = allPeople.filter(p => attendanceGetter(e.id, p.id) === 'absent').length;
+            const total = pCount + aCount;
+            const eventPct = total > 0 ? Math.round((pCount / total) * 100) : 0;
+            const pctColor = eventPct >= 80 ? "#10b981" : eventPct >= 50 ? "#f59e0b" : "#ef4444";
+
+            return \`
+              <tr>
+                <td><strong>\${new Date(e.date).toLocaleDateString()}</strong> - \${e.name}</td>
+                <td style="text-align: center; color: #10b981; font-weight: 500;">\${pCount}</td>
+                <td style="text-align: center; color: #ef4444; font-weight: 500;">\${aCount}</td>
+                <td style="text-align: center; font-weight: bold; color: \${pctColor}; background: \${pctColor}15;">\${eventPct}%</td>
               </tr>
-            `;
-    }).join("")}
+            \`;
+          }).join("")}
         </tbody>
       </table>
     `;
@@ -2692,9 +2720,204 @@ function buildReportHtml({ template, data, options }) {
     <head>
       <meta charset="utf-8">
       <title>AYSG Ghatkopar Attendance Report - ${TEMPLATES[template].title}</title>
+      <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
       <style>
-        body { font-family: 'Inter', -apple-system, sans-serif; padding: 40px; margin: 0; color: #111827; }
-        @media print { body { padding: 0; } }
+        :root {
+          --primary: #4f46e5;
+          --primary-dark: #4338ca;
+          --text-main: #1f2937;
+          --text-muted: #6b7280;
+          --bg-light: #f9fafb;
+          --border: #e5e7eb;
+        }
+        body { 
+          font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; 
+          padding: 40px; 
+          margin: 0; 
+          color: var(--text-main); 
+          background-color: #ffffff;
+        }
+        @media print { body { padding: 0; -webkit-print-color-adjust: exact; print-color-adjust: exact; } }
+        
+        .report-header {
+          display: flex;
+          align-items: flex-start;
+          gap: 24px;
+          border-bottom: 2px solid var(--primary);
+          padding-bottom: 24px;
+          margin-bottom: 32px;
+        }
+        
+        .header-logo-container {
+          width: 140px;
+          height: 120px;
+          overflow: hidden;
+          position: relative;
+          border-radius: 8px;
+          background: #fff;
+          box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+          flex-shrink: 0;
+          display: flex;
+          align-items: flex-start;
+          justify-content: center;
+        }
+        
+        .header-logo {
+          width: 100%;
+          height: 135%;
+          object-fit: cover;
+          object-position: top center;
+        }
+        
+        .header-details {
+          flex: 1;
+        }
+        
+        .report-title {
+          margin: 0; 
+          color: var(--primary-dark); 
+          font-size: 26px;
+          font-weight: 700;
+          letter-spacing: -0.5px;
+        }
+        
+        .report-subtitle {
+          margin: 6px 0 16px; 
+          color: var(--text-muted); 
+          font-size: 15px;
+          font-weight: 500;
+        }
+        
+        .metadata-grid {
+          display: grid;
+          grid-template-columns: repeat(2, 1fr);
+          gap: 8px 24px;
+          font-size: 12px;
+          background: var(--bg-light);
+          padding: 12px 16px;
+          border-radius: 6px;
+          border: 1px solid var(--border);
+        }
+        
+        .meta-item { color: var(--text-main); font-weight: 500; }
+        .meta-label { color: var(--text-muted); font-weight: 400; margin-right: 4px; }
+        
+        /* Summary Cards */
+        .summary-cards {
+          display: flex;
+          gap: 20px;
+          margin-bottom: 32px;
+        }
+        .card {
+          flex: 1;
+          padding: 24px 20px;
+          background: #ffffff;
+          border-radius: 12px;
+          text-align: center;
+          border: 1px solid var(--border);
+          box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+        }
+        .card-value {
+          font-size: 36px;
+          font-weight: 800;
+          margin-bottom: 4px;
+          line-height: 1;
+        }
+        .card-label {
+          font-size: 13px;
+          color: var(--text-muted);
+          font-weight: 500;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+        }
+        
+        /* Charts */
+        .chart-section {
+          margin-bottom: 32px;
+          page-break-inside: avoid;
+          background: #ffffff;
+          border: 1px solid var(--border);
+          border-radius: 12px;
+          padding: 20px;
+          box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        }
+        .chart-section h3 {
+          margin: 0 0 16px;
+          font-size: 16px;
+          color: var(--text-main);
+        }
+        .chart-container {
+          height: 140px;
+          background: var(--bg-light);
+          border-radius: 8px;
+          display: flex;
+          align-items: flex-end;
+          padding: 0 16px 16px;
+          gap: 12px;
+        }
+        .chart-bar {
+          flex: 1;
+          background: linear-gradient(180deg, #6366f1 0%, #4338ca 100%);
+          border-radius: 4px 4px 0 0;
+          opacity: 0.9;
+          transition: opacity 0.2s;
+        }
+        
+        /* Data Tables */
+        .data-table {
+          width: 100%;
+          border-collapse: separate;
+          border-spacing: 0;
+          font-size: 12px;
+          table-layout: fixed;
+          border-radius: 8px;
+          overflow: hidden;
+          border: 1px solid var(--border);
+          box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        .data-table thead th {
+          background: var(--primary);
+          color: #ffffff;
+          padding: 12px 10px;
+          font-weight: 600;
+          border-right: 1px solid rgba(255,255,255,0.1);
+          border-bottom: 2px solid var(--primary-dark);
+        }
+        .data-table thead th:last-child { border-right: none; }
+        
+        .data-table tbody td {
+          padding: 10px;
+          border-bottom: 1px solid var(--border);
+          border-right: 1px solid var(--border);
+          background: #ffffff;
+        }
+        .data-table tbody tr:nth-child(even) td {
+          background: var(--bg-light);
+        }
+        .data-table tbody tr:last-child td { border-bottom: none; }
+        .data-table tbody td:last-child { border-right: none; }
+        
+        /* Footer */
+        .signature-section {
+          margin-top: 60px;
+          display: flex;
+          justify-content: space-between;
+          page-break-inside: avoid;
+        }
+        .sig-block {
+          text-align: center;
+          width: 200px;
+        }
+        .sig-line {
+          border-bottom: 1px solid var(--text-main);
+          height: 40px;
+          margin-bottom: 8px;
+        }
+        .sig-title {
+          font-size: 13px;
+          font-weight: 500;
+          color: var(--text-muted);
+        }
       </style>
     </head>
     <body>
@@ -2703,7 +2926,7 @@ function buildReportHtml({ template, data, options }) {
       ${footerHtml}
     </body>
     </html>
-  `;
+  \`;
 }
 
 
