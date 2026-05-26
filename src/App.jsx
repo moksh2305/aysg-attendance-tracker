@@ -2632,7 +2632,7 @@ function buildReportHtml({ template, data, options }) {
             ${filteredEvents.slice(0, 10).map((e) => {
               const count = allPeople.filter(p => attendanceGetter(e.id, p.id) === 'present' || attendanceGetter(e.id, p.id) === 'late').length;
               const h = Math.max(10, Math.min(100, (count / (allPeople.length || 1)) * 100));
-              return \`<div class="chart-bar" style="height: \${h}%;" title="\${e.name}"></div>\`;
+              return `<div class="chart-bar" style="height: ${h}%;" title="${e.name}"></div>`;
             }).join("")}
           </div>
         </div>
@@ -2646,13 +2646,13 @@ function buildReportHtml({ template, data, options }) {
         <thead>
           <tr>
             <th style="text-align: left;">Member</th>
-            ${includePhone ? \`<th style="text-align: left;">Phone</th>\` : ""}
-            ${filteredEvents.map(e => \`
-              <th style="text-align: center; word-break: break-word; overflow-wrap: break-word;" title="\${e.name}">
-                <div style="font-size: 10px; font-weight: 600; margin-bottom: 4px; line-height: 1.3;">\${e.name}</div>
-                <div style="font-size: 10px; opacity: 0.85;">\${new Date(e.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</div>
+            ${includePhone ? `<th style="text-align: left;">Phone</th>` : ""}
+            ${filteredEvents.map(e => `
+              <th style="text-align: center; word-break: break-word; overflow-wrap: break-word;" title="${e.name}">
+                <div style="font-size: 10px; font-weight: 600; margin-bottom: 4px; line-height: 1.3;">${e.name}</div>
+                <div style="font-size: 10px; opacity: 0.85;">${new Date(e.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</div>
               </th>
-            \`).join("")}
+            `).join("")}
             <th style="text-align: center; width: 80px;">Attendance %</th>
           </tr>
         </thead>
@@ -2662,20 +2662,20 @@ function buildReportHtml({ template, data, options }) {
             const eventHtml = filteredEvents.map(e => {
               const s = getStatus(p, e.id);
               if (s.label === "Present" || s.label === "Late") presentCount++;
-              return \`<td style="text-align: center; color: \${s.color}; font-weight: bold; font-size: 14px;">\${s.icon}</td>\`;
+              return `<td style="text-align: center; color: ${s.color}; font-weight: bold; font-size: 14px;">${s.icon}</td>`;
             }).join("");
             
             const attendancePct = filteredEvents.length > 0 ? Math.round((presentCount / filteredEvents.length) * 100) : 0;
             const pctColor = attendancePct >= 80 ? "#10b981" : attendancePct >= 50 ? "#f59e0b" : "#ef4444";
 
-            return \`
+            return `
             <tr>
-              <td style="font-weight: 500;">\${p.name}</td>
-              \${includePhone ? \`<td style="color: #6b7280;">\${p.phone || '-'}</td>\` : ""}
-              \${eventHtml}
-              <td style="text-align: center; font-weight: bold; color: \${pctColor}; background: \${pctColor}15;">\${attendancePct}%</td>
+              <td style="font-weight: 500;">${p.name}</td>
+              ${includePhone ? `<td style="color: #6b7280;">${p.phone || '-'}</td>` : ""}
+              ${eventHtml}
+              <td style="text-align: center; font-weight: bold; color: ${pctColor}; background: ${pctColor}15;">${attendancePct}%</td>
             </tr>
-            \`;
+            `;
           }).join("")}
         </tbody>
       </table>
@@ -2700,14 +2700,14 @@ function buildReportHtml({ template, data, options }) {
             const eventPct = total > 0 ? Math.round((pCount / total) * 100) : 0;
             const pctColor = eventPct >= 80 ? "#10b981" : eventPct >= 50 ? "#f59e0b" : "#ef4444";
 
-            return \`
+            return `
               <tr>
-                <td><strong>\${new Date(e.date).toLocaleDateString()}</strong> - \${e.name}</td>
-                <td style="text-align: center; color: #10b981; font-weight: 500;">\${pCount}</td>
-                <td style="text-align: center; color: #ef4444; font-weight: 500;">\${aCount}</td>
-                <td style="text-align: center; font-weight: bold; color: \${pctColor}; background: \${pctColor}15;">\${eventPct}%</td>
+                <td><strong>${new Date(e.date).toLocaleDateString()}</strong> - ${e.name}</td>
+                <td style="text-align: center; color: #10b981; font-weight: 500;">${pCount}</td>
+                <td style="text-align: center; color: #ef4444; font-weight: 500;">${aCount}</td>
+                <td style="text-align: center; font-weight: bold; color: ${pctColor}; background: ${pctColor}15;">${eventPct}%</td>
               </tr>
-            \`;
+            `;
           }).join("")}
         </tbody>
       </table>
@@ -2926,7 +2926,7 @@ function buildReportHtml({ template, data, options }) {
       ${footerHtml}
     </body>
     </html>
-  \`;
+  `;
 }
 
 
