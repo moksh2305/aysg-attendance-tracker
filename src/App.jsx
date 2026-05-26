@@ -2572,6 +2572,24 @@ function buildReportHtml({ template, data, options }) {
 
   peopleList.sort((a, b) => a.name.localeCompare(b.name));
 
+  let mostActiveMember = "N/A";
+  let maxAttendance = -1;
+
+  if (filteredEvents.length > 0 && peopleList.length > 0) {
+    peopleList.forEach(p => {
+      let presentCount = 0;
+      filteredEvents.forEach(e => {
+        const s = getStatus(p, e.id);
+        if (s.label === "Present" || s.label === "Late") presentCount++;
+      });
+      if (presentCount > maxAttendance) {
+        maxAttendance = presentCount;
+        mostActiveMember = p.name;
+      }
+    });
+    if (maxAttendance === 0) mostActiveMember = "None (0%)";
+  }
+
   let htmlBody = "";
 
   const headerHtml = `
@@ -2586,7 +2604,10 @@ function buildReportHtml({ template, data, options }) {
         <div class="metadata-grid">
           <div class="meta-item"><span class="meta-label">Generated:</span> ${generatedAt}</div>
           <div class="meta-item"><span class="meta-label">Total Events:</span> ${filteredEvents.length}</div>
+          <div class="meta-item"><span class="meta-label">Total Members:</span> ${peopleList.length}</div>
+          <div class="meta-item"><span class="meta-label">Most Active:</span> ${mostActiveMember}</div>
           ${dateRange && dateRange.start ? `<div class="meta-item"><span class="meta-label">Period:</span> ${dateRange.start} to ${dateRange.end || 'Now'}</div>` : ''}
+          <div class="meta-item"><span class="meta-label">Prepared By:</span> System</div>
         </div>
       </div>
     </header>
@@ -2789,7 +2810,7 @@ function buildReportHtml({ template, data, options }) {
         
         .metadata-grid {
           display: grid;
-          grid-template-columns: repeat(2, 1fr);
+          grid-template-columns: repeat(3, 1fr);
           gap: 8px 24px;
           font-size: 12px;
           background: var(--bg-light);
