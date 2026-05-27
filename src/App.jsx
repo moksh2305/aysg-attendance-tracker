@@ -2681,7 +2681,7 @@ function buildReportHtml({ template, data, options }) {
             const eventHtml = filteredEvents.map(e => {
               const s = getStatus(p, e.id);
               if (s.label === "Present" || s.label === "Late") presentCount++;
-              return `<td style="text-align: center; color: ${s.color}; font-weight: bold; font-size: 14px;">${s.icon}</td>`;
+              return `<td style="text-align: center; background: ${s.bg}; color: ${s.color}; font-weight: bold; font-size: 14px;">${s.icon}</td>`;
             }).join("");
             
             const attendancePct = filteredEvents.length > 0 ? Math.round((presentCount / filteredEvents.length) * 100) : 0;
