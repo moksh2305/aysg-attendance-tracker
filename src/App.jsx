@@ -2600,13 +2600,13 @@ function buildReportHtml({ template, data, options }) {
       </div>
       <div class="header-details">
         <h1 class="report-title">AYSG Ghatkopar Attendance Report</h1>
-        <p class="report-subtitle">${TEMPLATES[template].title} &mdash; Detailed Attendance Analytics</p>
+        <p class="report-subtitle">${TEMPLATES[template].title}</p>
         <div class="metadata-grid">
           <div class="meta-item"><span class="meta-label">Generated:</span> ${generatedAt}</div>
           <div class="meta-item"><span class="meta-label">Total Events:</span> ${filteredEvents.length}</div>
           <div class="meta-item"><span class="meta-label">Total Members:</span> ${peopleList.length}</div>
           <div class="meta-item"><span class="meta-label">Most Active:</span> ${mostActiveMember}</div>
-          ${dateRange && dateRange.start ? `<div class="meta-item"><span class="meta-label">Period:</span> ${dateRange.start} to ${dateRange.end || 'Now'}</div>` : ''}
+          ${dateRange && dateRange.start ? `<div class="meta-item"><span class="meta-label">Period:</span> ${dateRange.start.split('-').reverse().join('/')} to ${dateRange.end ? dateRange.end.split('-').reverse().join('/') : 'Now'}</div>` : ''}
         </div>
       </div>
     </header>
