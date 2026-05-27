@@ -1313,7 +1313,12 @@ function Members({ members, setMembers, events, attendance, getMemberStats, show
     }
     setShowForm(false);
   };
-  const deleteMember = (id) => { setMembers(members.filter(m => m.id !== id)); showToast("Member removed", "success"); };
+  const deleteMember = (id) => {
+    if (window.confirm("Are you sure you want to delete this member?")) {
+      setMembers(prev => prev.filter(m => m.id !== id));
+      showToast("Member removed", "success");
+    }
+  };
   const selectedInsights = selectedMember ? memberInsights(selectedMember) : null;
 
   return (
@@ -1546,8 +1551,10 @@ function NewJoinees({ newJoinees, setNewJoinees, showToast, isAdmin }) {
   };
 
   const deleteJoinee = (id) => {
-    setNewJoinees(newJoinees.filter(j => j.id !== id));
-    showToast("New joinee removed", "success");
+    if (window.confirm("Are you sure you want to delete this new joinee?")) {
+      setNewJoinees(prev => prev.filter(j => j.id !== id));
+      showToast("New joinee removed", "success");
+    }
   };
 
   return (
@@ -1579,7 +1586,7 @@ function NewJoinees({ newJoinees, setNewJoinees, showToast, isAdmin }) {
                     <td>
                       <div className="flex gap-2">
                         <button className="btn btn-sm" onClick={() => openEdit(j)}>Edit</button>
-                        <button className="btn btn-sm btn-danger" onClick={() => deleteJoinee(j.id)}>Delete</button>
+                        <button className="btn btn-sm btn-danger" onClick={(e) => { e.stopPropagation(); deleteJoinee(j.id); }}>Delete</button>
                       </div>
                     </td>
                   )}
@@ -1632,7 +1639,12 @@ function Events({ events, setEvents, getEventStats, showToast, isAdmin }) {
     else { setEvents([...events, { ...form, id: genId("E") }]); showToast("Event created", "success"); }
     setShowForm(false);
   };
-  const deleteEvent = (id) => { setEvents(events.filter(e => e.id !== id)); showToast("Event deleted", "success"); };
+  const deleteEvent = (id) => {
+    if (window.confirm("Are you sure you want to delete this event?")) {
+      setEvents(prev => prev.filter(e => e.id !== id));
+      showToast("Event deleted", "success");
+    }
+  };
 
   return (
     <div>
@@ -1655,7 +1667,7 @@ function Events({ events, setEvents, getEventStats, showToast, isAdmin }) {
                     <span className="tag tag-purple" style={{ fontSize: 11 }}>{e.category}</span>                    {isAdmin && (
                       <div className="flex gap-2">
                         <button className="btn btn-sm" style={{ padding: "4px 8px" }} onClick={() => openEdit(e)}>Edit</button>
-                        <button className="btn btn-sm btn-danger" style={{ padding: "4px 8px" }} onClick={() => deleteEvent(e.id)}>Delete</button>
+                        <button className="btn btn-sm btn-danger" style={{ padding: "4px 8px" }} onClick={(e) => { e.stopPropagation(); deleteEvent(e.id); }}>Delete</button>
                       </div>
                     )}
                   </div>
