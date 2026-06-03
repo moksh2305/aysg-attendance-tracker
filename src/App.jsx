@@ -1059,7 +1059,8 @@ export default function App() {
       {view === "TVMode" ? (
         <CinematicTVMode events={events} members={members} attendance={attendance} setView={setView} />
       ) : (
-      <div className={`app ${isAdmin ? "admin-mode" : "view-mode"}`}>
+        <>
+          <div className={`app ${isAdmin ? "admin-mode" : "view-mode"}`}>
         <Sidebar
           view={view}
           setView={setView}
@@ -1116,6 +1117,7 @@ export default function App() {
         getMemberStats={getMemberStats}
         getEventStats={getEventStats}
       />
+      </>
       )}
     </>
   );
