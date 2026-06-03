@@ -2676,15 +2676,15 @@ function buildReportHtml({ template, data, options }) {
       <table class="data-table">
         <thead>
           <tr>
-            <th style="text-align: left; vertical-align: bottom;">Member</th>
-            ${includePhone ? `<th style="text-align: left; vertical-align: bottom;">Phone</th>` : ""}
+            <th style="text-align: center; vertical-align: middle;">Member</th>
+            ${includePhone ? `<th style="text-align: center; vertical-align: middle;">Phone</th>` : ""}
             ${filteredEvents.map(e => `
               <th style="text-align: center; word-break: break-word; overflow-wrap: break-word; vertical-align: bottom;" title="${e.name}">
-                <div style="font-size: 10px; font-weight: 600; margin-bottom: 4px; line-height: 1.3;">${e.name}</div>
+                <div style="font-size: 11px; font-weight: 600; margin-bottom: 4px; line-height: 1.3;">${e.name}</div>
                 <div style="font-size: 10px; opacity: 0.85;">${new Date(e.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</div>
               </th>
             `).join("")}
-            <th style="text-align: center; width: 80px; vertical-align: bottom;">Attendance %</th>
+            <th style="text-align: center; width: 80px; vertical-align: middle;">Attendance %</th>
           </tr>
         </thead>
         <tbody>
