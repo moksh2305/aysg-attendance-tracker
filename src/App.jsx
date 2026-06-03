@@ -3,6 +3,7 @@ import { onAuthStateChanged, signInWithPopup, signOut } from "firebase/auth";
 import { doc, onSnapshot, serverTimestamp, setDoc, collection, addDoc, query, where, deleteDoc } from "firebase/firestore";
 import { QRCodeCanvas } from "qrcode.react";
 import readXlsxFile from "read-excel-file/browser";
+import { LineChart, Line, XAxis, YAxis, Tooltip as RechartsTooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from "recharts";
 import { auth, db, googleProvider } from "./firebase";
 
 const ALLOWED_ADMIN_NAMES = new Set(["moksh", "moksh shah", "dheer sheth"]);
@@ -324,7 +325,7 @@ function normalizeAttendanceStatus(value) {
 
 function isAttendedStatus(value) {
   const status = normalizeAttendanceStatus(value);
-  return status === "present" || status === "late";
+  return status === "present" || status === "late" || status === "going" || value === "going";
 }
 
 function parseBulkNames(text) {
@@ -891,6 +892,25 @@ export default function App() {
     return { total, present, pct: total ? Math.round(present / total * 100) : 0 };
   };
 
+  const getMemberBadges = (member) => {
+    const stats = getMemberStats(member.id);
+    const sortedEvents = [...events].sort((a, b) => new Date(b.date) - new Date(a.date));
+    let streak = 0;
+    for (const event of sortedEvents) {
+      if (isAttendedStatus(attendance[event.id]?.[member.id])) streak += 1;
+      else break;
+    }
+    const today = new Date();
+    const joinedRecently = member.joinDate ? new Date(member.joinDate) >= new Date(today.setDate(today.getDate() - 60)) : false;
+    
+    const badges = [];
+    if (streak >= 3) badges.push({ icon: "🔥", label: "On Fire", tooltip: `Attended ${streak} events in a row` });
+    if (stats.pct === 100 && stats.total >= 3) badges.push({ icon: "🌟", label: "Perfect", tooltip: "100% Attendance (3+ events)" });
+    if (joinedRecently && stats.pct >= 75 && stats.total >= 1) badges.push({ icon: "🚀", label: "Rising Star", tooltip: "New member with great attendance" });
+    if (stats.total >= 10 && stats.pct >= 80) badges.push({ icon: "👑", label: "Veteran", tooltip: "Long-term high attendance" });
+    return badges;
+  };
+
   const getEventStats = (eventId) => {
     const rec = attendance[eventId] || {};
     const newRec = newJoineeAttendance[eventId] || {};
@@ -1147,6 +1167,21 @@ function Dashboard({ members, events, attendance, getEventStats, getMemberStats,
     { label: "Avg Attendance", value: overallPct + "%", icon: "✅", color: "#10d47e", sub: "Recent pulse vs prior events", trend: trend(attendanceTrend, "%") },
     { label: "Last Event", value: lastEventStats ? lastEventStats.present : 0, icon: "🎯", color: "#f0b429", sub: recentEvents[0] ? recentEvents[0].name : "No events yet", trend: trend(lastEventTrend, " present", "Same as prior event") },
   ];
+  const chartEvents = [...events].sort((a, b) => new Date(a.date) - new Date(b.date)).slice(-10);
+  const lineChartData = chartEvents.map(e => {
+    const stats = getEventStats(e.id);
+    return { name: e.name, pct: stats.pct, present: stats.present };
+  });
+
+  const areaCounts = {};
+  active.forEach(m => {
+    const a = m.area || "Other";
+    areaCounts[a] = (areaCounts[a] || 0) + 1;
+  });
+  const pieChartData = Object.entries(areaCounts)
+    .map(([name, value]) => ({ name, value }))
+    .sort((a, b) => b.value - a.value);
+  const pieColors = ["#7c6af8", "#06b6d4", "#10d47e", "#f0b429", "#ec4899", "#8b5cf6", "#3b82f6"];
 
   return (
     <div>
@@ -1185,6 +1220,40 @@ function Dashboard({ members, events, attendance, getEventStats, getMemberStats,
           </div>
         ))}
       </div>
+      
+      {!loading && events.length > 0 && (
+        <div className="grid-2 mb-6">
+          <div className="card" style={{ padding: 24 }}>
+            <h2 className="section-title mb-4">📈 Attendance Trends (Last 10 Events)</h2>
+            <div style={{ height: 260, width: "100%" }}>
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={lineChartData} margin={{ top: 5, right: 10, left: -20, bottom: 5 }}>
+                  <XAxis dataKey="name" tick={{ fontSize: 11, fill: "var(--text2)" }} tickLine={false} axisLine={{ stroke: "var(--border)" }} />
+                  <YAxis tick={{ fontSize: 11, fill: "var(--text2)" }} tickLine={false} axisLine={false} domain={[0, 100]} />
+                  <RechartsTooltip contentStyle={{ background: "var(--bg)", border: "1px solid var(--border)", borderRadius: 8, fontSize: 13 }} itemStyle={{ color: "var(--text)" }} />
+                  <Line type="monotone" dataKey="pct" name="Attendance %" stroke="#7c6af8" strokeWidth={3} dot={{ r: 4, fill: "#7c6af8" }} activeDot={{ r: 6 }} />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+          
+          <div className="card" style={{ padding: 24 }}>
+            <h2 className="section-title mb-4">📍 Members by Area</h2>
+            <div style={{ height: 260, width: "100%" }}>
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie data={pieChartData} cx="50%" cy="50%" innerRadius={60} outerRadius={90} paddingAngle={2} dataKey="value" stroke="none">
+                    {pieChartData.map((entry, index) => <Cell key={`cell-${index}`} fill={pieColors[index % pieColors.length]} />)}
+                  </Pie>
+                  <RechartsTooltip contentStyle={{ background: "var(--bg)", border: "1px solid var(--border)", borderRadius: 8, fontSize: 13 }} />
+                  <Legend verticalAlign="bottom" height={36} wrapperStyle={{ fontSize: 12, paddingTop: 10 }} />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="grid-2">
         <div className="card">
           <div className="flex items-center justify-between mb-4">
@@ -1251,7 +1320,14 @@ function Dashboard({ members, events, attendance, getEventStats, getMemberStats,
                 </div>
                 <Avatar name={m.name} size={32} />
                 <div className="flex-1">
-                  <div style={{ fontSize: 13, fontWeight: 700 }}>{m.name}</div>
+                  <div className="flex items-center gap-1">
+                    <div style={{ fontSize: 13, fontWeight: 700 }}>{m.name}</div>
+                    {getMemberBadges(m).length > 0 && (
+                      <div className="flex gap-1" style={{ marginLeft: 4 }}>
+                        {getMemberBadges(m).map((b, i) => <span key={i} title={b.tooltip} style={{ fontSize: 12, cursor: "help" }}>{b.icon}</span>)}
+                      </div>
+                    )}
+                  </div>
                   <div className="flex gap-2 wrap" style={{ marginTop: 5 }}>
                     <span className="streak-badge">🔥 {streak} streak</span>
                     <span className="tag tag-purple">{s.present}/{s.total} attended</span>
@@ -1260,6 +1336,84 @@ function Dashboard({ members, events, attendance, getEventStats, getMemberStats,
               </div>
             );
           })}
+        </div>
+      </div>
+
+      <div className="grid-2" style={{ marginTop: 24 }}>
+        <div className="card">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="section-title" style={{ margin: 0 }}>🎂 Birthdays This Month</h2>
+          </div>
+          {(() => {
+            const currentMonthNum = today.getMonth();
+            const birthdaysThisMonth = active.filter(m => {
+              if (!m.dob) return false;
+              const dob = new Date(m.dob);
+              return dob.getMonth() === currentMonthNum;
+            }).sort((a, b) => new Date(a.dob).getDate() - new Date(b.dob).getDate());
+
+            return birthdaysThisMonth.length === 0 ? (
+              <EmptyState icon="🎂" msg="No birthdays this month!" />
+            ) : (
+              birthdaysThisMonth.map(m => {
+                const d = new Date(m.dob);
+                const age = today.getFullYear() - d.getFullYear();
+                return (
+                  <div key={m.id} className="member-rank-card">
+                    <div style={{ fontSize: 24, width: 40, textAlign: "center" }}>🎉</div>
+                    <div className="flex-1">
+                      <div style={{ fontSize: 14, fontWeight: 700 }}>{m.name}</div>
+                      <div style={{ fontSize: 12, color: "var(--text2)", marginTop: 2 }}>
+                        Turns {age} on {d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                      </div>
+                    </div>
+                    <button className="btn btn-sm btn-outline">Wish</button>
+                  </div>
+                );
+              })
+            );
+          })()}
+        </div>
+
+        {/* Feature 2: Smart Reminders (Communications) */}
+        <div className="card">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="section-title" style={{ margin: 0 }}>📱 Smart Reminders</h2>
+          </div>
+          {(() => {
+            // Find members who missed the last 3 consecutive events
+            if (sortedEvents.length < 3) return <EmptyState icon="📱" msg="Need at least 3 events for smart reminders." />;
+            const last3Events = sortedEvents.slice(0, 3);
+            const slippingMembers = active.filter(m => {
+              return last3Events.every(e => !isAttendedStatus(attendance[e.id]?.[m.id]));
+            }).slice(0, 5); // Show top 5 to avoid overwhelming
+
+            return slippingMembers.length === 0 ? (
+              <EmptyState icon="✅" msg="Everyone is attending well!" />
+            ) : (
+              <div>
+                <p style={{ fontSize: 13, color: "var(--text2)", marginBottom: 12 }}>These active members missed the last 3 events:</p>
+                {slippingMembers.map(m => {
+                  const msg = encodeURIComponent(`Hi ${m.name.split(' ')[0]}, we missed you at the last few events! Hope everything is okay. Looking forward to seeing you at the next one! 🙏`);
+                  const waUrl = `https://wa.me/${m.mobile?.replace(/\D/g, '') || ''}?text=${msg}`;
+                  return (
+                    <div key={m.id} className="member-rank-card">
+                      <Avatar name={m.name} size={32} />
+                      <div className="flex-1">
+                        <div style={{ fontSize: 13, fontWeight: 700 }}>{m.name}</div>
+                        <div style={{ fontSize: 11, color: "var(--rose)", marginTop: 2 }}>Missed last 3 events</div>
+                      </div>
+                      {m.mobile ? (
+                        <a href={waUrl} target="_blank" rel="noreferrer" className="btn btn-sm btn-primary" style={{ background: "#25D366", borderColor: "#25D366", color: "#fff", textDecoration: "none" }}>WhatsApp</a>
+                      ) : (
+                        <span className="tag tag-gray">No Mobile</span>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            );
+          })()}
         </div>
       </div>
     </div>
@@ -1276,7 +1430,7 @@ function Members({ members, setMembers, newJoinees, setNewJoinees, events, atten
   const [editMember, setEditMember] = useState(null);
   const [deleteConfirmId, setDeleteConfirmId] = useState(null);
   const [showForm, setShowForm] = useState(false);
-  const [form, setForm] = useState({ name: "", mobile: "", area: "", gender: "Male", role: "Member", notes: "", joinDate: "", active: true });
+  const [form, setForm] = useState({ name: "", mobile: "", area: "", gender: "Male", role: "Member", notes: "", joinDate: "", dob: "", active: true });
   const [duplicateReport, setDuplicateReport] = useState(null);
 
   const sortedEvents = [...events].sort((a, b) => new Date(b.date) - new Date(a.date));
@@ -1308,7 +1462,10 @@ function Members({ members, setMembers, newJoinees, setNewJoinees, events, atten
     const missed = history.filter(h => !h.present).length;
     const joinedRecently = m.joinDate ? new Date(m.joinDate) >= daysAgo(60) : false;
     const inactiveByAttendance = stats.total > 0 && !lastAttended;
-    return { stats, history, presentHistory, lastAttended, streak, recentPct, missed, joinedRecently, inactiveByAttendance };
+    
+    const badges = getMemberBadges(m);
+
+    return { stats, history, presentHistory, lastAttended, streak, recentPct, missed, joinedRecently, inactiveByAttendance, badges };
   };
   const performanceBucket = (pct) => pct >= 75 ? "strong" : pct >= 50 ? "steady" : "needs";
   const filtered = members.filter(m => {
@@ -1325,7 +1482,7 @@ function Members({ members, setMembers, newJoinees, setNewJoinees, events, atten
     return matchesSearch && (!filterArea || m.area === filterArea) && matchesPerformance && matchesActivity && matchesJoiner;
   });
 
-  const openAdd = () => { setForm({ name: "", mobile: "", area: "", gender: "Male", role: "Member", notes: "", joinDate: new Date().toISOString().split("T")[0], active: true }); setEditMember(null); setShowForm(true); };
+  const openAdd = () => { setForm({ name: "", mobile: "", area: "", gender: "Male", role: "Member", notes: "", joinDate: new Date().toISOString().split("T")[0], dob: "", active: true }); setEditMember(null); setShowForm(true); };
   const openEdit = (m) => { setForm({ role: "Member", ...m }); setEditMember(m.id); setShowForm(true); };
   const saveMember = () => {
     if (!form.name.trim()) return showToast("Name is required", "error");
@@ -1439,7 +1596,7 @@ function Members({ members, setMembers, newJoinees, setNewJoinees, events, atten
                   const bucket = performanceBucket(s.pct);
                   return (
                     <tr key={m.id} className="member-row" onClick={() => setSelectedMember(m)}>
-                      <td><div className="flex items-center gap-3"><Avatar name={m.name} size={30} /><div><div style={{ fontWeight: 700, fontSize: 13 }}>{m.name}</div><div className="text-xs color-muted">{m.id} · {m.mobile || "No mobile"}</div></div></div></td>
+                      <td><div className="flex items-center gap-3"><Avatar name={m.name} size={30} /><div><div className="flex items-center gap-1"><div style={{ fontWeight: 700, fontSize: 13 }}>{m.name}</div>{insight.badges && insight.badges.length > 0 && <div className="flex gap-1" style={{ marginLeft: 4 }}>{insight.badges.map((b, i) => <span key={i} title={b.tooltip} style={{ cursor: "help" }}>{b.icon}</span>)}</div>}</div><div className="text-xs color-muted">{m.id} · {m.mobile || "No mobile"}</div></div></div></td>
                       <td>
                         <div className="attendance-meter">
                           <div className="attendance-ring" style={{ background: `conic-gradient(${pctColor(s.pct)} ${s.pct * 3.6}deg, var(--bg4) 0deg)` }}><span style={{ color: pctColor(s.pct) }}>{s.pct}%</span></div>
@@ -1558,9 +1715,10 @@ function Members({ members, setMembers, newJoinees, setNewJoinees, events, atten
             </div>
             <div className="grid-2">
               <div className="field"><label>Join Date</label><input className="input" type="date" value={form.joinDate} onChange={e => setForm({ ...form, joinDate: e.target.value })} /></div>
-              <div className="field"><label>Role</label><input className="input" value={form.role || ""} onChange={e => setForm({ ...form, role: e.target.value })} placeholder="Member / Lead / Volunteer" /></div>
+              <div className="field"><label>Date of Birth</label><input className="input" type="date" value={form.dob || ""} onChange={e => setForm({ ...form, dob: e.target.value })} /></div>
             </div>
             <div className="grid-2">
+              <div className="field"><label>Role</label><input className="input" value={form.role || ""} onChange={e => setForm({ ...form, role: e.target.value })} placeholder="Member / Lead / Volunteer" /></div>
               <div className="field"><label>Status</label>
                 <select className="input" value={form.active ? "active" : "inactive"} onChange={e => setForm({ ...form, active: e.target.value === "active" })}>
                   <option value="active">Active</option><option value="inactive">Inactive</option>
@@ -1863,14 +2021,28 @@ function Attendance({ events, members, newJoinees, attendance, setAttendance, ne
   const groupLabel = isNewJoineeGroup ? "New Joinees" : "Members";
   const sortedEvents = [...events].sort((a, b) => new Date(b.date) - new Date(a.date));
   const event = events.find(e => e.id === selEvent);
-  const statusOrder = ["present", "absent", "late", "excused"];
-  const statusMeta = {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const isUpcoming = event ? new Date(event.date) > today : false;
+
+  const statusOrder = isUpcoming ? ["going", "maybe", "not_going", "unanswered"] : ["present", "absent", "late", "excused"];
+  const statusMeta = isUpcoming ? {
+    going: { label: "Going", icon: "✓", color: "#10d47e" },
+    maybe: { label: "Maybe", icon: "?", color: "#f0b429" },
+    not_going: { label: "Not Going", icon: "×", color: "#f43f5e" },
+    unanswered: { label: "Unanswered", icon: "○", color: "#06b6d4" },
+  } : {
     present: { label: "Present", icon: "✓", color: "#10d47e" },
     absent: { label: "Absent", icon: "×", color: "#f43f5e" },
     late: { label: "Late", icon: "⏱", color: "#f0b429" },
     excused: { label: "Excused", icon: "○", color: "#06b6d4" },
   };
-  const statusOf = (personId) => normalizeAttendanceStatus(rec[personId]);
+
+  const statusOf = (personId) => {
+    const val = rec[personId];
+    if (isUpcoming) return val || "unanswered";
+    return normalizeAttendanceStatus(val);
+  };
   const pctColor = (value) => value >= 75 ? "var(--emerald)" : value >= 50 ? "var(--gold)" : "var(--rose)";
   const areas = isNewJoineeGroup ? [] : [...new Set(members.map(m => m.area).filter(Boolean))];
   const personHistory = (personId) => sortedEvents.map(e => ({
