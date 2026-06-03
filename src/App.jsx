@@ -1282,6 +1282,7 @@ function Members({ members, setMembers, events, attendance, getMemberStats, show
   const [filterJoiner, setFilterJoiner] = useState("");
   const [selectedMember, setSelectedMember] = useState(null);
   const [editMember, setEditMember] = useState(null);
+  const [deleteConfirmId, setDeleteConfirmId] = useState(null);
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState({ name: "", mobile: "", area: "", gender: "Male", role: "Member", notes: "", joinDate: "", active: true });
 
@@ -1345,10 +1346,9 @@ function Members({ members, setMembers, events, attendance, getMemberStats, show
     setShowForm(false);
   };
   const deleteMember = (id) => {
-    if (window.confirm("Are you sure you want to delete this member?")) {
-      setMembers(prev => prev.filter(m => m.id !== id));
-      showToast("Member removed", "success");
-    }
+    setMembers(prev => prev.filter(m => m.id !== id));
+    showToast("Member removed", "success");
+    setDeleteConfirmId(null);
   };
   const selectedInsights = selectedMember ? memberInsights(selectedMember) : null;
 
@@ -1420,7 +1420,7 @@ function Members({ members, setMembers, events, attendance, getMemberStats, show
                           <button className="btn btn-sm" onClick={e => { e.stopPropagation(); setSelectedMember(m); }}>Profile</button>
                           <button className="btn btn-sm" onClick={e => { e.stopPropagation(); setSelectedMember(m); setView("Attendance"); }}>History</button>
                           {isAdmin && <button className="btn btn-sm" onClick={e => { e.stopPropagation(); openEdit(m); }}>Edit</button>}
-                          {isAdmin && <button className="btn btn-sm btn-danger" onClick={e => { e.stopPropagation(); deleteMember(m.id); }}>Delete</button>}
+                          {isAdmin && <button className="btn btn-sm btn-danger" onClick={e => { e.stopPropagation(); setDeleteConfirmId(m.id); }}>Delete</button>}
                         </div>
                       </td>
                     </tr>
@@ -1536,6 +1536,18 @@ function Members({ members, setMembers, events, attendance, getMemberStats, show
           </div>
         </div>
       )}
+      {deleteConfirmId && (
+        <div className="modal-bg" onClick={() => setDeleteConfirmId(null)}>
+          <div className="modal">
+            <h2>Delete Member</h2>
+            <p>Are you sure you want to delete this member? This action cannot be undone.</p>
+            <div className="flex gap-3 mt-4">
+              <button className="btn btn-danger flex-1" style={{ justifyContent: "center" }} onClick={() => deleteMember(deleteConfirmId)}>Delete</button>
+              <button className="btn" onClick={() => setDeleteConfirmId(null)}>Cancel</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -1543,6 +1555,7 @@ function Members({ members, setMembers, events, attendance, getMemberStats, show
 function NewJoinees({ newJoinees, setNewJoinees, showToast, isAdmin }) {
   const [search, setSearch] = useState("");
   const [editJoinee, setEditJoinee] = useState(null);
+  const [deleteConfirmId, setDeleteConfirmId] = useState(null);
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState({ name: "", joinDate: "", notes: "", active: true });
 
@@ -1582,10 +1595,9 @@ function NewJoinees({ newJoinees, setNewJoinees, showToast, isAdmin }) {
   };
 
   const deleteJoinee = (id) => {
-    if (window.confirm("Are you sure you want to delete this new joinee?")) {
-      setNewJoinees(prev => prev.filter(j => j.id !== id));
-      showToast("New joinee removed", "success");
-    }
+    setNewJoinees(prev => prev.filter(j => j.id !== id));
+    showToast("New joinee removed", "success");
+    setDeleteConfirmId(null);
   };
 
   return (
@@ -1617,7 +1629,7 @@ function NewJoinees({ newJoinees, setNewJoinees, showToast, isAdmin }) {
                     <td>
                       <div className="flex gap-2">
                         <button className="btn btn-sm" onClick={() => openEdit(j)}>Edit</button>
-                        <button className="btn btn-sm btn-danger" onClick={(e) => { e.stopPropagation(); deleteJoinee(j.id); }}>Delete</button>
+                        <button className="btn btn-sm btn-danger" onClick={() => setDeleteConfirmId(j.id)}>Delete</button>
                       </div>
                     </td>
                   )}
@@ -1651,6 +1663,18 @@ function NewJoinees({ newJoinees, setNewJoinees, showToast, isAdmin }) {
           </div>
         </div>
       )}
+      {deleteConfirmId && (
+        <div className="modal-bg" onClick={() => setDeleteConfirmId(null)}>
+          <div className="modal">
+            <h2>Delete New Joinee</h2>
+            <p>Are you sure you want to delete this new joinee? This action cannot be undone.</p>
+            <div className="flex gap-3 mt-4">
+              <button className="btn btn-danger flex-1" style={{ justifyContent: "center" }} onClick={() => deleteJoinee(deleteConfirmId)}>Delete</button>
+              <button className="btn" onClick={() => setDeleteConfirmId(null)}>Cancel</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -1658,6 +1682,7 @@ function NewJoinees({ newJoinees, setNewJoinees, showToast, isAdmin }) {
 function Events({ events, setEvents, getEventStats, showToast, isAdmin }) {
   const [showForm, setShowForm] = useState(false);
   const [editEvent, setEditEvent] = useState(null);
+  const [deleteConfirmId, setDeleteConfirmId] = useState(null);
   const [form, setForm] = useState({ name: "", date: "", time: "", venue: "", category: "Religious", notes: "", color: "#7c6af8" });
   const categories = ["Religious", "Social", "Educational", "Cultural", "Other"];
   const colors = ["#7c6af8", "#ec4899", "#14b8a6", "#f59e0b", "#ef4444", "#06b6d4", "#10b981"];
@@ -1671,10 +1696,9 @@ function Events({ events, setEvents, getEventStats, showToast, isAdmin }) {
     setShowForm(false);
   };
   const deleteEvent = (id) => {
-    if (window.confirm("Are you sure you want to delete this event?")) {
-      setEvents(prev => prev.filter(e => e.id !== id));
-      showToast("Event deleted", "success");
-    }
+    setEvents(prev => prev.filter(e => e.id !== id));
+    showToast("Event deleted", "success");
+    setDeleteConfirmId(null);
   };
 
   return (
@@ -1698,7 +1722,7 @@ function Events({ events, setEvents, getEventStats, showToast, isAdmin }) {
                     <span className="tag tag-purple" style={{ fontSize: 11 }}>{e.category}</span>                    {isAdmin && (
                       <div className="flex gap-2">
                         <button className="btn btn-sm" style={{ padding: "4px 8px" }} onClick={() => openEdit(e)}>Edit</button>
-                        <button className="btn btn-sm btn-danger" style={{ padding: "4px 8px" }} onClick={(e) => { e.stopPropagation(); deleteEvent(e.id); }}>Delete</button>
+                        <button className="btn btn-sm btn-danger" style={{ padding: "4px 8px" }} onClick={(evt) => { evt.stopPropagation(); setDeleteConfirmId(e.id); }}>Delete</button>
                       </div>
                     )}
                   </div>
