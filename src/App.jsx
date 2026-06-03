@@ -2679,7 +2679,7 @@ function buildReportHtml({ template, data, options }) {
             <th style="text-align: center; vertical-align: middle;">Member</th>
             ${includePhone ? `<th style="text-align: center; vertical-align: middle;">Phone</th>` : ""}
             ${filteredEvents.map(e => `
-              <th style="word-break: break-word; overflow-wrap: break-word; vertical-align: top; height: 1px; padding: 0;" title="${e.name}">
+              <th style="vertical-align: top; height: 1px; padding: 0;" title="${e.name}">
                 <div style="display: flex; flex-direction: column; justify-content: space-between; align-items: center; height: 100%; padding: 12px 8px; box-sizing: border-box;">
                   <div style="font-size: 11px; font-weight: 600; margin-bottom: 4px; line-height: 1.3; text-align: center;">${e.name}</div>
                   <div style="font-size: 10px; opacity: 0.85; text-align: center;">${new Date(e.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</div>
