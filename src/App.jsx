@@ -190,33 +190,25 @@ function nextMemberId(usedIds) {
 
 function migrateMembers(value) {
   if (!Array.isArray(value)) return INITIAL_MEMBERS;
-  const base = isDemoMemberList(value) ? [] : value;
+  if (value.length === 0 || isDemoMemberList(value)) return INITIAL_MEMBERS;
   
   const usedIds = new Set();
-  const dedupedBase = base.map(member => {
+  const dedupedBase = [];
+  let changed = false;
+  
+  for (const member of value) {
     if (!member.id || usedIds.has(member.id)) {
       const newId = genId("M");
       usedIds.add(newId);
-      return { ...member, id: newId };
+      dedupedBase.push({ ...member, id: newId });
+      changed = true;
+    } else {
+      usedIds.add(member.id);
+      dedupedBase.push(member);
     }
-    usedIds.add(member.id);
-    return member;
-  });
-
-  const names = new Set(dedupedBase.map(member => normalizeName(member.name)));
-  const additions = INITIAL_MEMBERS
-    .filter(member => !names.has(normalizeName(member.name)))
-    .map(member => {
-      let id = member.id;
-      if (usedIds.has(id)) id = genId("M");
-      usedIds.add(id);
-      return { ...member, id };
-    });
-
-  if (dedupedBase.length !== value.length || additions.length > 0 || JSON.stringify(dedupedBase) !== JSON.stringify(base)) {
-    return [...dedupedBase, ...additions];
   }
-  return value;
+
+  return changed ? dedupedBase : value;
 }
 
 function migrateNewJoinees(value) {
@@ -939,7 +931,7 @@ export default function App() {
           />
           <div className="content scroll-area">
             {view === "Dashboard" && <Dashboard members={members} events={events} attendance={attendance} getEventStats={getEventStats} getMemberStats={getMemberStats} setView={setView} isAdmin={isAdmin} />}
-            {view === "Members" && <Members members={members} setMembers={setMembers} events={events} attendance={attendance} getMemberStats={getMemberStats} showToast={showToast} isAdmin={isAdmin} setView={setView} />}
+            {view === "Members" && <Members members={members} setMembers={setMembers} newJoinees={newJoinees} setNewJoinees={setNewJoinees} events={events} attendance={attendance} getMemberStats={getMemberStats} showToast={showToast} isAdmin={isAdmin} setView={setView} />}
             {view === "New Joinees" && <NewJoinees newJoinees={newJoinees} setNewJoinees={setNewJoinees} showToast={showToast} isAdmin={isAdmin} />}
             {view === "Events" && <Events events={events} setEvents={setEvents} getEventStats={getEventStats} showToast={showToast} isAdmin={isAdmin} />}
             {view === "Attendance" && <Attendance events={events} members={members} newJoinees={newJoinees} attendance={attendance} setAttendance={setAttendance} newJoineeAttendance={newJoineeAttendance} setNewJoineeAttendance={setNewJoineeAttendance} setNewJoinees={setNewJoinees} showToast={showToast} isAdmin={isAdmin} />}
@@ -1274,7 +1266,7 @@ function Dashboard({ members, events, attendance, getEventStats, getMemberStats,
   );
 }
 
-function Members({ members, setMembers, events, attendance, getMemberStats, showToast, isAdmin, setView }) {
+function Members({ members, setMembers, newJoinees, setNewJoinees, events, attendance, getMemberStats, showToast, isAdmin, setView }) {
   const [search, setSearch] = useState("");
   const [filterArea, setFilterArea] = useState("");
   const [filterPerformance, setFilterPerformance] = useState("");
@@ -1350,6 +1342,46 @@ function Members({ members, setMembers, events, attendance, getMemberStats, show
     showToast("Member removed", "success");
     setDeleteConfirmId(null);
   };
+  
+  const cleanAllDuplicates = () => {
+    if (!window.confirm("Are you sure you want to run the automatic deduplication tool? This will remove all duplicate members and joinees with the exact same name. Make sure you haven't made changes in other tabs first.")) return;
+    
+    let removedCount = 0;
+    const uniqueNames = new Set();
+    const cleanMembers = [];
+    
+    for (const m of members) {
+      const norm = normalizeName(m.name);
+      if (uniqueNames.has(norm)) {
+        removedCount++;
+      } else {
+        uniqueNames.add(norm);
+        cleanMembers.push(m);
+      }
+    }
+    
+    const uniqueJoineeNames = new Set();
+    const cleanJoinees = [];
+    for (const j of newJoinees) {
+      const norm = normalizeName(j.name);
+      // If they are in members, we also remove them from new joinees!
+      if (uniqueNames.has(norm) || uniqueJoineeNames.has(norm)) {
+        removedCount++;
+      } else {
+        uniqueJoineeNames.add(norm);
+        cleanJoinees.push(j);
+      }
+    }
+    
+    if (removedCount > 0) {
+      setMembers(cleanMembers);
+      setNewJoinees(cleanJoinees);
+      showToast(`Automatically removed ${removedCount} duplicates!`, "success");
+    } else {
+      showToast("No duplicates found!", "info");
+    }
+  };
+
   const selectedInsights = selectedMember ? memberInsights(selectedMember) : null;
 
   return (
@@ -1359,7 +1391,10 @@ function Members({ members, setMembers, events, attendance, getMemberStats, show
           <h1 className="page-title">Members</h1>
           <p className="color-muted text-sm" style={{ marginTop: 4 }}>{members.filter(m => m.active).length} active · {members.filter(m => !m.active).length} inactive</p>
         </div>
-        {isAdmin && <button className="btn btn-primary" onClick={openAdd}>+ Add Member</button>}
+        <div className="flex items-center gap-2">
+          {isAdmin && <button className="btn btn-outline" onClick={cleanAllDuplicates}>Clean Duplicates</button>}
+          {isAdmin && <button className="btn btn-primary" onClick={openAdd}>+ Add Member</button>}
+        </div>
       </div>
       <div className="flex gap-3 mb-4 wrap">
         <div className="search-box flex-1" style={{ minWidth: 240 }}>
