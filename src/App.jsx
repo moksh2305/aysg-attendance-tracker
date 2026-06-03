@@ -1088,8 +1088,8 @@ export default function App() {
             authReady={authReady}
           />
           <div className="content scroll-area">
-            {view === "Dashboard" && <Dashboard members={members} events={events} attendance={attendance} getEventStats={getEventStats} getMemberStats={getMemberStats} setView={setView} isAdmin={isAdmin} />}
-            {view === "Members" && <Members members={members} setMembers={setMembers} newJoinees={newJoinees} setNewJoinees={setNewJoinees} events={events} attendance={attendance} getMemberStats={getMemberStats} showToast={showToast} isAdmin={isAdmin} setView={setView} />}
+            {view === "Dashboard" && <Dashboard members={members} events={events} attendance={attendance} getEventStats={getEventStats} getMemberStats={getMemberStats} setView={setView} isAdmin={isAdmin} getMemberBadges={getMemberBadges} />}
+            {view === "Members" && <Members members={members} setMembers={setMembers} newJoinees={newJoinees} setNewJoinees={setNewJoinees} events={events} attendance={attendance} getMemberStats={getMemberStats} showToast={showToast} isAdmin={isAdmin} setView={setView} getMemberBadges={getMemberBadges} />}
             {view === "New Joinees" && <NewJoinees newJoinees={newJoinees} setNewJoinees={setNewJoinees} showToast={showToast} isAdmin={isAdmin} />}
             {view === "Events" && <Events events={events} setEvents={setEvents} getEventStats={getEventStats} showToast={showToast} isAdmin={isAdmin} />}
             {view === "Attendance" && <Attendance events={events} members={members} newJoinees={newJoinees} attendance={attendance} setAttendance={setAttendance} newJoineeAttendance={newJoineeAttendance} setNewJoineeAttendance={setNewJoineeAttendance} setNewJoinees={setNewJoinees} showToast={showToast} isAdmin={isAdmin} />}
@@ -1238,7 +1238,7 @@ function Topbar({ view, setView, members, newJoinees, events, isAdmin, onAdminCl
   );
 }
 
-function Dashboard({ members, events, attendance, getEventStats, getMemberStats, setView, isAdmin }) {
+function Dashboard({ members, events, attendance, getEventStats, getMemberStats, setView, isAdmin, getMemberBadges }) {
   const [loading, setLoading] = useState(true);
   useEffect(() => {
     const timer = setTimeout(() => setLoading(false), 420);
@@ -1564,7 +1564,7 @@ function Dashboard({ members, events, attendance, getEventStats, getMemberStats,
   );
 }
 
-function Members({ members, setMembers, newJoinees, setNewJoinees, events, attendance, getMemberStats, showToast, isAdmin, setView }) {
+function Members({ members, setMembers, newJoinees, setNewJoinees, events, attendance, getMemberStats, showToast, isAdmin, setView, getMemberBadges }) {
   const [search, setSearch] = useState("");
   const [filterArea, setFilterArea] = useState("");
   const [filterPerformance, setFilterPerformance] = useState("");
