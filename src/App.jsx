@@ -161,6 +161,18 @@ const DEMO_ATTENDANCE = {
 const INITIAL_ATTENDANCE = {};
 const passthrough = value => value;
 
+function getDistanceInMeters(lat1, lon1, lat2, lon2) {
+  if (!lat1 || !lon1 || !lat2 || !lon2) return 0;
+  const R = 6371e3;
+  const p1 = lat1 * Math.PI/180;
+  const p2 = lat2 * Math.PI/180;
+  const dp = (lat2-lat1) * Math.PI/180;
+  const dl = (lon2-lon1) * Math.PI/180;
+  const a = Math.sin(dp/2) * Math.sin(dp/2) + Math.cos(p1) * Math.cos(p2) * Math.sin(dl/2) * Math.sin(dl/2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  return R * c;
+}
+
 function stateDoc(key) {
   return doc(db, FIRESTORE_STATE_COLLECTION, key);
 }
@@ -678,10 +690,9 @@ function PublicCheckIn({ event }) {
   const [mobile, setMobile] = useState("");
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [geoError, setGeoError] = useState("");
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!name.trim()) return;
+  const completeSubmit = async () => {
     setLoading(true);
     try {
       await addDoc(collection(db, "pending_checkins"), {
@@ -696,6 +707,38 @@ function PublicCheckIn({ event }) {
       alert("Failed to submit check-in. Please try again.");
     }
     setLoading(false);
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!name.trim()) return;
+
+    if (event.lat && event.lng) {
+      setLoading(true);
+      if (!navigator.geolocation) {
+        setGeoError("Geolocation is not supported by your browser. Cannot verify venue lock.");
+        setLoading(false);
+        return;
+      }
+      navigator.geolocation.getCurrentPosition(
+        async (pos) => {
+          const dist = getDistanceInMeters(event.lat, event.lng, pos.coords.latitude, pos.coords.longitude);
+          if (dist > 300) {
+            setGeoError(`📍 Venue Lock Active: You are ${Math.round(dist)}m away. You must be within 300m of the venue to check in.`);
+            setLoading(false);
+            return;
+          }
+          await completeSubmit();
+        },
+        (err) => {
+          setGeoError("Could not get your location. Please enable location services to check in.");
+          setLoading(false);
+        },
+        { enableHighAccuracy: true }
+      );
+    } else {
+      await completeSubmit();
+    }
   };
 
   if (submitted) {
@@ -721,10 +764,20 @@ function PublicCheckIn({ event }) {
           </div>
           <div>
             <label style={{ display: "block", fontSize: 13, fontWeight: 600, color: "#374151", marginBottom: 4 }}>Mobile Number (Optional)</label>
-            <input type="tel" value={mobile} onChange={e => setMobile(e.target.value)} style={{ width: "100%", padding: "10px 12px", borderRadius: 8, border: "1px solid #d1d5db" }} placeholder="Enter mobile number" />
+            <input type="tel" value={mobile} onChange={e => setMobile(e.target.value)} style={{ width: "100%", padding: "10px 12px", borderRadius: 8, border: "1px solid #d1d5db" }} placeholder="Enter your mobile number" />
           </div>
-          <button disabled={loading} style={{ background: "#7c6af8", color: "white", padding: "12px", borderRadius: 8, fontWeight: 600, border: "none", marginTop: 8, cursor: loading ? "not-allowed" : "pointer" }}>
-            {loading ? "Submitting..." : "Submit Check-In"}
+          {event.lat && event.lng && (
+            <div style={{ background: "#eff6ff", color: "#1d4ed8", padding: "12px", borderRadius: 8, fontSize: 13, display: "flex", gap: 8 }}>
+              <span>📍</span> <span>This event is geo-fenced. You must be within 300m of the venue to check in. Location access will be requested.</span>
+            </div>
+          )}
+          {geoError && (
+            <div style={{ background: "#fef2f2", color: "#b91c1c", padding: "12px", borderRadius: 8, fontSize: 13, fontWeight: 500 }}>
+              {geoError}
+            </div>
+          )}
+          <button type="submit" disabled={loading} style={{ background: "#111827", color: "white", fontWeight: 600, padding: "12px", borderRadius: 8, border: "none", cursor: loading ? "not-allowed" : "pointer", marginTop: 8, transition: "background 0.2s" }}>
+            {loading ? "Verifying..." : "Submit Check-In"}
           </button>
         </form>
       </div>
@@ -2042,11 +2095,11 @@ function Events({ events, setEvents, getEventStats, showToast, isAdmin }) {
   const [showForm, setShowForm] = useState(false);
   const [editEvent, setEditEvent] = useState(null);
   const [deleteConfirmId, setDeleteConfirmId] = useState(null);
-  const [form, setForm] = useState({ name: "", date: "", time: "", venue: "", category: "Religious", notes: "", color: "#7c6af8" });
+  const [form, setForm] = useState({ name: "", date: "", time: "", venue: "", category: "Religious", notes: "", color: "#7c6af8", lat: null, lng: null });
   const categories = ["Religious", "Social", "Educational", "Cultural", "Other"];
   const colors = ["#7c6af8", "#ec4899", "#14b8a6", "#f59e0b", "#ef4444", "#06b6d4", "#10b981"];
 
-  const openAdd = () => { setForm({ name: "", date: new Date().toISOString().split("T")[0], time: "09:00", venue: "", category: "Religious", notes: "", color: "#7c6af8" }); setEditEvent(null); setShowForm(true); };
+  const openAdd = () => { setForm({ name: "", date: new Date().toISOString().split("T")[0], time: "09:00", venue: "", category: "Religious", notes: "", color: "#7c6af8", lat: null, lng: null }); setEditEvent(null); setShowForm(true); };
   const openEdit = (e) => { setForm({ ...e }); setEditEvent(e.id); setShowForm(true); };
   const saveEvent = () => {
     if (!form.name.trim()) return showToast("Event name required", "error");
@@ -2121,6 +2174,23 @@ function Events({ events, setEvents, getEventStats, showToast, isAdmin }) {
               <div className="field"><label>Time</label><input className="input" type="time" value={form.time} onChange={e => setForm({ ...form, time: e.target.value })} /></div>
             </div>
             <div className="field"><label>Venue</label><input className="input" value={form.venue} onChange={e => setForm({ ...form, venue: e.target.value })} placeholder="Location / Venue" /></div>
+            <div className="field">
+              <label>Venue Lock (Geo-Fencing)</label>
+              <div className="flex gap-2">
+                <input className="input flex-1" value={form.lat && form.lng ? `${form.lat.toFixed(5)}, ${form.lng.toFixed(5)}` : "No Coordinates Set"} readOnly placeholder="GPS Coordinates" />
+                <button className="btn btn-secondary" onClick={() => {
+                  if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(
+                      (pos) => setForm({ ...form, lat: pos.coords.latitude, lng: pos.coords.longitude }),
+                      () => alert("Location access denied")
+                    );
+                  } else {
+                    alert("Geolocation is not supported by your browser");
+                  }
+                }}>📍 Get Location</button>
+                {(form.lat || form.lng) && <button className="btn" onClick={() => setForm({ ...form, lat: null, lng: null })}>Clear</button>}
+              </div>
+            </div>
             <div className="grid-2">
               <div className="field"><label>Category</label>
                 <select className="input" value={form.category} onChange={e => setForm({ ...form, category: e.target.value })}>
