@@ -4,6 +4,8 @@ import { doc, onSnapshot, serverTimestamp, setDoc, collection, addDoc, query, wh
 import { QRCodeCanvas } from "qrcode.react";
 import readXlsxFile from "read-excel-file/browser";
 import { LineChart, Line, XAxis, YAxis, Tooltip as RechartsTooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from "recharts";
+import { Canvas, useFrame } from "@react-three/fiber";
+import { OrbitControls, Stars, Html } from "@react-three/drei";
 import { auth, db, googleProvider } from "./firebase";
 
 const ALLOWED_ADMIN_NAMES = new Set(["moksh", "moksh shah", "dheer sheth"]);
@@ -800,6 +802,138 @@ function PendingCheckinsModal({ eventId, members, onClose, onApprove, showToast 
   );
 }
 
+function CinematicTVMode({ events, members, attendance, setView }) {
+  const [time, setTime] = useState(new Date());
+  useEffect(() => {
+    const timer = setInterval(() => setTime(new Date()), 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const activeEvent = [...events].sort((a, b) => new Date(b.date) - new Date(a.date))[0];
+  const rec = activeEvent ? (attendance[activeEvent.id] || {}) : {};
+  const activeMembers = members.filter(m => m.active);
+  const presentMembers = activeMembers.filter(m => normalizeAttendanceStatus(rec[m.id]) === 'present' || normalizeAttendanceStatus(rec[m.id]) === 'late');
+  
+  return (
+    <div style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', background: '#000', color: '#fff', zIndex: 9999, display: 'flex', flexDirection: 'column', overflow: 'hidden', fontFamily: "'Syne', sans-serif" }}>
+      <div style={{ position: 'absolute', top: '-50%', left: '-50%', width: '200%', height: '200%', background: 'radial-gradient(circle at center, #1a1a2e 0%, #000 100%)', zIndex: -1, animation: 'pulse 10s infinite alternate' }} />
+      
+      <div style={{ padding: '40px 60px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(255,255,255,0.03)', backdropFilter: 'blur(20px)', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+        <div>
+          <h1 style={{ fontSize: 48, margin: 0, fontWeight: 800, background: 'linear-gradient(90deg, #fff, #a5b4fc)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>AYSG Live</h1>
+          <p style={{ fontSize: 24, margin: '10px 0 0 0', color: 'rgba(255,255,255,0.6)' }}>{activeEvent?.name || "No Active Event"} &bull; {activeEvent?.venue || ""}</p>
+        </div>
+        <div style={{ textAlign: 'right' }}>
+          <div style={{ fontSize: 64, fontWeight: 800, fontFamily: 'monospace' }}>
+            {time.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
+          </div>
+          <button className="btn btn-outline" style={{ borderColor: 'rgba(255,255,255,0.2)', color: '#fff', marginTop: 10 }} onClick={() => setView('Dashboard')}>Exit TV Mode</button>
+        </div>
+      </div>
+
+      <div style={{ flex: 1, display: 'flex', padding: '60px', gap: '60px' }}>
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '40px' }}>
+          <div style={{ background: 'rgba(255,255,255,0.05)', padding: '40px', borderRadius: '32px', border: '1px solid rgba(255,255,255,0.1)', backdropFilter: 'blur(20px)' }}>
+            <div style={{ fontSize: 24, color: 'rgba(255,255,255,0.6)', textTransform: 'uppercase', letterSpacing: 2, marginBottom: 10 }}>Total Check-ins</div>
+            <div style={{ fontSize: 120, fontWeight: 800, lineHeight: 1, color: '#10d47e' }}>{presentMembers.length}</div>
+            <div style={{ fontSize: 24, color: 'rgba(255,255,255,0.4)', marginTop: 10 }}>out of {activeMembers.length} expected</div>
+          </div>
+          
+          <div style={{ flex: 1, background: 'rgba(255,255,255,0.02)', padding: '40px', borderRadius: '32px', border: '1px solid rgba(255,255,255,0.05)', overflow: 'hidden', position: 'relative' }}>
+             <div style={{ fontSize: 24, color: 'rgba(255,255,255,0.6)', textTransform: 'uppercase', letterSpacing: 2, marginBottom: 30 }}>Present Members</div>
+             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '15px' }}>
+               {presentMembers.map(m => (
+                 <div key={m.id} style={{ background: 'rgba(16, 212, 126, 0.1)', border: '1px solid rgba(16, 212, 126, 0.3)', padding: '12px 24px', borderRadius: '100px', color: '#10d47e', fontSize: 20, fontWeight: 700 }}>
+                   {m.name}
+                 </div>
+               ))}
+               {presentMembers.length === 0 && <div style={{ fontSize: 24, color: 'rgba(255,255,255,0.3)' }}>Waiting for members to arrive...</div>}
+             </div>
+          </div>
+        </div>
+
+        <div style={{ width: '450px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: 'rgba(255,255,255,0.05)', padding: '60px', borderRadius: '40px', border: '1px solid rgba(255,255,255,0.1)', backdropFilter: 'blur(20px)' }}>
+           <h2 style={{ fontSize: 32, fontWeight: 700, marginBottom: 20, textAlign: 'center' }}>Scan to Check-in</h2>
+           <div style={{ background: '#fff', padding: '30px', borderRadius: '32px', boxShadow: '0 20px 50px rgba(0,0,0,0.5)' }}>
+             <QRCodeCanvas value={`${window.location.origin}/?checkin=${activeEvent?.id}`} size={300} level="H" />
+           </div>
+           <p style={{ fontSize: 20, color: 'rgba(255,255,255,0.5)', marginTop: 40, textAlign: 'center' }}>Point your camera at the screen</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function MemberStar({ member, stat, position }) {
+  const meshRef = useRef();
+  const [hovered, setHover] = useState(false);
+  
+  useFrame((state, delta) => {
+    if (meshRef.current) {
+      meshRef.current.rotation.y += delta * 0.2;
+      const scale = 1 + Math.sin(state.clock.elapsedTime * 2 + position[0]) * 0.1 * (stat.pct / 100);
+      meshRef.current.scale.set(scale, scale, scale);
+    }
+  });
+
+  const color = stat.pct >= 75 ? "#10d47e" : stat.pct >= 50 ? "#f0b429" : "#f43f5e";
+  const size = 0.5 + (stat.pct / 100) * 1.5;
+
+  return (
+    <group position={position}>
+      <mesh
+        ref={meshRef}
+        onPointerOver={(e) => { e.stopPropagation(); setHover(true); }}
+        onPointerOut={(e) => { e.stopPropagation(); setHover(false); }}
+      >
+        <sphereGeometry args={[size, 32, 32]} />
+        <meshStandardMaterial color={color} emissive={color} emissiveIntensity={hovered ? 2 : 0.5} roughness={0.2} metalness={0.8} />
+      </mesh>
+      {hovered && (
+        <Html distanceFactor={15}>
+          <div style={{ background: 'rgba(0,0,0,0.8)', padding: '10px 15px', borderRadius: '10px', color: 'white', whiteSpace: 'nowrap', border: `1px solid ${color}`, pointerEvents: 'none', transform: 'translate3d(-50%, -150%, 0)' }}>
+            <div style={{ fontWeight: 'bold', fontSize: 16 }}>{member.name}</div>
+            <div style={{ fontSize: 12, opacity: 0.8 }}>Attendance: {stat.pct}%</div>
+            {stat.streak > 0 && <div style={{ fontSize: 12, color: '#f0b429' }}>🔥 {stat.streak} Streak</div>}
+          </div>
+        </Html>
+      )}
+    </group>
+  );
+}
+
+function GalaxyVisualizer({ members, getMemberStats }) {
+  const activeMembers = members.filter(m => m.active);
+  
+  const starData = activeMembers.map((m, i) => {
+    const stat = getMemberStats(m.id);
+    const angle = i * 0.5;
+    const radius = 5 + (i * 0.3);
+    const x = Math.cos(angle) * radius;
+    const z = Math.sin(angle) * radius;
+    const y = (Math.random() - 0.5) * 4;
+    return { m, stat, position: [x, y, z] };
+  });
+
+  return (
+    <div style={{ width: '100%', height: '500px', background: '#000', borderRadius: '24px', overflow: 'hidden', position: 'relative', marginBottom: '24px', border: '1px solid rgba(255,255,255,0.1)' }}>
+      <div style={{ position: 'absolute', top: 20, left: 20, zIndex: 10, color: '#fff' }}>
+        <h2 style={{ margin: 0, fontSize: 24, fontWeight: 800 }}>🌌 Member Galaxy</h2>
+        <p style={{ opacity: 0.6, margin: '5px 0 0 0', fontSize: 13 }}>Interactive 3D visualization. Stars represent members.</p>
+      </div>
+      <Canvas camera={{ position: [0, 20, 30], fov: 60 }}>
+        <ambientLight intensity={0.5} />
+        <pointLight position={[10, 10, 10]} intensity={1} />
+        <Stars radius={100} depth={50} count={5000} factor={4} saturation={0} fade speed={1} />
+        {starData.map(data => (
+          <MemberStar key={data.m.id} member={data.m} stat={data.stat} position={data.position} />
+        ))}
+        <OrbitControls autoRotate autoRotateSpeed={0.5} enablePan={false} maxDistance={100} minDistance={10} />
+      </Canvas>
+    </div>
+  );
+}
+
 export default function App() {
   const [view, setView] = useState("Dashboard");
   const urlParams = new URLSearchParams(window.location.search);
@@ -922,6 +1056,9 @@ export default function App() {
   return (
     <>
       <style>{css}</style>
+      {view === "TVMode" ? (
+        <CinematicTVMode events={events} members={members} attendance={attendance} setView={setView} />
+      ) : (
       <div className={`app ${isAdmin ? "admin-mode" : "view-mode"}`}>
         <Sidebar
           view={view}
@@ -979,6 +1116,7 @@ export default function App() {
         getMemberStats={getMemberStats}
         getEventStats={getEventStats}
       />
+      )}
     </>
   );
 }
@@ -1196,7 +1334,7 @@ function Dashboard({ members, events, attendance, getEventStats, getMemberStats,
           {[
             { label: "Create Event", detail: "Plan the next activity", icon: "➕", color: "#06b6d4", view: "Events" },
             { label: "Start Attendance", detail: "Mark today or recent event", icon: "✅", color: "#10d47e", view: "Attendance" },
-            { label: "Add Member", detail: "Grow the main group", icon: "👤", color: "#ec4899", view: "Members" },
+            { label: "Live TV Mode", detail: "Cast to a projector", icon: "📺", color: "#8b5cf6", view: "TVMode" },
             { label: "Export Report", detail: "Open PDF exports", icon: "📄", color: "#f0b429", view: "Reports" },
           ].map(a => (
             <button key={a.label} className="quick-action" onClick={() => setView(a.view)}>
@@ -1252,6 +1390,10 @@ function Dashboard({ members, events, attendance, getEventStats, getMemberStats,
             </div>
           </div>
         </div>
+      )}
+
+      {!loading && members.length > 0 && (
+         <GalaxyVisualizer members={members} getMemberStats={getMemberStats} />
       )}
 
       <div className="grid-2">
@@ -2176,6 +2318,64 @@ function Attendance({ events, members, newJoinees, attendance, setAttendance, ne
   }, {});
   const present = counts.present + counts.late;
   const pct = activePeople.length ? Math.round(present / activePeople.length * 100) : 0;
+  
+  const [isListening, setIsListening] = useState(false);
+
+  const startVoiceAttendance = () => {
+    if (!isAdmin || !selEvent) return;
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      showToast("Speech recognition not supported in this browser.", "error");
+      return;
+    }
+    const recognition = new SpeechRecognition();
+    recognition.continuous = false;
+    recognition.interimResults = false;
+    recognition.lang = 'en-US';
+
+    recognition.onstart = () => {
+      setIsListening(true);
+      showToast("Listening... Say e.g., 'Mark Dhruv and Moksh present'", "success");
+    };
+
+    recognition.onresult = (e) => {
+      const transcript = e.results[0][0].transcript.toLowerCase();
+      let statusToSet = "present";
+      if (transcript.includes("absent") || transcript.includes("not coming")) statusToSet = "absent";
+      else if (transcript.includes("late")) statusToSet = "late";
+      else if (transcript.includes("excuse")) statusToSet = "excused";
+
+      let matchCount = 0;
+      const updated = {};
+      
+      activePeople.forEach(p => {
+        const nameParts = p.name.toLowerCase().split(' ').filter(part => part.length > 2);
+        const matches = nameParts.some(part => transcript.includes(part));
+        if (matches) {
+           updated[p.id] = statusToSet;
+           matchCount++;
+        }
+      });
+      
+      if (matchCount > 0) {
+        setStore(prev => ({ ...prev, [selEvent]: { ...(prev[selEvent] || {}), ...updated } }));
+        showToast(`Voice matched ${matchCount} member(s) to ${statusMeta[statusToSet]?.label || statusToSet}`, "success");
+      } else {
+        showToast(`Heard: "${transcript}" but no names matched.`, "error");
+      }
+    };
+
+    recognition.onerror = (e) => {
+      showToast("Voice recognition error: " + e.error, "error");
+      setIsListening(false);
+    };
+    
+    recognition.onend = () => {
+      setIsListening(false);
+    };
+
+    recognition.start();
+  };
 
   return (
     <div>
@@ -2235,6 +2435,13 @@ function Attendance({ events, members, newJoinees, attendance, setAttendance, ne
             <div className="flex gap-3 mb-4 wrap">
               <button className={`btn btn-sm${!isNewJoineeGroup ? " btn-primary" : ""}`} onClick={() => { setGroup("members"); setAreaFilter(""); }}>Members</button>
               <button className={`btn btn-sm${isNewJoineeGroup ? " btn-primary" : ""}`} onClick={() => { setGroup("newJoinees"); setAreaFilter(""); }}>New Joinees</button>
+              
+              {isAdmin && selEvent && (
+                <button className={`btn btn-sm ${isListening ? "btn-danger pulse-anim" : "btn-primary"}`} onClick={startVoiceAttendance} title="AI Voice Attendance">
+                  {isListening ? "🎙 Listening..." : "🎙 AI Voice"}
+                </button>
+              )}
+              
               <div className="search-box flex-1" style={{ minWidth: 220 }}>
                 <input className="input" placeholder={`Search ${groupLabel.toLowerCase()}...`} value={search} onChange={e => setSearch(e.target.value)} />
               </div>
