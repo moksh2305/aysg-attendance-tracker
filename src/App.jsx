@@ -191,18 +191,49 @@ function nextMemberId(usedIds) {
 function migrateMembers(value) {
   if (!Array.isArray(value)) return INITIAL_MEMBERS;
   const base = isDemoMemberList(value) ? [] : value;
-  const names = new Set(base.map(member => normalizeName(member.name)));
-  const usedIds = new Set(base.map(member => member.id));
+  
+  const usedIds = new Set();
+  const dedupedBase = base.map(member => {
+    if (!member.id || usedIds.has(member.id)) {
+      const newId = genId("M");
+      usedIds.add(newId);
+      return { ...member, id: newId };
+    }
+    usedIds.add(member.id);
+    return member;
+  });
+
+  const names = new Set(dedupedBase.map(member => normalizeName(member.name)));
   const additions = INITIAL_MEMBERS
     .filter(member => !names.has(normalizeName(member.name)))
     .map(member => {
-      const id = usedIds.has(member.id) ? nextMemberId(usedIds) : member.id;
+      let id = member.id;
+      if (usedIds.has(id)) id = genId("M");
       usedIds.add(id);
       return { ...member, id };
     });
 
-  if (base.length !== value.length || additions.length > 0) return [...base, ...additions];
+  if (dedupedBase.length !== value.length || additions.length > 0 || JSON.stringify(dedupedBase) !== JSON.stringify(base)) {
+    return [...dedupedBase, ...additions];
+  }
   return value;
+}
+
+function migrateNewJoinees(value) {
+  if (!Array.isArray(value)) return INITIAL_NEW_JOINEES;
+  const usedIds = new Set();
+  let changed = false;
+  const deduped = value.map(joinee => {
+    if (!joinee.id || usedIds.has(joinee.id)) {
+      changed = true;
+      const newId = genId("N");
+      usedIds.add(newId);
+      return { ...joinee, id: newId };
+    }
+    usedIds.add(joinee.id);
+    return joinee;
+  });
+  return changed ? deduped : value;
 }
 
 function migrateAttendance(value) {
@@ -289,7 +320,7 @@ function useSyncedStorage(key, initial, migrate = passthrough) {
   return [val, setVal];
 }
 
-function genId(prefix) { return prefix + Date.now().toString(36).toUpperCase(); }
+function genId(prefix) { return prefix + Date.now().toString(36).toUpperCase() + Math.random().toString(36).substring(2, 6).toUpperCase(); }
 
 function fmtDate(d) { return d ? new Date(d).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" }) : ""; }
 
@@ -802,7 +833,7 @@ export default function App() {
     }
   }, [darkMode]);
   const [members, setMembers] = useSyncedStorage(PERSISTED_DATA_KEYS.members, INITIAL_MEMBERS, migrateMembers);
-  const [newJoinees, setNewJoinees] = useSyncedStorage(PERSISTED_DATA_KEYS.newJoinees, INITIAL_NEW_JOINEES);
+  const [newJoinees, setNewJoinees] = useSyncedStorage(PERSISTED_DATA_KEYS.newJoinees, INITIAL_NEW_JOINEES, migrateNewJoinees);
   const [events, setEvents] = useSyncedStorage(PERSISTED_DATA_KEYS.events, INITIAL_EVENTS);
   const [attendance, setAttendance] = useSyncedStorage(PERSISTED_DATA_KEYS.attendance, INITIAL_ATTENDANCE, migrateAttendance);
   const [newJoineeAttendance, setNewJoineeAttendance] = useSyncedStorage(PERSISTED_DATA_KEYS.newJoineeAttendance, INITIAL_ATTENDANCE);
