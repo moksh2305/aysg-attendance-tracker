@@ -1277,6 +1277,7 @@ function Members({ members, setMembers, newJoinees, setNewJoinees, events, atten
   const [deleteConfirmId, setDeleteConfirmId] = useState(null);
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState({ name: "", mobile: "", area: "", gender: "Male", role: "Member", notes: "", joinDate: "", active: true });
+  const [duplicateReport, setDuplicateReport] = useState(null);
 
   const sortedEvents = [...events].sort((a, b) => new Date(b.date) - new Date(a.date));
   const today = new Date();
@@ -1347,6 +1348,7 @@ function Members({ members, setMembers, newJoinees, setNewJoinees, events, atten
     if (!window.confirm("Are you sure you want to run the automatic deduplication tool? This will remove all duplicate members and joinees with the exact same name. Make sure you haven't made changes in other tabs first.")) return;
     
     let removedCount = 0;
+    const removedNames = [];
     const uniqueNames = new Set();
     const cleanMembers = [];
     
@@ -1354,6 +1356,7 @@ function Members({ members, setMembers, newJoinees, setNewJoinees, events, atten
       const norm = normalizeName(m.name);
       if (uniqueNames.has(norm)) {
         removedCount++;
+        removedNames.push(m.name + " (Member)");
       } else {
         uniqueNames.add(norm);
         cleanMembers.push(m);
@@ -1367,6 +1370,7 @@ function Members({ members, setMembers, newJoinees, setNewJoinees, events, atten
       // If they are in members, we also remove them from new joinees!
       if (uniqueNames.has(norm) || uniqueJoineeNames.has(norm)) {
         removedCount++;
+        removedNames.push(j.name + " (New Joinee)");
       } else {
         uniqueJoineeNames.add(norm);
         cleanJoinees.push(j);
@@ -1376,7 +1380,7 @@ function Members({ members, setMembers, newJoinees, setNewJoinees, events, atten
     if (removedCount > 0) {
       setMembers(cleanMembers);
       setNewJoinees(cleanJoinees);
-      showToast(`Automatically removed ${removedCount} duplicates!`, "success");
+      setDuplicateReport(removedNames);
     } else {
       showToast("No duplicates found!", "info");
     }
@@ -1579,6 +1583,24 @@ function Members({ members, setMembers, newJoinees, setNewJoinees, events, atten
             <div className="flex gap-3 mt-4">
               <button className="btn btn-danger flex-1" style={{ justifyContent: "center" }} onClick={() => deleteMember(deleteConfirmId)}>Delete</button>
               <button className="btn" onClick={() => setDeleteConfirmId(null)}>Cancel</button>
+            </div>
+          </div>
+        </div>
+      )}
+      {duplicateReport && (
+        <div className="modal-bg" onClick={() => setDuplicateReport(null)}>
+          <div className="modal" style={{ maxWidth: 500 }} onClick={e => e.stopPropagation()}>
+            <h2>Duplicates Removed</h2>
+            <p className="mb-4" style={{ color: "var(--text)" }}>Successfully removed {duplicateReport.length} duplicate entries from the database.</p>
+            <div className="scroll-area" style={{ maxHeight: 300, background: "var(--bg-alt)", padding: "10px", borderRadius: "8px", border: "1px solid var(--border)" }}>
+              <ul style={{ margin: 0, paddingLeft: "20px", fontSize: "14px", color: "var(--text-muted)" }}>
+                {duplicateReport.map((name, i) => (
+                  <li key={i} style={{ marginBottom: 4 }}>{name}</li>
+                ))}
+              </ul>
+            </div>
+            <div className="mt-4 flex justify-end">
+              <button className="btn btn-primary" onClick={() => setDuplicateReport(null)}>Done</button>
             </div>
           </div>
         </div>
