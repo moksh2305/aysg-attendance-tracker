@@ -2182,7 +2182,8 @@ function Events({ events, setEvents, getEventStats, showToast, isAdmin }) {
                   if (navigator.geolocation) {
                     navigator.geolocation.getCurrentPosition(
                       (pos) => setForm({ ...form, lat: pos.coords.latitude, lng: pos.coords.longitude }),
-                      () => alert("Location access denied")
+                      (err) => alert("Location access denied or unavailable: " + err.message),
+                      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
                     );
                   } else {
                     alert("Geolocation is not supported by your browser");
