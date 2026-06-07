@@ -2214,8 +2214,10 @@ function Attendance({ events, members, newJoinees, attendance, setAttendance, ne
     if (attendanceEventId) {
       setSelEvent(attendanceEventId);
       setAttendanceEventId(""); // Clear it so it doesn't force override later if they use dropdown
+    } else if (!selEvent && sortedEvents.length > 0) {
+      setSelEvent(sortedEvents[0].id);
     }
-  }, [attendanceEventId, setAttendanceEventId]);
+  }, [attendanceEventId, setAttendanceEventId, selEvent, sortedEvents]);
   
   const [showQR, setShowQR] = useState(false);
   const [showPending, setShowPending] = useState(false);
@@ -2387,7 +2389,7 @@ function Attendance({ events, members, newJoinees, attendance, setAttendance, ne
     acc[status] = activePeople.filter(p => statusOf(p.id) === status).length;
     return acc;
   }, {});
-  const present = counts.present + counts.late;
+  const present = isUpcoming ? (counts.going || 0) : ((counts.present || 0) + (counts.late || 0));
   const pct = activePeople.length ? Math.round(present / activePeople.length * 100) : 0;
   
   const [isListening, setIsListening] = useState(false);
@@ -2489,9 +2491,19 @@ function Attendance({ events, members, newJoinees, attendance, setAttendance, ne
               </div>
               <div style={{ flex: 1 }}>
                 <div className="flex justify-between text-xs color-muted mb-2">
-                  <span>Present/Late: {present}</span>
-                  <span>Absent: {counts.absent}</span>
-                  <span>Excused: {counts.excused}</span>
+                  {isUpcoming ? (
+                    <>
+                      <span>Going: {counts.going || 0}</span>
+                      <span>Not Going: {counts.not_going || 0}</span>
+                      <span>Unanswered: {counts.unanswered || 0}</span>
+                    </>
+                  ) : (
+                    <>
+                      <span>Present/Late: {present}</span>
+                      <span>Absent: {counts.absent || 0}</span>
+                      <span>Excused: {counts.excused || 0}</span>
+                    </>
+                  )}
                 </div>
                 <div className="progress-bar"><div className="progress-fill" style={{ width: pct + "%", background: pctColor(pct) }} /></div>
                 {event && <div className="text-xs color-muted" style={{ marginTop: 8 }}>{event.name} · {fmtDate(event.date)} · {event.venue || "Venue pending"}</div>}
@@ -2562,7 +2574,7 @@ function Attendance({ events, members, newJoinees, attendance, setAttendance, ne
           <div className="attendance-grid">
             {filtered.map(p => {
               const status = statusOf(p.id);
-              const meta = statusMeta[status] || statusMeta.absent;
+              const meta = statusMeta[status] || statusMeta[isUpcoming ? "unanswered" : "absent"];
               const stats = personStats(p);
               const detail = isNewJoineeGroup ? (p.notes || "New joinee") : (p.area || "Member");
               const role = p.role || (isNewJoineeGroup ? "New Joinee" : "Member");
