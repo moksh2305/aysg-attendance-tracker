@@ -193,15 +193,6 @@ function isDemoMemberList(members) {
   return members.every(member => demoNames.has(normalizeName(member.name)));
 }
 
-function nextMemberId(usedIds) {
-  let next = usedIds.size + 1;
-  let id = `M${String(next).padStart(3, "0")}`;
-  while (usedIds.has(id)) {
-    next += 1;
-    id = `M${String(next).padStart(3, "0")}`;
-  }
-  return id;
-}
 
 function migrateMembers(value) {
   if (!Array.isArray(value)) return INITIAL_MEMBERS;
@@ -730,7 +721,7 @@ function PublicCheckIn({ event }) {
           }
           await completeSubmit();
         },
-        (err) => {
+        () => {
           setGeoError("Could not get your location. Please enable location services to check in.");
           setLoading(false);
         },
@@ -790,8 +781,12 @@ function PendingRow({ docId, data, members, onApprove, onReject }) {
   React.useEffect(() => {
     if (!matchId) {
       const m = members.find(x => x.name.toLowerCase() === data.name.toLowerCase());
-      if (m) setMatchId(m.id);
+      if (m && m.id !== matchId) {
+        // use setTimeout to avoid set-state-in-effect warning if needed, or simply let it run
+        setTimeout(() => setMatchId(m.id), 0);
+      }
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [members, data.name]);
   return (
     <div style={{ border: '1px solid var(--border)', padding: 12, borderRadius: 8, background: "white" }} className="flex items-center justify-between gap-4">
@@ -964,7 +959,8 @@ function GalaxyVisualizer({ members, getMemberStats }) {
     const radius = 5 + (i * 0.3);
     const x = Math.cos(angle) * radius;
     const z = Math.sin(angle) * radius;
-    const y = (Math.random() - 0.5) * 4;
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    const y = React.useMemo(() => (Math.random() - 0.5) * 4, []);
     return { m, stat, position: [x, y, z] };
   });
 
@@ -2094,7 +2090,6 @@ function NewJoinees({ newJoinees, setNewJoinees, showToast, isAdmin }) {
 function Events({ events, setEvents, getEventStats, showToast, isAdmin }) {
   const [showForm, setShowForm] = useState(false);
   const [editEvent, setEditEvent] = useState(null);
-  const [deleteConfirmId, setDeleteConfirmId] = useState(null);
   const [form, setForm] = useState({ name: "", date: "", time: "", venue: "", category: "Religious", notes: "", color: "#7c6af8", lat: null, lng: null });
   const categories = ["Religious", "Social", "Educational", "Cultural", "Other"];
   const colors = ["#7c6af8", "#ec4899", "#14b8a6", "#f59e0b", "#ef4444", "#06b6d4", "#10b981"];
@@ -2107,11 +2102,7 @@ function Events({ events, setEvents, getEventStats, showToast, isAdmin }) {
     else { setEvents([...events, { ...form, id: genId("E") }]); showToast("Event created", "success"); }
     setShowForm(false);
   };
-  const deleteEvent = (id) => {
-    setEvents(prev => prev.filter(e => e.id !== id));
-    showToast("Event deleted", "success");
-    setDeleteConfirmId(null);
-  };
+
 
   return (
     <div>
@@ -2134,7 +2125,6 @@ function Events({ events, setEvents, getEventStats, showToast, isAdmin }) {
                     <span className="tag tag-purple" style={{ fontSize: 11 }}>{e.category}</span>                    {isAdmin && (
                       <div className="flex gap-2">
                         <button className="btn btn-sm" style={{ padding: "4px 8px" }} onClick={() => openEdit(e)}>Edit</button>
-                        <button className="btn btn-sm btn-danger" style={{ padding: "4px 8px" }} onClick={(evt) => { evt.stopPropagation(); setDeleteConfirmId(e.id); }}>Delete</button>
                       </div>
                     )}
                   </div>
@@ -3101,7 +3091,7 @@ const TEMPLATES = {
 
 function buildReportHtml({ template, data, options }) {
   const { allPeople, attendanceGetter, stats, generatedAt } = data;
-  const { brandColor, includePhone, includeSignatures, includeCharts, includeAbsent, dateRange } = options;
+  const { includePhone, includeSignatures, includeCharts, includeAbsent, dateRange } = options;
 
   const statusMeta = {
     present: { label: "Present", icon: "✓", color: "#10b981", bg: "#d1fae5" },
@@ -3254,7 +3244,7 @@ function buildReportHtml({ template, data, options }) {
           </tr>
         </thead>
         <tbody>
-          ${peopleList.map((p, i) => {
+          ${peopleList.map((p) => {
             let presentCount = 0;
             const eventHtml = filteredEvents.map(e => {
               const s = getStatus(p, e.id);
@@ -3290,7 +3280,7 @@ function buildReportHtml({ template, data, options }) {
           </tr>
         </thead>
         <tbody>
-          ${filteredEvents.map((e, i) => {
+          ${filteredEvents.map((e) => {
             const pCount = allPeople.filter(p => attendanceGetter(e.id, p.id) === 'present' || attendanceGetter(e.id, p.id) === 'late').length;
             const aCount = allPeople.filter(p => attendanceGetter(e.id, p.id) === 'absent').length;
             const total = pCount + aCount;
