@@ -330,7 +330,7 @@ function normalizeAttendanceStatus(value) {
 
 function isAttendedStatus(value) {
   const status = normalizeAttendanceStatus(value);
-  return status === "present" || status === "late" || status === "going" || value === "going";
+  return status === "present" || status === "late";
 }
 
 function parseBulkNames(text) {
@@ -2236,17 +2236,9 @@ function Attendance({ events, members, newJoinees, attendance, setAttendance, ne
   const rec = store[selEvent] || {};
   const groupLabel = isNewJoineeGroup ? "New Joinees" : "Members";
   const event = events.find(e => e.id === selEvent);
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  const isUpcoming = event ? new Date(event.date) > today : false;
-
-  const statusOrder = isUpcoming ? ["going", "maybe", "not_going", "unanswered"] : ["present", "absent", "late", "excused"];
-  const statusMeta = isUpcoming ? {
-    going: { label: "Going", icon: "✓", color: "#10d47e" },
-    maybe: { label: "Maybe", icon: "?", color: "#f0b429" },
-    not_going: { label: "Not Going", icon: "×", color: "#f43f5e" },
-    unanswered: { label: "Unanswered", icon: "○", color: "#06b6d4" },
-  } : {
+  
+  const statusOrder = ["present", "absent", "late", "excused"];
+  const statusMeta = {
     present: { label: "Present", icon: "✓", color: "#10d47e" },
     absent: { label: "Absent", icon: "×", color: "#f43f5e" },
     late: { label: "Late", icon: "⏱", color: "#f0b429" },
@@ -2255,7 +2247,6 @@ function Attendance({ events, members, newJoinees, attendance, setAttendance, ne
 
   const statusOf = (personId) => {
     const val = rec[personId];
-    if (isUpcoming) return val || "unanswered";
     return normalizeAttendanceStatus(val);
   };
   const pctColor = (value) => value >= 75 ? "var(--emerald)" : value >= 50 ? "var(--gold)" : "var(--rose)";
@@ -2389,7 +2380,7 @@ function Attendance({ events, members, newJoinees, attendance, setAttendance, ne
     acc[status] = activePeople.filter(p => statusOf(p.id) === status).length;
     return acc;
   }, {});
-  const present = isUpcoming ? (counts.going || 0) : ((counts.present || 0) + (counts.late || 0));
+  const present = counts.present + counts.late;
   const pct = activePeople.length ? Math.round(present / activePeople.length * 100) : 0;
   
   const [isListening, setIsListening] = useState(false);
@@ -2491,19 +2482,9 @@ function Attendance({ events, members, newJoinees, attendance, setAttendance, ne
               </div>
               <div style={{ flex: 1 }}>
                 <div className="flex justify-between text-xs color-muted mb-2">
-                  {isUpcoming ? (
-                    <>
-                      <span>Going: {counts.going || 0}</span>
-                      <span>Not Going: {counts.not_going || 0}</span>
-                      <span>Unanswered: {counts.unanswered || 0}</span>
-                    </>
-                  ) : (
-                    <>
-                      <span>Present/Late: {present}</span>
-                      <span>Absent: {counts.absent || 0}</span>
-                      <span>Excused: {counts.excused || 0}</span>
-                    </>
-                  )}
+                  <span>Present/Late: {present}</span>
+                  <span>Absent: {counts.absent}</span>
+                  <span>Excused: {counts.excused}</span>
                 </div>
                 <div className="progress-bar"><div className="progress-fill" style={{ width: pct + "%", background: pctColor(pct) }} /></div>
                 {event && <div className="text-xs color-muted" style={{ marginTop: 8 }}>{event.name} · {fmtDate(event.date)} · {event.venue || "Venue pending"}</div>}
@@ -2574,7 +2555,7 @@ function Attendance({ events, members, newJoinees, attendance, setAttendance, ne
           <div className="attendance-grid">
             {filtered.map(p => {
               const status = statusOf(p.id);
-              const meta = statusMeta[status] || statusMeta[isUpcoming ? "unanswered" : "absent"];
+              const meta = statusMeta[status] || statusMeta.absent;
               const stats = personStats(p);
               const detail = isNewJoineeGroup ? (p.notes || "New joinee") : (p.area || "Member");
               const role = p.role || (isNewJoineeGroup ? "New Joinee" : "Member");
