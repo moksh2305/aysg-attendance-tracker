@@ -985,6 +985,7 @@ function GalaxyVisualizer({ members, getMemberStats }) {
 
 export default function App() {
   const [view, setView] = useState("Dashboard");
+  const [attendanceEventId, setAttendanceEventId] = useState("");
   const urlParams = new URLSearchParams(window.location.search);
   const checkinEventId = urlParams.get("checkin");
   const [darkMode, setDarkMode] = useState(() => {
@@ -1137,11 +1138,11 @@ export default function App() {
             authReady={authReady}
           />
           <div className="content scroll-area">
-            {view === "Dashboard" && <Dashboard members={members} events={events} attendance={attendance} getEventStats={getEventStats} getMemberStats={getMemberStats} setView={setView} isAdmin={isAdmin} getMemberBadges={getMemberBadges} />}
+            {view === "Dashboard" && <Dashboard members={members} events={events} attendance={attendance} getEventStats={getEventStats} getMemberStats={getMemberStats} setView={setView} setAttendanceEventId={setAttendanceEventId} isAdmin={isAdmin} getMemberBadges={getMemberBadges} />}
             {view === "Members" && <Members members={members} setMembers={setMembers} newJoinees={newJoinees} setNewJoinees={setNewJoinees} events={events} attendance={attendance} getMemberStats={getMemberStats} showToast={showToast} isAdmin={isAdmin} setView={setView} getMemberBadges={getMemberBadges} />}
             {view === "New Joinees" && <NewJoinees newJoinees={newJoinees} setNewJoinees={setNewJoinees} showToast={showToast} isAdmin={isAdmin} />}
             {view === "Events" && <Events events={events} setEvents={setEvents} getEventStats={getEventStats} showToast={showToast} isAdmin={isAdmin} />}
-            {view === "Attendance" && <Attendance events={events} members={members} newJoinees={newJoinees} attendance={attendance} setAttendance={setAttendance} newJoineeAttendance={newJoineeAttendance} setNewJoineeAttendance={setNewJoineeAttendance} setNewJoinees={setNewJoinees} showToast={showToast} isAdmin={isAdmin} />}
+            {view === "Attendance" && <Attendance events={events} members={members} newJoinees={newJoinees} attendance={attendance} setAttendance={setAttendance} newJoineeAttendance={newJoineeAttendance} setNewJoineeAttendance={setNewJoineeAttendance} setNewJoinees={setNewJoinees} showToast={showToast} isAdmin={isAdmin} attendanceEventId={attendanceEventId} setAttendanceEventId={setAttendanceEventId} />}
             {view === "Analytics" && <Analytics members={members} newJoinees={newJoinees} events={events} getMemberStats={getMemberStats} attendance={attendance} newJoineeAttendance={newJoineeAttendance} isAdmin={isAdmin} />}
             {view === "Reports" && <Reports members={members} newJoinees={newJoinees} events={events} attendance={attendance} newJoineeAttendance={newJoineeAttendance} getEventStats={getEventStats} showToast={showToast} isAdmin={isAdmin} />}
           </div>
@@ -1287,7 +1288,7 @@ function Topbar({ view, setView, members, newJoinees, events, isAdmin, onAdminCl
   );
 }
 
-function Dashboard({ members, events, attendance, getEventStats, getMemberStats, setView, isAdmin, getMemberBadges }) {
+function Dashboard({ members, events, attendance, getEventStats, getMemberStats, setView, setAttendanceEventId, isAdmin, getMemberBadges }) {
   const [loading, setLoading] = useState(true);
   useEffect(() => {
     const timer = setTimeout(() => setLoading(false), 420);
@@ -1479,7 +1480,7 @@ function Dashboard({ members, events, attendance, getEventStats, getMemberStats,
                   <div style={{ fontSize: 11, color: "var(--text2)" }}>{s.present}/{s.total}</div>
                 </div>
                 <div className="event-actions">
-                  <button className="btn btn-sm" onClick={() => setView("Attendance")}>Mark</button>
+                  <button className="btn btn-sm" onClick={() => { setAttendanceEventId(e.id); setView("Attendance"); }}>Mark</button>
                   <button className="btn btn-sm" onClick={() => setView("Reports")}>PDF</button>
                 </div>
               </div>
@@ -2206,8 +2207,16 @@ function Events({ events, setEvents, getEventStats, showToast, isAdmin }) {
   );
 }
 
-function Attendance({ events, members, newJoinees, attendance, setAttendance, newJoineeAttendance, setNewJoineeAttendance, setNewJoinees, showToast, isAdmin }) {
-  const [selEvent, setSelEvent] = useState(events[0]?.id || "");
+function Attendance({ events, members, newJoinees, attendance, setAttendance, newJoineeAttendance, setNewJoineeAttendance, setNewJoinees, showToast, isAdmin, attendanceEventId, setAttendanceEventId }) {
+  const sortedEvents = [...events].sort((a, b) => new Date(b.date) - new Date(a.date));
+  const [selEvent, setSelEvent] = useState(attendanceEventId || sortedEvents[0]?.id || "");
+  useEffect(() => {
+    if (attendanceEventId) {
+      setSelEvent(attendanceEventId);
+      setAttendanceEventId(""); // Clear it so it doesn't force override later if they use dropdown
+    }
+  }, [attendanceEventId, setAttendanceEventId]);
+  
   const [showQR, setShowQR] = useState(false);
   const [showPending, setShowPending] = useState(false);
   const [search, setSearch] = useState("");
@@ -2224,7 +2233,6 @@ function Attendance({ events, members, newJoinees, attendance, setAttendance, ne
   const setStore = isNewJoineeGroup ? setNewJoineeAttendance : setAttendance;
   const rec = store[selEvent] || {};
   const groupLabel = isNewJoineeGroup ? "New Joinees" : "Members";
-  const sortedEvents = [...events].sort((a, b) => new Date(b.date) - new Date(a.date));
   const event = events.find(e => e.id === selEvent);
   const today = new Date();
   today.setHours(0, 0, 0, 0);
