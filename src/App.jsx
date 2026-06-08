@@ -3592,23 +3592,36 @@ function Reports({ members, newJoinees, events, attendance, newJoineeAttendance,
   }, [previewHtml, zoom]);
 
   const handleExport = () => {
+    // Open immediately to bypass mobile popup blockers
+    const win = window.open("", "_blank");
+    if (!win) {
+      alert("Please allow pop-ups to generate the PDF on your device.");
+      return;
+    }
+
     setIsExporting(true);
     setExportStep(1); // Generating PDF
 
+    // Inject a script that prints after images load
+    const printScript = `
+      <script>
+        window.onload = function() {
+          setTimeout(function() { window.print(); }, 500);
+        };
+      </script>
+    `;
+
+    win.document.open();
+    win.document.write(previewHtml + printScript);
+    win.document.close();
+    win.focus();
+
     setTimeout(() => {
       setExportStep(2); // Finalizing
-
       setTimeout(() => {
-        const win = window.open("", "_blank");
-        win.document.write(previewHtml);
-        win.document.close();
-        win.focus();
-        setTimeout(() => {
-          win.print();
-          setIsExporting(false);
-          setExportStep(3); // Done
-          setTimeout(() => setExportStep(0), 3000);
-        }, 500);
+        setIsExporting(false);
+        setExportStep(3); // Done
+        setTimeout(() => setExportStep(0), 3000);
       }, 1000);
     }, 1500);
   };
