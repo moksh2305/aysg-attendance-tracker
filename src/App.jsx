@@ -3181,7 +3181,6 @@ function buildReportHtml({ template, data, options }) {
         <h1 class="report-title">AYSG Ghatkopar Attendance Report</h1>
         <p class="report-subtitle">${TEMPLATES[template].title}</p>
         <div class="metadata-grid">
-          <div class="meta-item"><span class="meta-label">Generated:</span> ${generatedAt}</div>
           <div class="meta-item"><span class="meta-label">Total Events:</span> ${filteredEvents.length}</div>
           <div class="meta-item"><span class="meta-label">Total Members:</span> ${peopleList.length}</div>
           <div class="meta-item"><span class="meta-label">Most Active:</span> ${mostActiveMember}</div>
