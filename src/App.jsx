@@ -2212,9 +2212,12 @@ function Attendance({ events, members, newJoinees, attendance, setAttendance, ne
   const [selEvent, setSelEvent] = useState(attendanceEventId || sortedEvents[0]?.id || "");
   useEffect(() => {
     if (attendanceEventId) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setSelEvent(attendanceEventId);
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setAttendanceEventId(""); // Clear it so it doesn't force override later if they use dropdown
     } else if (!selEvent && sortedEvents.length > 0) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setSelEvent(sortedEvents[0].id);
     }
   }, [attendanceEventId, setAttendanceEventId, selEvent, sortedEvents]);
@@ -3137,8 +3140,6 @@ function buildReportHtml({ template, data, options }) {
     });
   }
 
-  peopleList.sort((a, b) => a.name.localeCompare(b.name));
-
   let mostActiveMember = "N/A";
   let maxAttendance = -1;
 
@@ -3149,12 +3150,23 @@ function buildReportHtml({ template, data, options }) {
         const s = getStatus(p, e.id);
         if (s.label === "Present" || s.label === "Late") presentCount++;
       });
+      p._sortCount = presentCount;
       if (presentCount > maxAttendance) {
         maxAttendance = presentCount;
         mostActiveMember = p.name;
       }
     });
     if (maxAttendance === 0) mostActiveMember = "None (0%)";
+
+    // Sort by most attended person to least attended
+    peopleList.sort((a, b) => {
+      if (b._sortCount !== a._sortCount) {
+        return b._sortCount - a._sortCount;
+      }
+      return a.name.localeCompare(b.name);
+    });
+  } else {
+    peopleList.sort((a, b) => a.name.localeCompare(b.name));
   }
 
   let htmlBody = "";
