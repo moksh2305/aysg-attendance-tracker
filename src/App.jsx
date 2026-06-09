@@ -1928,6 +1928,41 @@ function Dashboard({ members, events, attendance, getEventStats, getMemberStats,
     </div>
   );
 }
+const IDCardModal = ({ member, onClose }) => {
+  if (!member) return null;
+  return (
+    <AnimatedModal isOpen={true} onClose={onClose} maxWidth={360} style={{ padding: 0, background: 'transparent', boxShadow: 'none' }}>
+      <div style={{ background: 'var(--bg2)', borderRadius: 16, overflow: 'hidden', border: '1px solid var(--border)', position: 'relative' }}>
+        <div style={{ height: 110, background: 'linear-gradient(135deg, var(--accent), var(--accent2))', display: 'flex', alignItems: 'flex-start', justifyContent: 'center', paddingTop: 20 }}>
+          <h2 style={{ color: 'white', fontWeight: 800, letterSpacing: 2, fontSize: 24, margin: 0, textShadow: "0 2px 10px rgba(0,0,0,0.2)" }}>AYSG</h2>
+        </div>
+        <div style={{ padding: "0 24px 24px 24px", textAlign: 'center', position: 'relative' }}>
+          <div style={{ width: 84, height: 84, borderRadius: '50%', background: 'var(--bg)', border: '4px solid var(--bg2)', position: 'absolute', top: -42, left: '50%', transform: 'translateX(-50%)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}>
+            <Avatar name={member.name} size={76} />
+          </div>
+          <div style={{ marginTop: 54 }}>
+            <h3 style={{ fontSize: 22, fontWeight: 700, margin: '0 0 4px 0', color: 'var(--text)' }}>{member.name}</h3>
+            <p style={{ color: 'var(--accent)', fontWeight: 600, fontSize: 12, margin: '0 0 20px 0', textTransform: 'uppercase', letterSpacing: 1 }}>{member.role || 'Volunteer'}</p>
+            
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, background: 'var(--bg)', padding: 16, borderRadius: 12, textAlign: 'left', border: "1px solid var(--border)" }}>
+              <div><span style={{ fontSize: 10, color: 'var(--text2)', textTransform: "uppercase", letterSpacing: 0.5 }}>Mobile</span><div style={{ fontWeight: 600, fontSize: 13, marginTop: 2 }}>{member.mobile || 'N/A'}</div></div>
+              <div><span style={{ fontSize: 10, color: 'var(--text2)', textTransform: "uppercase", letterSpacing: 0.5 }}>Gender</span><div style={{ fontWeight: 600, fontSize: 13, marginTop: 2 }}>{member.gender || 'N/A'}</div></div>
+              <div style={{ gridColumn: '1 / -1' }}><span style={{ fontSize: 10, color: 'var(--text2)', textTransform: "uppercase", letterSpacing: 0.5 }}>Locality</span><div style={{ fontWeight: 600, fontSize: 14, marginTop: 2 }}>{member.area || 'Ghatkopar'}</div></div>
+            </div>
+            
+            <div style={{ display: 'flex', justifyContent: 'center', marginTop: 24 }}>
+              <div style={{ padding: 10, background: 'white', borderRadius: 12, boxShadow: "0 4px 14px rgba(0,0,0,0.1)" }}>
+                <QRCodeCanvas value={`AYSG-${member.id}`} size={110} />
+              </div>
+            </div>
+            <div style={{ marginTop: 12, fontSize: 10, color: 'var(--text2)', fontFamily: 'monospace', letterSpacing: 1 }}>ID: {member.id.substring(0, 12)}...</div>
+          </div>
+        </div>
+        <button className="btn" style={{ position: 'absolute', top: 12, right: 12, background: 'rgba(0,0,0,0.15)', border: 'none', color: 'white', padding: '6px 12px', fontSize: 12, backdropFilter: "blur(4px)" }} onClick={onClose}>Close</button>
+      </div>
+    </AnimatedModal>
+  );
+};
 
 function Members({ members, setMembers, newJoinees, setNewJoinees, events, attendance, getMemberStats, showToast, isAdmin, setView, getMemberBadges }) {
   const [search, setSearch] = useState("");
@@ -1938,6 +1973,7 @@ function Members({ members, setMembers, newJoinees, setNewJoinees, events, atten
   const [selectedMember, setSelectedMember] = useState(null);
   const [editMember, setEditMember] = useState(null);
   const [deleteConfirmId, setDeleteConfirmId] = useState(null);
+  const [showIdCardFor, setShowIdCardFor] = useState(null);
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState({ name: "", mobile: "", area: "", gender: "Male", role: "Member", notes: "", joinDate: "", dob: "", active: true });
   const [duplicateReport, setDuplicateReport] = useState(null);
@@ -2119,7 +2155,13 @@ function Members({ members, setMembers, newJoinees, setNewJoinees, events, atten
                       <td style={{ fontSize: 12.5, color: "var(--text2)" }}>{insight.lastAttended ? <><span style={{ color: "var(--text)" }}>{insight.lastAttended.name}</span><br />{fmtDate(insight.lastAttended.date)}</> : "No attendance yet"}</td>
                       <td><span className="tag tag-purple">{roleOf(m)}</span></td>
                       <td style={{ color: "var(--text2)", fontSize: 12.5 }}>{m.area || "—"}</td>
-                      <td><span className={`tag ${m.active ? "tag-present" : "tag-absent"}`}>{m.active ? "Active" : "Inactive"}</span>{insight.joinedRecently && <span className="tag tag-purple" style={{ marginLeft: 6 }}>New</span>}</td>
+                      <td>
+                        <div className="flex items-center gap-2">
+                          <span className={`tag ${m.active ? "tag-present" : "tag-absent"}`}>{m.active ? "Active" : "Inactive"}</span>
+                          {insight.joinedRecently && <span className="tag tag-purple">New</span>}
+                          <button className="btn btn-sm" style={{ padding: "2px 6px", fontSize: 16, background: "transparent", border: "none" }} onClick={e => { e.stopPropagation(); setShowIdCardFor(m); }} title="Digital ID Card">🪪</button>
+                        </div>
+                      </td>
                       <td>
                         <div className="row-actions">
                           <button className="btn btn-sm" onClick={e => { e.stopPropagation(); setSelectedMember(m); }}>Profile</button>
@@ -2254,6 +2296,7 @@ function Members({ members, setMembers, newJoinees, setNewJoinees, events, atten
           <button className="btn btn-primary" onClick={() => setDuplicateReport(null)}>Done</button>
         </div>
       </AnimatedModal>
+      {showIdCardFor && <IDCardModal member={showIdCardFor} onClose={() => setShowIdCardFor(null)} />}
     </div>
   );
 }
@@ -2264,6 +2307,7 @@ function NewJoinees({ newJoinees, setNewJoinees, showToast, isAdmin }) {
   const [deleteConfirmId, setDeleteConfirmId] = useState(null);
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState({ name: "", joinDate: "", notes: "", active: true });
+  const [showIdCardFor, setShowIdCardFor] = useState(null);
 
   const filtered = newJoinees.filter(j =>
     !search ||
@@ -2331,7 +2375,12 @@ function NewJoinees({ newJoinees, setNewJoinees, showToast, isAdmin }) {
                   <td><span className="tag tag-purple">{j.id}</span></td>
                   <td style={{ fontSize: 12.5, color: "var(--text2)" }}>{fmtDate(j.joinDate)}</td>
                   <td style={{ fontSize: 13, color: "var(--text2)" }}>{j.notes}</td>
-                  <td><span className={`tag ${j.active ? "tag-present" : "tag-absent"}`}>{j.active ? "Active" : "Inactive"}</span></td>                  {isAdmin && (
+                  <td>
+                    <div className="flex items-center gap-2">
+                      <span className={`tag ${j.active ? "tag-present" : "tag-absent"}`}>{j.active ? "Active" : "Inactive"}</span>
+                      <button className="btn btn-sm" style={{ padding: "2px 6px", fontSize: 16, background: "transparent", border: "none" }} onClick={() => setShowIdCardFor(j)} title="Digital ID Card">🪪</button>
+                    </div>
+                  </td>                  {isAdmin && (
                     <td>
                       <div className="flex gap-2">
                         <button className="btn btn-sm" onClick={() => openEdit(j)}>Edit</button>
@@ -2373,6 +2422,7 @@ function NewJoinees({ newJoinees, setNewJoinees, showToast, isAdmin }) {
           <button className="btn" onClick={() => setDeleteConfirmId(null)}>Cancel</button>
         </div>
       </AnimatedModal>
+      {showIdCardFor && <IDCardModal member={showIdCardFor} onClose={() => setShowIdCardFor(null)} />}
     </div>
   );
 }
