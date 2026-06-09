@@ -259,14 +259,21 @@ function migrateMembers(value) {
   let changed = false;
   
   for (const member of value) {
-    if (!member.id || usedIds.has(member.id)) {
+    let m = { ...member };
+    // Inject phone number if it exists in our mapping and is currently empty
+    if (!m.mobile && PHONES[m.name]) {
+      m.mobile = PHONES[m.name];
+      changed = true;
+    }
+    
+    if (!m.id || usedIds.has(m.id)) {
       const newId = genId("M");
       usedIds.add(newId);
-      dedupedBase.push({ ...member, id: newId });
+      dedupedBase.push({ ...m, id: newId });
       changed = true;
     } else {
-      usedIds.add(member.id);
-      dedupedBase.push(member);
+      usedIds.add(m.id);
+      dedupedBase.push(m);
     }
   }
 
@@ -278,14 +285,21 @@ function migrateNewJoinees(value) {
   const usedIds = new Set();
   let changed = false;
   const deduped = value.map(joinee => {
-    if (!joinee.id || usedIds.has(joinee.id)) {
+    let j = { ...joinee };
+    // Inject phone number if it exists in our mapping and is currently empty
+    if (!j.mobile && PHONES[j.name]) {
+      j.mobile = PHONES[j.name];
+      changed = true;
+    }
+
+    if (!j.id || usedIds.has(j.id)) {
       changed = true;
       const newId = genId("N");
       usedIds.add(newId);
-      return { ...joinee, id: newId };
+      return { ...j, id: newId };
     }
-    usedIds.add(joinee.id);
-    return joinee;
+    usedIds.add(j.id);
+    return j;
   });
   return changed ? deduped : value;
 }
