@@ -4132,12 +4132,25 @@ async function answerAttendanceQuestionWithGemini(question, data, apiKey) {
   
   try {
     const ai = new GoogleGenAI({ apiKey });
-    
-    // Create compact context payload
+    // Create complete context payload with individual data and specific event history
     const contextData = {
-      members: data.members.map(m => ({ id: m.id, name: m.name, active: m.active, stats: data.getMemberStats(m.id) })),
-      newJoinees: data.newJoinees.map(m => ({ id: m.id, name: m.name, active: m.active })),
-      events: data.events.map(e => ({ id: e.id, name: e.name, date: e.date, stats: data.getEventStats(e.id) })),
+      members: data.members.map(m => {
+        const history = data.events.map(e => ({
+          eventName: e.name,
+          date: e.date,
+          status: data.attendance[e.id]?.[m.id] || "none"
+        }));
+        return { ...m, stats: data.getMemberStats(m.id), attendanceHistory: history };
+      }),
+      newJoinees: data.newJoinees.map(m => {
+        const history = data.events.map(e => ({
+          eventName: e.name,
+          date: e.date,
+          status: data.newJoineeAttendance[e.id]?.[m.id] || "none"
+        }));
+        return { ...m, attendanceHistory: history };
+      }),
+      events: data.events.map(e => ({ id: e.id, name: e.name, date: e.date, category: e.category, stats: data.getEventStats(e.id) })),
     };
 
     const prompt = `You are the AYSG Attendance Tracker AI Assistant. You answer questions strictly based on the following JSON data representing members, events, and their attendance statistics.
@@ -4149,7 +4162,8 @@ User Question: ${question}
 Instructions:
 - Be concise, friendly, and helpful.
 - Format lists with clear bullet points.
-- If asking about a specific person, reference their stats.
+- You have access to individual members' data (like area, mobile, notes) and their specific attendance history per event. Use this to answer specific queries.
+- If asking about a specific person, reference their stats and specific events they missed or attended.
 - If you don't know the answer based on the data, explicitly state that you don't have that data.`;
 
     const response = await ai.models.generateContent({
