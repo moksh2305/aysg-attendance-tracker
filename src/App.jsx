@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
 import { onAuthStateChanged, signInWithPopup, signOut } from "firebase/auth";
 import { doc, onSnapshot, serverTimestamp, setDoc, collection, addDoc, query, where, deleteDoc } from "firebase/firestore";
 import { QRCodeCanvas } from "qrcode.react";
@@ -87,8 +88,8 @@ const SpotlightCard = ({ children, className = "", ...props }) => {
 const ParticleBurst = ({ trigger, x, y, color = "#10d47e" }) => {
   if (!trigger) return null;
   const particles = Array.from({ length: 20 });
-  return (
-    <div style={{ position: "fixed", top: y, left: x, pointerEvents: "none", zIndex: 9999 }}>
+  return createPortal(
+    <div style={{ position: "fixed", top: y, left: x, pointerEvents: "none", zIndex: 99999 }}>
       {particles.map((_, i) => {
         const angle = (i / particles.length) * Math.PI * 2;
         const velocity = 60 + Math.random() * 120;
@@ -113,7 +114,8 @@ const ParticleBurst = ({ trigger, x, y, color = "#10d47e" }) => {
           />
         );
       })}
-    </div>
+    </div>,
+    document.body
   );
 };
 
@@ -2829,10 +2831,10 @@ function Attendance({ events, members, newJoinees, attendance, setAttendance, ne
           </motion.div>
           {filtered.length === 0 && <EmptyState icon="🔎" msg="No people match the selected attendance filters" />}
           {isAdmin && (
-            <div style={{ marginTop: 30, marginBottom: 40, textAlign: "right", paddingRight: 10 }}>
+            <div style={{ padding: "40px 20px 60px", textAlign: "right", display: "flex", justifyContent: "flex-end" }}>
               <button 
                 className="btn btn-primary" 
-                style={{ padding: "12px 24px", fontSize: "15px", boxShadow: "0 8px 16px rgba(124, 106, 248, 0.25)" }}
+                style={{ padding: "12px 28px", fontSize: "16px", boxShadow: "0 8px 24px rgba(124, 106, 248, 0.3)" }}
                 onClick={(e) => {
                   setBurst({ x: e.clientX, y: e.clientY, id: Date.now() });
                   setTimeout(() => setBurst(null), 1500);
