@@ -14,6 +14,7 @@ import {
   MapPin, Clock, Phone, AlertCircle, CheckCircle2, ChevronDown, Activity, UserPlus
 } from "lucide-react";
 import { auth, db, googleProvider } from "./firebase";
+import { GoogleGenAI } from "@google/genai";
 
 const AnimatedModal = ({ isOpen, onClose, children, style, className = "modal", maxWidth }) => (
   <AnimatePresence>
@@ -4062,8 +4063,14 @@ function AttendanceAssistant({ members, newJoinees, events, attendance, newJoine
   const [open, setOpen] = useState(false);
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState([
-    { from: "bot", text: "Hi, I can answer questions about attendance, events, members, new joinees, and who needs attention." },
+    { from: "bot", text: "Hi, I'm the AYSG AI Assistant powered by Gemini! I can answer complex questions about attendance, events, members, new joinees, and overall data trends." },
   ]);
+
+  useEffect(() => {
+    if (!localStorage.getItem("gemini_key")) {
+      localStorage.setItem("gemini_key", "AIzaSyD_58MamDo810uuSsQSA5DG6rVL3cyot8U");
+    }
+  }, []);
 
   const suggestions = [
     "Overall attendance summary",
@@ -4072,12 +4079,20 @@ function AttendanceAssistant({ members, newJoinees, events, attendance, newJoine
     "Latest event stats",
   ];
 
-  const ask = (question) => {
+  const ask = async (question) => {
     const clean = question.trim();
     if (!clean) return;
-    const answer = answerAttendanceQuestion(clean, { members, newJoinees, events, attendance, newJoineeAttendance, getMemberStats, getEventStats });
-    setMessages(prev => [...prev, { from: "user", text: clean }, { from: "bot", text: answer }]);
+    
+    setMessages(prev => [...prev, { from: "user", text: clean }, { from: "bot", text: "..." }]);
     setInput("");
+    
+    const answer = await answerAttendanceQuestionWithGemini(clean, { members, newJoinees, events, attendance, newJoineeAttendance, getMemberStats, getEventStats }, localStorage.getItem("gemini_key"));
+    
+    setMessages(prev => {
+      const newMsg = [...prev];
+      newMsg[newMsg.length - 1] = { from: "bot", text: answer };
+      return newMsg;
+    });
   };
 
   return (
@@ -4110,67 +4125,43 @@ function AttendanceAssistant({ members, newJoinees, events, attendance, newJoine
   );
 }
 
-function answerAttendanceQuestion(question, data) {
-  const q = normalizeName(question);
-  const activeMembers = data.members.filter(member => member.active);
-  const activeJoinees = data.newJoinees.filter(joinee => joinee.active);
-  const allPeople = [
-    ...activeMembers.map(person => ({ ...person, group: "Member", store: data.attendance })),
-    ...activeJoinees.map(person => ({ ...person, group: "New Joinee", store: data.newJoineeAttendance })),
-  ];
-  const sortedEvents = [...data.events].sort((a, b) => new Date(b.date) - new Date(a.date));
-  const event = findMentionedEvent(q, sortedEvents) || (q.includes("latest") || q.includes("last") || q.includes("recent") ? sortedEvents[0] : null);
-  const person = allPeople.find(item => q.includes(normalizeName(item.name)));
-
-  if (q.includes("help") || q.includes("what can you")) {
-    return "Try questions like:\n- What is Moksh Shah attendance?\n- Who was present in Chaas Vitran?\n- Who has low attendance?\n- Latest event stats\n- How many members and new joinees are active?";
+async function answerAttendanceQuestionWithGemini(question, data, apiKey) {
+  if (!apiKey) {
+    return "Error: Gemini API Key is missing. Please add it in the settings.";
   }
+  
+  try {
+    const ai = new GoogleGenAI({ apiKey });
+    
+    // Create compact context payload
+    const contextData = {
+      members: data.members.map(m => ({ id: m.id, name: m.name, active: m.active, stats: data.getMemberStats(m.id) })),
+      newJoinees: data.newJoinees.map(m => ({ id: m.id, name: m.name, active: m.active })),
+      events: data.events.map(e => ({ id: e.id, name: e.name, date: e.date, stats: data.getEventStats(e.id) })),
+    };
 
-  if (person) {
-    const stats = person.group === "Member" ? data.getMemberStats(person.id) : getPersonStatsFromStore(person.id, data.newJoineeAttendance);
-    const last = sortedEvents.find(item => isAttendedStatus(person.store[item.id]?.[person.id]));
-    return `${person.name} (${person.group})\nAttendance: ${stats.present}/${stats.total} events (${stats.pct}%).\nLast attended: ${last ? `${last.name} on ${fmtDate(last.date)}` : "No recorded attendance yet."}`;
+    const prompt = `You are the AYSG Attendance Tracker AI Assistant. You answer questions strictly based on the following JSON data representing members, events, and their attendance statistics.
+JSON Data:
+${JSON.stringify(contextData)}
+
+User Question: ${question}
+
+Instructions:
+- Be concise, friendly, and helpful.
+- Format lists with clear bullet points.
+- If asking about a specific person, reference their stats.
+- If you don't know the answer based on the data, explicitly state that you don't have that data.`;
+
+    const response = await ai.models.generateContent({
+      model: 'gemini-2.5-flash',
+      contents: prompt,
+    });
+    
+    return response.text;
+  } catch (err) {
+    console.error(err);
+    return "Error communicating with AI: " + err.message;
   }
-
-  if (event) {
-    const stats = data.getEventStats(event.id);
-    const presentPeople = peopleForEvent(allPeople, event.id, status => isAttendedStatus(status));
-    const absentPeople = peopleForEvent(allPeople, event.id, status => normalizeAttendanceStatus(status) === "absent");
-    if (q.includes("present") || q.includes("attended")) {
-      return `${event.name} present list (${presentPeople.length}):\n${formatNameList(presentPeople)}`;
-    }
-    if (q.includes("absent") || q.includes("missing")) {
-      return `${event.name} absent list (${absentPeople.length}):\n${formatNameList(absentPeople)}`;
-    }
-    return `${event.name} (${fmtDate(event.date)})\nPresent/Late: ${stats.present}\nAbsent: ${stats.absent}\nTotal active people: ${stats.total}\nAttendance: ${stats.pct}%`;
-  }
-
-  if (q.includes("top") || q.includes("best") || q.includes("highest")) {
-    const top = activeMembers
-      .map(member => ({ ...member, stats: data.getMemberStats(member.id) }))
-      .sort((a, b) => b.stats.pct - a.stats.pct || b.stats.present - a.stats.present)
-      .slice(0, 5);
-    return `Top attendance members:\n${top.map((member, index) => `${index + 1}. ${member.name}: ${member.stats.pct}% (${member.stats.present}/${member.stats.total})`).join("\n") || "No attendance data yet."}`;
-  }
-
-  if (q.includes("low") || q.includes("poor") || q.includes("attention") || q.includes("inactive")) {
-    const low = activeMembers
-      .map(member => ({ ...member, stats: data.getMemberStats(member.id) }))
-      .filter(member => member.stats.total > 0)
-      .sort((a, b) => a.stats.pct - b.stats.pct || a.stats.present - b.stats.present)
-      .slice(0, 8);
-    return `Members needing attention:\n${low.map(member => `${member.name}: ${member.stats.pct}% (${member.stats.present}/${member.stats.total})`).join("\n") || "No attendance data yet."}`;
-  }
-
-  if (q.includes("member") || q.includes("new joinee") || q.includes("people") || q.includes("count")) {
-    return `Active members: ${activeMembers.length}\nActive new joinees: ${activeJoinees.length}\nTotal active people: ${activeMembers.length + activeJoinees.length}\nEvents tracked: ${data.events.length}`;
-  }
-
-  const overallPct = activeMembers.length
-    ? Math.round(activeMembers.reduce((sum, member) => sum + data.getMemberStats(member.id).pct, 0) / activeMembers.length)
-    : 0;
-  const latest = sortedEvents[0];
-  return `Overall summary:\nEvents tracked: ${data.events.length}\nActive members: ${activeMembers.length}\nActive new joinees: ${activeJoinees.length}\nAverage member attendance: ${overallPct}%\nLatest event: ${latest ? `${latest.name} (${fmtDate(latest.date)})` : "No events yet."}`;
 }
 
 function findMentionedEvent(question, events) {
