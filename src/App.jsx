@@ -1046,12 +1046,12 @@ function PendingRow({ docId, data, members, onApprove, onReject }) {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [members, data.name]);
   return (
-    <div style={{ border: '1px solid var(--border)', padding: 12, borderRadius: 8, background: "white" }} className="flex items-center justify-between gap-4">
-      <div style={{ flex: 1 }}>
-        <div style={{ fontWeight: 600, fontSize: 14 }}>{data.name}</div>
-        <div style={{ fontSize: 12, color: 'var(--text2)' }}>{data.mobile || "No mobile"}</div>
+    <div style={{ border: '1px solid var(--border)', padding: 16, borderRadius: 12, background: "var(--bg2)" }} className="flex wrap items-center justify-between gap-4">
+      <div style={{ flex: "1 1 150px" }}>
+        <div style={{ fontWeight: 600, fontSize: 15, color: "var(--text)" }}>{data.name}</div>
+        <div style={{ fontSize: 13, color: 'var(--text2)', marginTop: 2 }}>{data.mobile || "No mobile"}</div>
       </div>
-      <select value={matchId} onChange={e => setMatchId(e.target.value)} className="input" style={{ flex: 1 }}>
+      <select value={matchId} onChange={e => setMatchId(e.target.value)} className="input" style={{ flex: "1 1 150px", minWidth: 150 }}>
         <option value="">-- Match Member --</option>
         <option value="NEW_JOINEE">+ Add as New Joinee</option>
         <optgroup label="Members">
