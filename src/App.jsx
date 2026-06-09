@@ -1123,7 +1123,10 @@ function CinematicTVMode({ events, members, attendance, setView }) {
       
       <div style={{ padding: '40px 60px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(255,255,255,0.03)', backdropFilter: 'blur(20px)', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
         <div>
-          <h1 style={{ fontSize: 48, margin: 0, fontWeight: 800, background: 'linear-gradient(90deg, #fff, #a5b4fc)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>AYSG Live</h1>
+          <div className="flex items-center gap-4">
+            <img src="/logo.png" alt="AYSG Logo" style={{ height: 56, background: 'white', padding: '4px', borderRadius: '8px', objectFit: 'contain' }} />
+            <h1 style={{ fontSize: 48, margin: 0, fontWeight: 800, background: 'linear-gradient(90deg, #fff, #a5b4fc)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>Live</h1>
+          </div>
           <p style={{ fontSize: 24, margin: '10px 0 0 0', color: 'rgba(255,255,255,0.6)' }}>{activeEvent?.name || "No Active Event"} &bull; {activeEvent?.venue || ""}</p>
         </div>
         <div style={{ textAlign: 'right' }}>
@@ -1479,7 +1482,7 @@ function Sidebar({ view, setView, members, newJoinees, events, isAdmin, collapse
         {collapsed ? "›" : "‹"}
       </button>
       <div className="brand">
-        <div className="brand-icon">AY</div>
+        <img src="/logo.png" className="brand-icon" style={{ background: 'white', objectFit: 'contain', padding: '2px' }} alt="AYSG Logo" />
         <div className="brand-copy">
           <div className="brand-title">Arham Yuva Seva Group</div>
           <div className="brand-sub">Attendance Tracker</div>
@@ -1933,8 +1936,8 @@ const IDCardModal = ({ member, onClose }) => {
   return (
     <AnimatedModal isOpen={true} onClose={onClose} maxWidth={360} style={{ padding: 0, background: 'transparent', boxShadow: 'none' }}>
       <div style={{ background: 'var(--bg2)', borderRadius: 16, overflow: 'hidden', border: '1px solid var(--border)', position: 'relative' }}>
-        <div style={{ height: 110, background: 'linear-gradient(135deg, var(--accent), var(--accent2))', display: 'flex', alignItems: 'flex-start', justifyContent: 'center', paddingTop: 20 }}>
-          <h2 style={{ color: 'white', fontWeight: 800, letterSpacing: 2, fontSize: 24, margin: 0, textShadow: "0 2px 10px rgba(0,0,0,0.2)" }}>AYSG</h2>
+        <div style={{ height: 110, background: 'linear-gradient(135deg, var(--accent), var(--accent2))', display: 'flex', alignItems: 'flex-start', justifyContent: 'center', paddingTop: 16 }}>
+          <img src="/logo.png" alt="AYSG Logo" style={{ height: 48, background: 'white', padding: '4px', borderRadius: '8px', objectFit: 'contain', boxShadow: "0 4px 12px rgba(0,0,0,0.2)" }} />
         </div>
         <div style={{ padding: "0 24px 24px 24px", textAlign: 'center', position: 'relative' }}>
           <div style={{ width: 84, height: 84, borderRadius: '50%', background: 'var(--bg)', border: '4px solid var(--bg2)', position: 'absolute', top: -42, left: '50%', transform: 'translateX(-50%)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}>
@@ -3526,7 +3529,7 @@ function buildReportHtml({ template, data, options }) {
     <header class="report-header">
       <div class="header-logo-container">
         <!-- Logo cropped to exclude the bottom text -->
-        <img src="/aysg-logo.jpg" alt="AYSG Logo" class="header-logo" onerror="this.style.display='none'" />
+        <img src="/logo.png" alt="AYSG Logo" class="header-logo" onerror="this.style.display='none'" />
       </div>
       <div class="header-details">
         <h1 class="report-title">AYSG Ghatkopar Attendance Report</h1>
