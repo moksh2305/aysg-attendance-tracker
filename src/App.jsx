@@ -807,7 +807,7 @@ select.input{cursor:pointer}
 .locked-screen{text-align:center;padding:40px 0}
 .lock-icon{font-size:64px;margin-bottom:20px;animation:shake 0.5s ease}
 @keyframes shake{0%,100%{transform:rotate(0)}25%{transform:rotate(-10deg)}75%{transform:rotate(10deg)}}
-.flex{display:flex}.items-center{align-items:center}.justify-between{justify-content:space-between}.gap-2{gap:8px}.gap-3{gap:12px}.gap-4{gap:16px}.mb-2{margin-bottom:8px}.mb-3{margin-bottom:12px}.mb-4{margin-bottom:16px}.mb-6{margin-bottom:24px}.mt-2{margin-top:8px}.mt-4{margin-top:16px}.flex-1{flex:1}.text-sm{font-size:12.5px}.text-xs{font-size:11.5px}.font-bold{font-weight:700}.font-semi{font-weight:600}.color-muted{color:var(--text2)}.color-accent{color:var(--accent2)}.color-green{color:var(--emerald)}.color-red{color:var(--rose)}.color-gold{color:var(--gold)}.wrap{flex-wrap:wrap}
+.flex{display:flex}.flex-col{flex-direction:column}.items-center{align-items:center}.justify-center{justify-content:center}.justify-between{justify-content:space-between}.gap-2{gap:8px}.gap-3{gap:12px}.gap-4{gap:16px}.gap-6{gap:24px}.mb-2{margin-bottom:8px}.mb-3{margin-bottom:12px}.mb-4{margin-bottom:16px}.mb-6{margin-bottom:24px}.mt-2{margin-top:8px}.mt-4{margin-top:16px}.flex-1{flex:1}.text-sm{font-size:12.5px}.text-xs{font-size:11.5px}.font-bold{font-weight:700}.font-semi{font-weight:600}.color-muted{color:var(--text2)}.color-accent{color:var(--accent2)}.color-green{color:var(--emerald)}.color-red{color:var(--rose)}.color-gold{color:var(--gold)}.wrap{flex-wrap:wrap}
 .ring-chart{position:relative;display:inline-flex;align-items:center;justify-content:center}
 .bar-item{height:32px;border-radius:6px;display:flex;align-items:center;padding:0 12px;font-size:12.5px;font-weight:500;color:var(--text2);margin-bottom:6px;background:var(--bg4);overflow:hidden;position:relative}
 .bar-fill{position:absolute;left:0;top:0;bottom:0;border-radius:6px;opacity:0.25;transition:width 0.5s ease}
@@ -3253,23 +3253,23 @@ function Analytics({ members, newJoinees, events, getMemberStats, attendance, ne
         {/* Area-wise Participation */}
         <div className="ac-card col-3">
           <div className="ac-card-title">Area-wise Participation</div>
-          <div className="flex items-center justify-center gap-6" style={{ height: "100%" }}>
+          <div className="flex items-center justify-center gap-6" style={{ height: "100%", paddingBottom: "20px" }}>
             <div style={{ position: "relative", width: "120px", height: "120px" }}>
               <svg viewBox="0 0 100 100" style={{ transform: "rotate(-90deg)", width: "100%", height: "100%" }}>
                 {donutSegments.map(segment => (
-                  <circle key={segment.name} cx="50" cy="50" r="40" fill="none" stroke={segment.color} strokeWidth="20" strokeDasharray={segment.dashArray} strokeDashoffset={segment.dashOffset} />
+                  <circle key={segment.name} cx="50" cy="50" r="40" fill="none" stroke={segment.color} strokeWidth="18" strokeDasharray={segment.dashArray} strokeDashoffset={segment.dashOffset} strokeLinecap="round" />
                 ))}
               </svg>
-              <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
+              <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyItems: "center", justifyContent: "center" }}>
                 <span style={{ fontSize: "20px", fontWeight: "bold" }}>{active.length}</span>
                 <span style={{ fontSize: "9px", color: "var(--text2)" }}>Members</span>
               </div>
             </div>
-            <div className="flex flex-col gap-2">
+            <div className="flex flex-col gap-3">
               {areaData.slice(0, 5).map((a, i) => (
                 <div key={a.name} className="flex items-center gap-2 text-xs">
                   <span style={{ width: 10, height: 10, background: donutColors[i % donutColors.length], borderRadius: "50%" }}></span>
-                  <span style={{ width: 60, overflow: "hidden", textOverflow: "ellipsis" }}>{a.name}</span>
+                  <span style={{ width: 70, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{a.name || "Unknown"}</span>
                   <span className="font-bold">{a.count}</span>
                 </div>
               ))}
@@ -3280,31 +3280,31 @@ function Analytics({ members, newJoinees, events, getMemberStats, attendance, ne
         {/* Attendance Categories */}
         <div className="ac-card col-4">
           <div className="ac-card-title">Attendance Categories</div>
-          <div className="flex flex-col gap-4" style={{ flex: 1, justifyContent: "center" }}>
+          <div className="flex flex-col gap-6 mt-4">
             <div>
-              <div className="flex justify-between text-xs mb-2">
+              <div className="flex justify-between text-sm mb-2">
                 <span style={{ color: "#10d47e", fontWeight: 600 }}>Consistent (≥80%)</span>
-                <span>{consistent.length} ({active.length ? Math.round((consistent.length / active.length) * 100) : 0}%)</span>
+                <span>{consistent.length} <span className="color-muted text-xs">({active.length ? Math.round((consistent.length / active.length) * 100) : 0}%)</span></span>
               </div>
-              <div style={{ height: 8, background: "var(--bg4)", borderRadius: 4, overflow: "hidden" }}>
+              <div style={{ height: 12, background: "var(--bg4)", borderRadius: 6, overflow: "hidden" }}>
                 <div style={{ height: "100%", width: `${active.length ? (consistent.length / active.length) * 100 : 0}%`, background: "#10d47e" }} />
               </div>
             </div>
             <div>
-              <div className="flex justify-between text-xs mb-2">
+              <div className="flex justify-between text-sm mb-2">
                 <span style={{ color: "#f0b429", fontWeight: 600 }}>Irregular (40% - 79%)</span>
-                <span>{irregular.length} ({active.length ? Math.round((irregular.length / active.length) * 100) : 0}%)</span>
+                <span>{irregular.length} <span className="color-muted text-xs">({active.length ? Math.round((irregular.length / active.length) * 100) : 0}%)</span></span>
               </div>
-              <div style={{ height: 8, background: "var(--bg4)", borderRadius: 4, overflow: "hidden" }}>
+              <div style={{ height: 12, background: "var(--bg4)", borderRadius: 6, overflow: "hidden" }}>
                 <div style={{ height: "100%", width: `${active.length ? (irregular.length / active.length) * 100 : 0}%`, background: "#f0b429" }} />
               </div>
             </div>
             <div>
-              <div className="flex justify-between text-xs mb-2">
+              <div className="flex justify-between text-sm mb-2">
                 <span style={{ color: "#f43f5e", fontWeight: 600 }}>Inactive (&lt;40%)</span>
-                <span>{inactive.length} ({active.length ? Math.round((inactive.length / active.length) * 100) : 0}%)</span>
+                <span>{inactive.length} <span className="color-muted text-xs">({active.length ? Math.round((inactive.length / active.length) * 100) : 0}%)</span></span>
               </div>
-              <div style={{ height: 8, background: "var(--bg4)", borderRadius: 4, overflow: "hidden" }}>
+              <div style={{ height: 12, background: "var(--bg4)", borderRadius: 6, overflow: "hidden" }}>
                 <div style={{ height: "100%", width: `${active.length ? (inactive.length / active.length) * 100 : 0}%`, background: "#f43f5e" }} />
               </div>
             </div>
