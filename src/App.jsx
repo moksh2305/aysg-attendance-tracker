@@ -1949,7 +1949,7 @@ const IDCardModal = ({ member, onClose }) => {
         
         {/* Header */}
         <div style={{ padding: '24px 24px 0 24px', display: 'flex', justifyContent: 'center', position: 'relative', zIndex: 10 }}>
-          <img src="/logo.png" alt="AYSG Logo" style={{ height: 54, background: 'rgba(255,255,255,0.95)', padding: '6px 20px', borderRadius: '14px', objectFit: 'contain', boxShadow: "0 8px 24px rgba(0,0,0,0.3)" }} />
+          <img src="/logo.png" alt="AYSG Logo" style={{ height: 60, width: 60, background: '#fff', borderRadius: '50%', objectFit: 'contain', boxShadow: "0 8px 24px rgba(0,0,0,0.4)", border: "2px solid rgba(255,255,255,0.2)" }} />
         </div>
 
         {/* Profile */}
@@ -1987,7 +1987,7 @@ const IDCardModal = ({ member, onClose }) => {
           <div style={{ display: 'flex', justifyContent: 'center' }}>
             <div style={{ padding: 12, background: '#fff', borderRadius: 16, boxShadow: "0 12px 30px rgba(0,0,0,0.4)", position: 'relative' }}>
               <div style={{ position: 'absolute', top: -10, left: '50%', transform: 'translateX(-50%)', background: 'var(--accent)', color: 'white', fontSize: 10, padding: '2px 10px', borderRadius: 12, fontWeight: 700, letterSpacing: 0.5, boxShadow: '0 4px 10px rgba(0,0,0,0.3)' }}>SCAN ME</div>
-              <QRCodeCanvas value={`AYSG-${member.id}`} size={120} />
+              <QRCodeCanvas value={`Arham Yuva Seva Group Ghatkopar Gen Next Member\nName: ${member.name}\nNumber: ${member.mobile || 'N/A'}\nGender: ${member.gender || 'N/A'}\nLocality: ${member.area || 'Ghatkopar'}`} size={120} />
             </div>
           </div>
           <div style={{ marginTop: 20, fontSize: 11, color: 'rgba(255,255,255,0.5)', fontFamily: 'monospace', letterSpacing: 2 }}>ID: {member.id}</div>
