@@ -3109,7 +3109,7 @@ function Analytics({ members, newJoinees, events, getMemberStats, attendance, ne
   const currentSmartList = getSmartTabData();
 
   return (
-    <div className="ac-dashboard">
+    <div className="ac-dashboard" style={{ paddingBottom: "40px" }}>
       <div style={{ marginBottom: "20px" }}>
         <h1 className="page-title" style={{ fontSize: "24px" }}>Analytics Intelligence Center</h1>
         <p className="color-muted text-sm">Real-time insights and smart analysis of attendance patterns</p>
@@ -3364,8 +3364,8 @@ function Analytics({ members, newJoinees, events, getMemberStats, attendance, ne
         {/* Top Performers */}
         <div className="ac-card col-5">
           <div className="ac-card-title">🏆 Top Performers</div>
-          <div className="flex flex-col gap-3">
-            {sortedMembers.slice(0, 5).map((m, i) => {
+          <div className="flex flex-col gap-4">
+            {sortedMembers.slice(0, 8).map((m, i) => {
               const s = getMemberStats(m.id);
               return (
                 <div key={m.id} className="flex items-center gap-3">
