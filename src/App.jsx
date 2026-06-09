@@ -6,7 +6,40 @@ import readXlsxFile from "read-excel-file/browser";
 import { LineChart, Line, XAxis, YAxis, Tooltip as RechartsTooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from "recharts";
 import { Canvas, useFrame } from "@react-three/fiber";
 import { OrbitControls, Stars, Html } from "@react-three/drei";
+import { motion, AnimatePresence } from "framer-motion";
+import { 
+  Users, CalendarDays, ClipboardCheck, LayoutDashboard, Settings, 
+  LogOut, Plus, Edit2, Trash2, Search, Filter, Download, 
+  MapPin, Clock, Phone, AlertCircle, CheckCircle2, ChevronDown, Activity, UserPlus
+} from "lucide-react";
 import { auth, db, googleProvider } from "./firebase";
+
+const AnimatedModal = ({ isOpen, onClose, children, style, className = "modal", maxWidth }) => (
+  <AnimatePresence>
+    {isOpen && (
+      <motion.div
+        initial={{ opacity: 0, backdropFilter: "blur(0px)" }}
+        animate={{ opacity: 1, backdropFilter: "blur(4px)" }}
+        exit={{ opacity: 0, backdropFilter: "blur(0px)" }}
+        transition={{ duration: 0.2 }}
+        className="modal-bg"
+        onClick={e => e.target === e.currentTarget && onClose && onClose()}
+      >
+        <motion.div
+          initial={{ scale: 0.95, opacity: 0, y: 10 }}
+          animate={{ scale: 1, opacity: 1, y: 0 }}
+          exit={{ scale: 0.95, opacity: 0, y: 10 }}
+          transition={{ type: "spring", damping: 25, stiffness: 300 }}
+          className={className}
+          style={{ ...style, maxWidth }}
+          onClick={e => e.stopPropagation()}
+        >
+          {children}
+        </motion.div>
+      </motion.div>
+    )}
+  </AnimatePresence>
+);
 
 const ALLOWED_ADMIN_NAMES = new Set(["moksh", "moksh shah", "dheer sheth"]);
 const FIRESTORE_STATE_COLLECTION = "appState";
@@ -510,10 +543,12 @@ html.light .stat-card{box-shadow:0 1px 4px rgba(0,0,0,0.06)}
 .stat-icon{position:absolute;top:16px;right:16px;width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px}
 h1.page-title{font-family:'Syne',sans-serif;font-size:22px;font-weight:700;color:var(--text)}
 h2.section-title{font-family:'Syne',sans-serif;font-size:16px;font-weight:700;color:var(--text);margin-bottom:16px}
-.btn{display:inline-flex;align-items:center;gap:8px;padding:9px 18px;border-radius:10px;font-size:13.5px;font-weight:500;cursor:pointer;border:1px solid var(--border);background:var(--bg3);color:var(--text);transition:all 0.2s;font-family:'DM Sans',sans-serif}
-.btn:hover{background:var(--bg4);border-color:var(--border2)}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:9px 18px;border-radius:10px;font-size:13.5px;font-weight:500;cursor:pointer;border:1px solid var(--border);background:var(--bg3);color:var(--text);transition:all 0.2s cubic-bezier(0.25, 1, 0.5, 1);font-family:'DM Sans',sans-serif}
+.btn:hover{background:var(--bg4);border-color:var(--border2);transform:translateY(-1px)}
+.btn:active{transform:scale(0.96) translateY(0);opacity:0.85}
 .btn-primary{background:linear-gradient(135deg,var(--accent3),var(--accent));border:none;color:#fff;box-shadow:0 4px 15px rgba(124,106,248,0.3)}
 .btn-primary:hover{opacity:0.9;transform:translateY(-1px);box-shadow:0 6px 20px rgba(124,106,248,0.4)}
+.btn-primary:active{transform:scale(0.96) translateY(0);box-shadow:0 2px 8px rgba(124,106,248,0.3)}
 .btn-sm{padding:6px 14px;font-size:12.5px;border-radius:8px}
 .btn-danger{background:rgba(244,63,94,0.15);border-color:rgba(244,63,94,0.3);color:var(--rose)}
 .btn-success{background:rgba(16,212,126,0.12);border-color:rgba(16,212,126,0.25);color:var(--emerald)}
@@ -596,6 +631,18 @@ select.input{cursor:pointer}
 .skeleton-card{height:138px;border-radius:14px;background:linear-gradient(90deg,var(--bg3),var(--bg4),var(--bg3));background-size:220% 100%;animation:shimmer 1.1s infinite}
 .skeleton-line{height:12px;border-radius:8px;background:linear-gradient(90deg,var(--bg3),var(--bg4),var(--bg3));background-size:220% 100%;animation:shimmer 1.1s infinite}
 @keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@keyframes cascadeIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.table tbody tr, .attendance-card, .history-item { animation: cascadeIn 0.35s cubic-bezier(0.25, 1, 0.5, 1) both; }
+.table tbody tr:nth-child(1), .attendance-card:nth-child(1), .history-item:nth-child(1) { animation-delay: 0.03s; }
+.table tbody tr:nth-child(2), .attendance-card:nth-child(2), .history-item:nth-child(2) { animation-delay: 0.06s; }
+.table tbody tr:nth-child(3), .attendance-card:nth-child(3), .history-item:nth-child(3) { animation-delay: 0.09s; }
+.table tbody tr:nth-child(4), .attendance-card:nth-child(4), .history-item:nth-child(4) { animation-delay: 0.12s; }
+.table tbody tr:nth-child(5), .attendance-card:nth-child(5), .history-item:nth-child(5) { animation-delay: 0.15s; }
+.table tbody tr:nth-child(6), .attendance-card:nth-child(6), .history-item:nth-child(6) { animation-delay: 0.18s; }
+.table tbody tr:nth-child(7), .attendance-card:nth-child(7), .history-item:nth-child(7) { animation-delay: 0.21s; }
+.table tbody tr:nth-child(8), .attendance-card:nth-child(8), .history-item:nth-child(8) { animation-delay: 0.24s; }
+.table tbody tr:nth-child(9), .attendance-card:nth-child(9), .history-item:nth-child(9) { animation-delay: 0.27s; }
+.table tbody tr:nth-child(n+10), .attendance-card:nth-child(n+10), .history-item:nth-child(n+10) { animation-delay: 0.30s; }
 @keyframes shimmer{0%{background-position:120% 0}100%{background-position:-120% 0}}
 .search-box{position:relative}
 .search-box .input{padding-left:36px}
@@ -904,19 +951,17 @@ function PendingCheckinsModal({ eventId, members, onClose, onApprove, showToast 
   };
 
   return (
-    <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center' }} onClick={onClose}>
-      <div style={{ background: '#f9fafb', padding: 32, borderRadius: 16, width: '100%', maxWidth: 600, maxHeight: '80vh', overflowY: 'auto' }} onClick={e => e.stopPropagation()}>
-        <div className="flex justify-between items-center mb-6">
-          <h2 style={{ fontSize: 20, fontWeight: 700 }}>Pending Scans ({pending.length})</h2>
-          <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 24 }}>&times;</button>
-        </div>
-        {loading ? <p>Loading...</p> : pending.length === 0 ? <p className="color-muted">No pending check-ins for this event.</p> : (
-          <div className="flex flex-col gap-3">
-            {pending.map(p => <PendingRow key={p.id} docId={p.id} data={p} members={members} onApprove={handleApprove} onReject={handleReject} />)}
-          </div>
-        )}
+    <AnimatedModal isOpen={true} onClose={onClose} maxWidth={600} style={{ background: '#f9fafb', padding: 32, borderRadius: 16 }}>
+      <div className="flex justify-between items-center mb-6">
+        <h2 style={{ fontSize: 20, fontWeight: 700 }}>Pending Scans ({pending.length})</h2>
+        <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 24 }}>&times;</button>
       </div>
-    </div>
+      {loading ? <p>Loading...</p> : pending.length === 0 ? <p className="color-muted">No pending check-ins for this event.</p> : (
+        <div className="flex flex-col gap-3">
+          {pending.map(p => <PendingRow key={p.id} docId={p.id} data={p} members={members} onApprove={handleApprove} onReject={handleReject} />)}
+        </div>
+      )}
+    </AnimatedModal>
   );
 }
 
@@ -1208,13 +1253,24 @@ export default function App() {
             authReady={authReady}
           />
           <div className="content scroll-area">
-            {view === "Dashboard" && <Dashboard members={members} events={events} attendance={attendance} getEventStats={getEventStats} getMemberStats={getMemberStats} setView={setView} setAttendanceEventId={setAttendanceEventId} isAdmin={isAdmin} getMemberBadges={getMemberBadges} />}
-            {view === "Members" && <Members members={members} setMembers={setMembers} newJoinees={newJoinees} setNewJoinees={setNewJoinees} events={events} attendance={attendance} getMemberStats={getMemberStats} showToast={showToast} isAdmin={isAdmin} setView={setView} getMemberBadges={getMemberBadges} />}
-            {view === "New Joinees" && <NewJoinees newJoinees={newJoinees} setNewJoinees={setNewJoinees} showToast={showToast} isAdmin={isAdmin} />}
-            {view === "Events" && <Events events={events} setEvents={setEvents} getEventStats={getEventStats} showToast={showToast} isAdmin={isAdmin} />}
-            {view === "Attendance" && <Attendance events={events} members={members} newJoinees={newJoinees} attendance={attendance} setAttendance={setAttendance} newJoineeAttendance={newJoineeAttendance} setNewJoineeAttendance={setNewJoineeAttendance} setNewJoinees={setNewJoinees} showToast={showToast} isAdmin={isAdmin} attendanceEventId={attendanceEventId} setAttendanceEventId={setAttendanceEventId} />}
-            {view === "Analytics" && <Analytics members={members} newJoinees={newJoinees} events={events} getMemberStats={getMemberStats} attendance={attendance} newJoineeAttendance={newJoineeAttendance} isAdmin={isAdmin} />}
-            {view === "Reports" && <Reports members={members} newJoinees={newJoinees} events={events} attendance={attendance} newJoineeAttendance={newJoineeAttendance} getEventStats={getEventStats} showToast={showToast} isAdmin={isAdmin} />}
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={view}
+                initial={{ opacity: 0, y: 10, filter: "blur(4px)" }}
+                animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+                exit={{ opacity: 0, y: -10, filter: "blur(4px)" }}
+                transition={{ duration: 0.25, ease: "easeInOut" }}
+                style={{ height: "100%", width: "100%" }}
+              >
+                {view === "Dashboard" && <Dashboard members={members} events={events} attendance={attendance} getEventStats={getEventStats} getMemberStats={getMemberStats} setView={setView} setAttendanceEventId={setAttendanceEventId} isAdmin={isAdmin} getMemberBadges={getMemberBadges} />}
+                {view === "Members" && <Members members={members} setMembers={setMembers} newJoinees={newJoinees} setNewJoinees={setNewJoinees} events={events} attendance={attendance} getMemberStats={getMemberStats} showToast={showToast} isAdmin={isAdmin} setView={setView} getMemberBadges={getMemberBadges} />}
+                {view === "New Joinees" && <NewJoinees newJoinees={newJoinees} setNewJoinees={setNewJoinees} showToast={showToast} isAdmin={isAdmin} />}
+                {view === "Events" && <Events events={events} setEvents={setEvents} getEventStats={getEventStats} showToast={showToast} isAdmin={isAdmin} />}
+                {view === "Attendance" && <Attendance events={events} members={members} newJoinees={newJoinees} attendance={attendance} setAttendance={setAttendance} newJoineeAttendance={newJoineeAttendance} setNewJoineeAttendance={setNewJoineeAttendance} setNewJoinees={setNewJoinees} showToast={showToast} isAdmin={isAdmin} attendanceEventId={attendanceEventId} setAttendanceEventId={setAttendanceEventId} />}
+                {view === "Analytics" && <Analytics members={members} newJoinees={newJoinees} events={events} getMemberStats={getMemberStats} attendance={attendance} newJoineeAttendance={newJoineeAttendance} isAdmin={isAdmin} />}
+                {view === "Reports" && <Reports members={members} newJoinees={newJoinees} events={events} attendance={attendance} newJoineeAttendance={newJoineeAttendance} getEventStats={getEventStats} showToast={showToast} isAdmin={isAdmin} />}
+              </motion.div>
+            </AnimatePresence>
           </div>
         </div>
       </div>
@@ -1957,76 +2013,64 @@ function Members({ members, setMembers, newJoinees, setNewJoinees, events, atten
           </div>
         </div>
       )}
-      {showForm && (
-        <div className="modal-bg" onClick={e => e.target === e.currentTarget && setShowForm(false)}>
-          <div className="modal">
-            <h2>{editMember ? "Edit Member" : "Add New Member"}</h2>
-            <div className="grid-2">
-              {[["Full Name", "name", "text"], ["Mobile Number", "mobile", "text"]].map(([label, key, type]) => (
-                <div key={key} className="field">
-                  <label>{label}</label>
-                  <input className="input" type={type} value={form[key]} onChange={e => setForm({ ...form, [key]: e.target.value })} placeholder={label} />
-                </div>
-              ))}
+      <AnimatedModal isOpen={showForm} onClose={() => setShowForm(false)}>
+        <h2>{editMember ? "Edit Member" : "Add New Member"}</h2>
+        <div className="grid-2">
+          {[["Full Name", "name", "text"], ["Mobile Number", "mobile", "text"]].map(([label, key, type]) => (
+            <div key={key} className="field">
+              <label>{label}</label>
+              <input className="input" type={type} value={form[key]} onChange={e => setForm({ ...form, [key]: e.target.value })} placeholder={label} />
             </div>
-            <div className="grid-2">
-              <div className="field"><label>Area</label><input className="input" value={form.area} onChange={e => setForm({ ...form, area: e.target.value })} placeholder="Area / Location" /></div>
-              <div className="field"><label>Gender</label>
-                <select className="input" value={form.gender} onChange={e => setForm({ ...form, gender: e.target.value })}>
-                  <option>Male</option><option>Female</option><option>Other</option>
-                </select>
-              </div>
-            </div>
-            <div className="grid-2">
-              <div className="field"><label>Join Date</label><input className="input" type="date" value={form.joinDate} onChange={e => setForm({ ...form, joinDate: e.target.value })} /></div>
-              <div className="field"><label>Date of Birth</label><input className="input" type="date" value={form.dob || ""} onChange={e => setForm({ ...form, dob: e.target.value })} /></div>
-            </div>
-            <div className="grid-2">
-              <div className="field"><label>Role</label><input className="input" value={form.role || ""} onChange={e => setForm({ ...form, role: e.target.value })} placeholder="Member / Lead / Volunteer" /></div>
-              <div className="field"><label>Status</label>
-                <select className="input" value={form.active ? "active" : "inactive"} onChange={e => setForm({ ...form, active: e.target.value === "active" })}>
-                  <option value="active">Active</option><option value="inactive">Inactive</option>
-                </select>
-              </div>
-            </div>
-            <div className="field"><label>Notes</label><input className="input" value={form.notes} onChange={e => setForm({ ...form, notes: e.target.value })} placeholder="Any notes..." /></div>
-            <div className="flex gap-3 mt-4">
-              <button className="btn btn-primary flex-1" style={{ justifyContent: "center" }} onClick={saveMember}>{editMember ? "Update Member" : "Add Member"}</button>
-              <button className="btn" onClick={() => setShowForm(false)}>Cancel</button>
-            </div>
+          ))}
+        </div>
+        <div className="grid-2">
+          <div className="field"><label>Area</label><input className="input" value={form.area} onChange={e => setForm({ ...form, area: e.target.value })} placeholder="Area / Location" /></div>
+          <div className="field"><label>Gender</label>
+            <select className="input" value={form.gender} onChange={e => setForm({ ...form, gender: e.target.value })}>
+              <option>Male</option><option>Female</option><option>Other</option>
+            </select>
           </div>
         </div>
-      )}
-      {deleteConfirmId && (
-        <div className="modal-bg" onClick={() => setDeleteConfirmId(null)}>
-          <div className="modal">
-            <h2>Delete Member</h2>
-            <p>Are you sure you want to delete this member? This action cannot be undone.</p>
-            <div className="flex gap-3 mt-4">
-              <button className="btn btn-danger flex-1" style={{ justifyContent: "center" }} onClick={() => deleteMember(deleteConfirmId)}>Delete</button>
-              <button className="btn" onClick={() => setDeleteConfirmId(null)}>Cancel</button>
-            </div>
+        <div className="grid-2">
+          <div className="field"><label>Join Date</label><input className="input" type="date" value={form.joinDate} onChange={e => setForm({ ...form, joinDate: e.target.value })} /></div>
+          <div className="field"><label>Date of Birth</label><input className="input" type="date" value={form.dob || ""} onChange={e => setForm({ ...form, dob: e.target.value })} /></div>
+        </div>
+        <div className="grid-2">
+          <div className="field"><label>Role</label><input className="input" value={form.role || ""} onChange={e => setForm({ ...form, role: e.target.value })} placeholder="Member / Lead / Volunteer" /></div>
+          <div className="field"><label>Status</label>
+            <select className="input" value={form.active ? "active" : "inactive"} onChange={e => setForm({ ...form, active: e.target.value === "active" })}>
+              <option value="active">Active</option><option value="inactive">Inactive</option>
+            </select>
           </div>
         </div>
-      )}
-      {duplicateReport && (
-        <div className="modal-bg" onClick={() => setDuplicateReport(null)}>
-          <div className="modal" style={{ maxWidth: 500 }} onClick={e => e.stopPropagation()}>
-            <h2>Duplicates Removed</h2>
-            <p className="mb-4" style={{ color: "var(--text)" }}>Successfully removed {duplicateReport.length} duplicate entries from the database.</p>
-            <div className="scroll-area" style={{ maxHeight: 300, background: "var(--bg-alt)", padding: "10px", borderRadius: "8px", border: "1px solid var(--border)" }}>
-              <ul style={{ margin: 0, paddingLeft: "20px", fontSize: "14px", color: "var(--text-muted)" }}>
-                {duplicateReport.map((name, i) => (
-                  <li key={i} style={{ marginBottom: 4 }}>{name}</li>
-                ))}
-              </ul>
-            </div>
-            <div className="mt-4 flex justify-end">
-              <button className="btn btn-primary" onClick={() => setDuplicateReport(null)}>Done</button>
-            </div>
-          </div>
+        <div className="field"><label>Notes</label><input className="input" value={form.notes} onChange={e => setForm({ ...form, notes: e.target.value })} placeholder="Any notes..." /></div>
+        <div className="flex gap-3 mt-4">
+          <button className="btn btn-primary flex-1" style={{ justifyContent: "center" }} onClick={saveMember}>{editMember ? "Update Member" : "Add Member"}</button>
+          <button className="btn" onClick={() => setShowForm(false)}>Cancel</button>
         </div>
-      )}
+      </AnimatedModal>
+      <AnimatedModal isOpen={!!deleteConfirmId} onClose={() => setDeleteConfirmId(null)}>
+        <h2>Delete Member</h2>
+        <p>Are you sure you want to delete this member? This action cannot be undone.</p>
+        <div className="flex gap-3 mt-4">
+          <button className="btn btn-danger flex-1" style={{ justifyContent: "center" }} onClick={() => deleteMember(deleteConfirmId)}>Delete</button>
+          <button className="btn" onClick={() => setDeleteConfirmId(null)}>Cancel</button>
+        </div>
+      </AnimatedModal>
+      <AnimatedModal isOpen={!!duplicateReport} onClose={() => setDuplicateReport(null)} maxWidth={500}>
+        <h2>Duplicates Removed</h2>
+        <p className="mb-4" style={{ color: "var(--text)" }}>Successfully removed {duplicateReport?.length} duplicate entries from the database.</p>
+        <div className="scroll-area" style={{ maxHeight: 300, background: "var(--bg-alt)", padding: "10px", borderRadius: "8px", border: "1px solid var(--border)" }}>
+          <ul style={{ margin: 0, paddingLeft: "20px", fontSize: "14px", color: "var(--text-muted)" }}>
+            {duplicateReport?.map((name, i) => (
+              <li key={i} style={{ marginBottom: 4 }}>{name}</li>
+            ))}
+          </ul>
+        </div>
+        <div className="mt-4 flex justify-end">
+          <button className="btn btn-primary" onClick={() => setDuplicateReport(null)}>Done</button>
+        </div>
+      </AnimatedModal>
     </div>
   );
 }
@@ -2118,42 +2162,34 @@ function NewJoinees({ newJoinees, setNewJoinees, showToast, isAdmin }) {
           </table>
         )}
       </div>
-      {showForm && (
-        <div className="modal-bg" onClick={e => e.target === e.currentTarget && setShowForm(false)}>
-          <div className="modal">
-            <h2>{editJoinee ? "Edit New Joinee" : "Add New Joinee"}</h2>
-            <div className="field">
-              <label>Full Name</label>
-              <input className="input" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} placeholder="Full Name" autoFocus />
-            </div>
-            <div className="grid-2">
-              <div className="field"><label>Join Date</label><input className="input" type="date" value={form.joinDate} onChange={e => setForm({ ...form, joinDate: e.target.value })} /></div>
-              <div className="field"><label>Status</label>
-                <select className="input" value={form.active ? "active" : "inactive"} onChange={e => setForm({ ...form, active: e.target.value === "active" })}>
-                  <option value="active">Active</option><option value="inactive">Inactive</option>
-                </select>
-              </div>
-            </div>
-            <div className="field"><label>Notes</label><input className="input" value={form.notes} onChange={e => setForm({ ...form, notes: e.target.value })} placeholder="Any notes..." /></div>
-            <div className="flex gap-3 mt-4">
-              <button className="btn btn-primary flex-1" style={{ justifyContent: "center" }} onClick={saveJoinee}>{editJoinee ? "Update New Joinee" : "Add New Joinee"}</button>
-              <button className="btn" onClick={() => setShowForm(false)}>Cancel</button>
-            </div>
+      <AnimatedModal isOpen={showForm} onClose={() => setShowForm(false)}>
+        <h2>{editJoinee ? "Edit New Joinee" : "Add New Joinee"}</h2>
+        <div className="field">
+          <label>Full Name</label>
+          <input className="input" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} placeholder="Full Name" autoFocus />
+        </div>
+        <div className="grid-2">
+          <div className="field"><label>Join Date</label><input className="input" type="date" value={form.joinDate} onChange={e => setForm({ ...form, joinDate: e.target.value })} /></div>
+          <div className="field"><label>Status</label>
+            <select className="input" value={form.active ? "active" : "inactive"} onChange={e => setForm({ ...form, active: e.target.value === "active" })}>
+              <option value="active">Active</option><option value="inactive">Inactive</option>
+            </select>
           </div>
         </div>
-      )}
-      {deleteConfirmId && (
-        <div className="modal-bg" onClick={() => setDeleteConfirmId(null)}>
-          <div className="modal">
-            <h2>Delete New Joinee</h2>
-            <p>Are you sure you want to delete this new joinee? This action cannot be undone.</p>
-            <div className="flex gap-3 mt-4">
-              <button className="btn btn-danger flex-1" style={{ justifyContent: "center" }} onClick={() => deleteJoinee(deleteConfirmId)}>Delete</button>
-              <button className="btn" onClick={() => setDeleteConfirmId(null)}>Cancel</button>
-            </div>
-          </div>
+        <div className="field"><label>Notes</label><input className="input" value={form.notes} onChange={e => setForm({ ...form, notes: e.target.value })} placeholder="Any notes..." /></div>
+        <div className="flex gap-3 mt-4">
+          <button className="btn btn-primary flex-1" style={{ justifyContent: "center" }} onClick={saveJoinee}>{editJoinee ? "Update New Joinee" : "Add New Joinee"}</button>
+          <button className="btn" onClick={() => setShowForm(false)}>Cancel</button>
         </div>
-      )}
+      </AnimatedModal>
+      <AnimatedModal isOpen={!!deleteConfirmId} onClose={() => setDeleteConfirmId(null)}>
+        <h2>Delete New Joinee</h2>
+        <p>Are you sure you want to delete this new joinee? This action cannot be undone.</p>
+        <div className="flex gap-3 mt-4">
+          <button className="btn btn-danger flex-1" style={{ justifyContent: "center" }} onClick={() => deleteJoinee(deleteConfirmId)}>Delete</button>
+          <button className="btn" onClick={() => setDeleteConfirmId(null)}>Cancel</button>
+        </div>
+      </AnimatedModal>
     </div>
   );
 }
@@ -2225,54 +2261,50 @@ function Events({ events, setEvents, getEventStats, showToast, isAdmin }) {
           })}
         </div>
       )}
-      {showForm && (
-        <div className="modal-bg" onClick={e => e.target === e.currentTarget && setShowForm(false)}>
-          <div className="modal">
-            <h2>{editEvent ? "Edit Event" : "Create New Event"}</h2>
-            <div className="field"><label>Event Name</label><input className="input" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} placeholder="e.g. Monthly Sabha" /></div>
-            <div className="grid-2">
-              <div className="field"><label>Date</label><input className="input" type="date" value={form.date} onChange={e => setForm({ ...form, date: e.target.value })} /></div>
-              <div className="field"><label>Time</label><input className="input" type="time" value={form.time} onChange={e => setForm({ ...form, time: e.target.value })} /></div>
-            </div>
-            <div className="field"><label>Venue</label><input className="input" value={form.venue} onChange={e => setForm({ ...form, venue: e.target.value })} placeholder="Location / Venue" /></div>
-            <div className="field">
-              <label>Venue Lock (Geo-Fencing)</label>
-              <div className="flex gap-2">
-                <input className="input flex-1" value={form.lat && form.lng ? `${form.lat.toFixed(5)}, ${form.lng.toFixed(5)}` : "No Coordinates Set"} readOnly placeholder="GPS Coordinates" />
-                <button className="btn btn-secondary" onClick={() => {
-                  if (navigator.geolocation) {
-                    navigator.geolocation.getCurrentPosition(
-                      (pos) => setForm({ ...form, lat: pos.coords.latitude, lng: pos.coords.longitude }),
-                      (err) => alert("Location access denied or unavailable: " + err.message),
-                      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
-                    );
-                  } else {
-                    alert("Geolocation is not supported by your browser");
-                  }
-                }}>📍 Get Location</button>
-                {(form.lat || form.lng) && <button className="btn" onClick={() => setForm({ ...form, lat: null, lng: null })}>Clear</button>}
-              </div>
-            </div>
-            <div className="grid-2">
-              <div className="field"><label>Category</label>
-                <select className="input" value={form.category} onChange={e => setForm({ ...form, category: e.target.value })}>
-                  {categories.map(c => <option key={c}>{c}</option>)}
-                </select>
-              </div>
-              <div className="field"><label>Event Color</label>
-                <div className="flex gap-2 mt-1">
-                  {colors.map(c => <div key={c} onClick={() => setForm({ ...form, color: c })} style={{ width: 28, height: 28, borderRadius: 8, background: c, cursor: "pointer", border: form.color === c ? "3px solid white" : "2px solid transparent", transition: "all 0.15s" }} />)}
-                </div>
-              </div>
-            </div>
-            <div className="field"><label>Notes</label><input className="input" value={form.notes} onChange={e => setForm({ ...form, notes: e.target.value })} placeholder="Any notes..." /></div>
-            <div className="flex gap-3 mt-4">
-              <button className="btn btn-primary flex-1" style={{ justifyContent: "center" }} onClick={saveEvent}>{editEvent ? "Update Event" : "Create Event"}</button>
-              <button className="btn" onClick={() => setShowForm(false)}>Cancel</button>
+      <AnimatedModal isOpen={showForm} onClose={() => setShowForm(false)}>
+        <h2>{editEvent ? "Edit Event" : "Create New Event"}</h2>
+        <div className="field"><label>Event Name</label><input className="input" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} placeholder="e.g. Monthly Sabha" /></div>
+        <div className="grid-2">
+          <div className="field"><label>Date</label><input className="input" type="date" value={form.date} onChange={e => setForm({ ...form, date: e.target.value })} /></div>
+          <div className="field"><label>Time</label><input className="input" type="time" value={form.time} onChange={e => setForm({ ...form, time: e.target.value })} /></div>
+        </div>
+        <div className="field"><label>Venue</label><input className="input" value={form.venue} onChange={e => setForm({ ...form, venue: e.target.value })} placeholder="Location / Venue" /></div>
+        <div className="field">
+          <label>Venue Lock (Geo-Fencing)</label>
+          <div className="flex gap-2">
+            <input className="input flex-1" value={form.lat && form.lng ? `${form.lat.toFixed(5)}, ${form.lng.toFixed(5)}` : "No Coordinates Set"} readOnly placeholder="GPS Coordinates" />
+            <button className="btn btn-secondary" onClick={() => {
+              if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                  (pos) => setForm({ ...form, lat: pos.coords.latitude, lng: pos.coords.longitude }),
+                  (err) => alert("Location access denied or unavailable: " + err.message),
+                  { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+                );
+              } else {
+                alert("Geolocation is not supported by your browser");
+              }
+            }}>📍 Get Location</button>
+            {(form.lat || form.lng) && <button className="btn" onClick={() => setForm({ ...form, lat: null, lng: null })}>Clear</button>}
+          </div>
+        </div>
+        <div className="grid-2">
+          <div className="field"><label>Category</label>
+            <select className="input" value={form.category} onChange={e => setForm({ ...form, category: e.target.value })}>
+              {categories.map(c => <option key={c}>{c}</option>)}
+            </select>
+          </div>
+          <div className="field"><label>Event Color</label>
+            <div className="flex gap-2 mt-1">
+              {colors.map(c => <div key={c} onClick={() => setForm({ ...form, color: c })} style={{ width: 28, height: 28, borderRadius: 8, background: c, cursor: "pointer", border: form.color === c ? "3px solid white" : "2px solid transparent", transition: "all 0.15s" }} />)}
             </div>
           </div>
         </div>
-      )}
+        <div className="field"><label>Notes</label><input className="input" value={form.notes} onChange={e => setForm({ ...form, notes: e.target.value })} placeholder="Any notes..." /></div>
+        <div className="flex gap-3 mt-4">
+          <button className="btn btn-primary flex-1" style={{ justifyContent: "center" }} onClick={saveEvent}>{editEvent ? "Update Event" : "Create Event"}</button>
+          <button className="btn" onClick={() => setShowForm(false)}>Cancel</button>
+        </div>
+      </AnimatedModal>
     </div>
   );
 }
@@ -2678,46 +2710,38 @@ function Attendance({ events, members, newJoinees, attendance, setAttendance, ne
           )}
         </>
       )}
-      {showBulkNames && (
-        <div className="modal-bg" onClick={e => e.target === e.currentTarget && setShowBulkNames(false)}>
-          <div className="modal" style={{ maxWidth: 520 }}>
-            <h2>Mark {groupLabel} Present</h2>
-            <div className="field">
-              <label>Names</label>
-              <textarea
-                className="input"
-                value={bulkNames}
-                onChange={e => setBulkNames(e.target.value)}
-                placeholder="Enter one name per line, or separate names with commas"
-                rows={8}
-                autoFocus
-                style={{ resize: "vertical", minHeight: 160 }}
-              />
-            </div>
-            <p className="color-muted text-xs" style={{ marginTop: -6, marginBottom: 12 }}>
-              This marks matching {groupLabel.toLowerCase()} as present for the selected event only.
-            </p>
-            <div className="flex gap-3 mt-4">
-              <button className="btn btn-primary flex-1" style={{ justifyContent: "center" }} onClick={submitBulkNames}>OK</button>
-              <button className="btn" onClick={() => setShowBulkNames(false)}>Cancel</button>
-            </div>
-          </div>
+      <AnimatedModal isOpen={showBulkNames} onClose={() => setShowBulkNames(false)} maxWidth={520}>
+        <h2>Mark {groupLabel} Present</h2>
+        <div className="field">
+          <label>Names</label>
+          <textarea
+            className="input"
+            value={bulkNames}
+            onChange={e => setBulkNames(e.target.value)}
+            placeholder="Enter one name per line, or separate names with commas"
+            rows={8}
+            autoFocus
+            style={{ resize: "vertical", minHeight: 160 }}
+          />
         </div>
-      )}
-      {showQR && selEvent && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center' }} onClick={() => setShowQR(false)}>
-          <div style={{ background: 'white', padding: 32, borderRadius: 16, textAlign: 'center', maxWidth: 400 }} onClick={e => e.stopPropagation()}>
-            <h2 className="mb-2">Event Check-In QR</h2>
-            <p className="color-muted mb-6 text-sm">Members scan this to submit attendance.</p>
-            <div style={{ display: 'inline-block', padding: 16, background: '#f9fafb', borderRadius: 12 }}>
-              <QRCodeCanvas value={`${window.location.origin}/?checkin=${selEvent}`} size={240} />
-            </div>
-            <div className="mt-6">
-              <button className="btn" style={{ width: '100%', padding: "10px", background: "#f3f4f6", color: "var(--text)", border: "none" }} onClick={() => setShowQR(false)}>Close</button>
-            </div>
-          </div>
+        <p className="color-muted text-xs" style={{ marginTop: -6, marginBottom: 12 }}>
+          This marks matching {groupLabel.toLowerCase()} as present for the selected event only.
+        </p>
+        <div className="flex gap-3 mt-4">
+          <button className="btn btn-primary flex-1" style={{ justifyContent: "center" }} onClick={submitBulkNames}>OK</button>
+          <button className="btn" onClick={() => setShowBulkNames(false)}>Cancel</button>
         </div>
-      )}
+      </AnimatedModal>
+      <AnimatedModal isOpen={showQR && !!selEvent} onClose={() => setShowQR(false)} maxWidth={400} style={{ background: 'white', padding: 32, borderRadius: 16, textAlign: 'center' }}>
+        <h2 className="mb-2">Event Check-In QR</h2>
+        <p className="color-muted mb-6 text-sm">Members scan this to submit attendance.</p>
+        <div style={{ display: 'inline-block', padding: 16, background: '#f9fafb', borderRadius: 12 }}>
+          <QRCodeCanvas value={`${window.location.origin}/?checkin=${selEvent}`} size={240} />
+        </div>
+        <div className="mt-6">
+          <button className="btn" style={{ width: '100%', padding: "10px", background: "#f3f4f6", color: "var(--text)", border: "none" }} onClick={() => setShowQR(false)}>Close</button>
+        </div>
+      </AnimatedModal>
       {showPending && selEvent && (
         <PendingCheckinsModal
           eventId={selEvent}
