@@ -6,7 +6,7 @@ import readXlsxFile from "read-excel-file/browser";
 import { LineChart, Line, XAxis, YAxis, Tooltip as RechartsTooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from "recharts";
 import { Canvas, useFrame } from "@react-three/fiber";
 import { OrbitControls, Stars, Html } from "@react-three/drei";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, animate } from "framer-motion";
 import { 
   Users, CalendarDays, ClipboardCheck, LayoutDashboard, Settings, 
   LogOut, Plus, Edit2, Trash2, Search, Filter, Download, 
@@ -40,6 +40,49 @@ const AnimatedModal = ({ isOpen, onClose, children, style, className = "modal", 
     )}
   </AnimatePresence>
 );
+
+const AnimatedNumber = ({ value }) => {
+  const [displayValue, setDisplayValue] = useState(0);
+  useEffect(() => {
+    const controls = animate(displayValue, value, {
+      duration: 1.2,
+      ease: [0.25, 1, 0.5, 1], // easeOutQuart
+      onUpdate(v) {
+        setDisplayValue(Math.round(v));
+      }
+    });
+    return () => controls.stop();
+  }, [value]);
+  return <>{displayValue}</>;
+};
+
+const SpotlightCard = ({ children, className = "", ...props }) => {
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+  const [isHovering, setIsHovering] = useState(false);
+  const handleMouseMove = (e) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    setMousePosition({ x: e.clientX - rect.left, y: e.clientY - rect.top });
+  };
+  return (
+    <div
+      onMouseMove={handleMouseMove}
+      onMouseEnter={() => setIsHovering(true)}
+      onMouseLeave={() => setIsHovering(false)}
+      className={`spotlight-card ${className}`}
+      {...props}
+    >
+      <motion.div
+        className="spotlight"
+        animate={{ opacity: isHovering ? 1 : 0 }}
+        transition={{ duration: 0.3 }}
+        style={{
+          background: `radial-gradient(400px circle at ${mousePosition.x}px ${mousePosition.y}px, rgba(124, 106, 248, 0.15), transparent 40%)`
+        }}
+      />
+      {children}
+    </div>
+  );
+};
 
 const ALLOWED_ADMIN_NAMES = new Set(["moksh", "moksh shah", "dheer sheth"]);
 const FIRESTORE_STATE_COLLECTION = "appState";
@@ -534,9 +577,11 @@ html.light .stat-card{box-shadow:0 1px 4px rgba(0,0,0,0.06)}
 .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
 .grid-2{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
 .grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
-.stat-card{background:var(--bg3);border:1px solid var(--border);border-radius:14px;padding:20px;position:relative;overflow:hidden;transition:all 0.2s;animation:fadeUp 0.35s ease both}
-.stat-card::after{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,0.02) 0%,transparent 100%);pointer-events:none}
-.stat-card:hover{border-color:var(--border2);transform:translateY(-2px)}
+.stat-card{position:relative;transition:all 0.2s;animation:fadeUp 0.35s ease both}
+.spotlight-card{background:var(--bg3);border:1px solid var(--border);border-radius:14px;padding:20px;position:relative;overflow:hidden;transition:all 0.2s}
+.spotlight-card .spotlight{position:absolute;inset:0;pointer-events:none;z-index:0}
+.spotlight-card > *{position:relative;z-index:1}
+.spotlight-card:hover{border-color:var(--border2);transform:translateY(-2px)}
 .stat-label{font-size:12px;color:var(--text2);font-weight:500;letter-spacing:0.3px;margin-bottom:8px}
 .stat-value{font-family:'Syne',sans-serif;font-size:28px;font-weight:700;color:var(--text)}
 .stat-sub{font-size:12px;color:var(--text2);margin-top:6px}
@@ -1274,16 +1319,48 @@ export default function App() {
           </div>
         </div>
       </div>
-      {toast && (
-        <div className="toast" style={{ borderColor: toast.type === "success" ? "rgba(16,212,126,0.3)" : toast.type === "error" ? "rgba(244,63,94,0.3)" : "var(--border2)" }}>
-          {toast.type === "success" ? "✅ " : toast.type === "error" ? "❌ " : "ℹ️ "}{toast.msg}
-        </div>
-      )}
-      {adminErr && (
-        <div className="toast" style={{ bottom: 82, borderColor: "rgba(244,63,94,0.3)" }}>
-          Unauthorized admin account: {adminErr}
-        </div>
-      )}
+      <AnimatePresence>
+        {toast && (
+          <motion.div
+            initial={{ opacity: 0, y: 50, scale: 0.3 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.5, transition: { duration: 0.2 } }}
+            drag="x"
+            dragConstraints={{ left: 0, right: 300 }}
+            dragElastic={0.2}
+            onDragEnd={(e, { offset, velocity }) => {
+              if (offset.x > 100 || velocity.x > 500) {
+                setToast(null);
+              }
+            }}
+            className="toast"
+            style={{ borderColor: toast.type === "success" ? "rgba(16,212,126,0.3)" : toast.type === "error" ? "rgba(244,63,94,0.3)" : "var(--border2)" }}
+          >
+            {toast.type === "success" ? "✅ " : toast.type === "error" ? "❌ " : "ℹ️ "}{toast.msg}
+          </motion.div>
+        )}
+      </AnimatePresence>
+      <AnimatePresence>
+        {adminErr && (
+          <motion.div
+            initial={{ opacity: 0, y: 50, scale: 0.3 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.5, transition: { duration: 0.2 } }}
+            drag="x"
+            dragConstraints={{ left: 0, right: 300 }}
+            dragElastic={0.2}
+            onDragEnd={(e, { offset, velocity }) => {
+              if (offset.x > 100 || velocity.x > 500) {
+                setAdminErr("");
+              }
+            }}
+            className="toast"
+            style={{ bottom: 82, borderColor: "rgba(244,63,94,0.3)" }}
+          >
+            Unauthorized admin account: {adminErr}
+          </motion.div>
+        )}
+      </AnimatePresence>
       <AttendanceAssistant
         members={members}
         newJoinees={newJoinees}
@@ -1478,10 +1555,10 @@ function Dashboard({ members, events, attendance, getEventStats, getMemberStats,
     return count;
   };
   const statCards = [
-    { label: "Total Members", value: active.length, icon: "👥", color: "#7c6af8", sub: "Active volunteers", trend: trend(memberGrowth, " joined this month", "Roster steady") },
-    { label: "Total Events", value: totalEvents, icon: "📅", color: "#06b6d4", sub: "Activities tracked", trend: trend(eventGrowth, " this month", "No monthly change") },
-    { label: "Avg Attendance", value: overallPct + "%", icon: "✅", color: "#10d47e", sub: "Recent pulse vs prior events", trend: trend(attendanceTrend, "%") },
-    { label: "Last Event", value: lastEventStats ? lastEventStats.present : 0, icon: "🎯", color: "#f0b429", sub: recentEvents[0] ? recentEvents[0].name : "No events yet", trend: trend(lastEventTrend, " present", "Same as prior event") },
+    { label: "Total Members", numValue: active.length, suffix: "", icon: "👥", color: "#7c6af8", sub: "Active volunteers", trend: trend(memberGrowth, " joined this month", "Roster steady") },
+    { label: "Total Events", numValue: totalEvents, suffix: "", icon: "📅", color: "#06b6d4", sub: "Activities tracked", trend: trend(eventGrowth, " this month", "No monthly change") },
+    { label: "Avg Attendance", numValue: overallPct, suffix: "%", icon: "✅", color: "#10d47e", sub: "Recent pulse vs prior events", trend: trend(attendanceTrend, "%") },
+    { label: "Last Event", numValue: lastEventStats ? lastEventStats.present : 0, suffix: "", icon: "🎯", color: "#f0b429", sub: recentEvents[0] ? recentEvents[0].name : "No events yet", trend: trend(lastEventTrend, " present", "Same as prior event") },
   ];
   const chartEvents = [...events].sort((a, b) => new Date(a.date) - new Date(b.date)).slice(-10);
   const lineChartData = chartEvents.map(e => {
@@ -1525,15 +1602,17 @@ function Dashboard({ members, events, attendance, getEventStats, getMemberStats,
       )}
       <div className="grid-4 mb-6">
         {loading ? [1, 2, 3, 4].map(n => <div key={n} className="skeleton-card" />) : statCards.map((s, index) => (
-          <div key={s.label} className="stat-card">
+          <SpotlightCard key={s.label} className="stat-card">
             <div className="stat-icon" style={{ background: s.color + "22" }}>{s.icon}</div>
             <div className="stat-label">{s.label}</div>
-            <div className="stat-value" style={{ color: s.color }}>{s.value}</div>
+            <div className="stat-value" style={{ color: s.color }}>
+              <AnimatedNumber value={s.numValue} />{s.suffix}
+            </div>
             <div className="stat-sub">{s.sub}</div>
             <div className={`trend ${s.trend.className}`} style={{ animationDelay: `${index * 0.05}s` }}>
               <span>{s.trend.icon}</span><span>{s.trend.text}</span>
             </div>
-          </div>
+          </SpotlightCard>
         ))}
       </div>
       
@@ -2657,51 +2736,63 @@ function Attendance({ events, members, newJoinees, attendance, setAttendance, ne
               </span>
             ))}
           </div>
-          <div className="attendance-grid">
-            {filtered.map(p => {
-              const status = statusOf(p.id);
-              const meta = statusMeta[status] || statusMeta.absent;
-              const stats = personStats(p);
-              const detail = isNewJoineeGroup ? (p.notes || "New joinee") : (p.area || "Member");
-              const role = p.role || (isNewJoineeGroup ? "New Joinee" : "Member");
-              return (
-                <div key={p.id} className={`attendance-card ${isAdmin ? "editable" : "locked"}`} onClick={() => cycleStatus(p.id)} style={{ "--status-color": meta.color, borderColor: status === "absent" ? "var(--border)" : `${meta.color}44`, background: status === "absent" ? "var(--bg3)" : `${meta.color}12` }}>
-                  <div className="flex items-center gap-3">
-                    <Avatar name={p.name} size={38} color={isAttendedStatus(status) ? meta.color : undefined} />
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 wrap">
-                        <div style={{ fontSize: 13.5, fontWeight: 800, color: "var(--text)" }}>{p.name}</div>
-                        <span className="tag tag-purple">{role}</span>
+          <motion.div layout className="attendance-grid">
+            <AnimatePresence>
+              {filtered.map(p => {
+                const status = statusOf(p.id);
+                const meta = statusMeta[status] || statusMeta.absent;
+                const stats = personStats(p);
+                const detail = isNewJoineeGroup ? (p.notes || "New joinee") : (p.area || "Member");
+                const role = p.role || (isNewJoineeGroup ? "New Joinee" : "Member");
+                return (
+                  <motion.div
+                    layout
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.9 }}
+                    transition={{ duration: 0.2 }}
+                    key={p.id}
+                    className={`attendance-card ${isAdmin ? "editable" : "locked"}`}
+                    onClick={() => cycleStatus(p.id)}
+                    style={{ "--status-color": meta.color, borderColor: status === "absent" ? "var(--border)" : `${meta.color}44`, background: status === "absent" ? "var(--bg3)" : `${meta.color}12` }}
+                  >
+                    <div className="flex items-center gap-3">
+                      <Avatar name={p.name} size={38} color={isAttendedStatus(status) ? meta.color : undefined} />
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 wrap">
+                          <div style={{ fontSize: 13.5, fontWeight: 800, color: "var(--text)" }}>{p.name}</div>
+                          <span className="tag tag-purple">{role}</span>
+                        </div>
+                        <div style={{ fontSize: 11.5, color: "var(--text2)", marginTop: 3 }}>{detail}</div>
                       </div>
-                      <div style={{ fontSize: 11.5, color: "var(--text2)", marginTop: 3 }}>{detail}</div>
+                      <span className="status-pill" style={{ "--status-color": meta.color }}>{meta.icon} {meta.label}</span>
                     </div>
-                    <span className="status-pill" style={{ "--status-color": meta.color }}>{meta.icon} {meta.label}</span>
-                  </div>
-                  <div className="flex gap-2 wrap mt-4">
-                    <span className="streak-badge">🔥 {stats.streak} streak</span>
-                    <span className="tag tag-purple">{stats.pct}% overall</span>
-                    {stats.firstTimer && <span className="tag tag-present">First-time</span>}
-                  </div>
-                  <div className="text-xs color-muted mt-2">
-                    Last attended: {stats.last ? `${stats.last.name} (${fmtDate(stats.last.date)})` : "No previous attendance"}
-                  </div>
-                  <div className="status-picker" onClick={e => e.stopPropagation()}>
-                    {statusOrder.map(option => (
-                      <button
-                        key={option}
-                        className={`status-choice ${status === option ? "active" : ""}`}
-                        style={{ "--status-color": statusMeta[option].color }}
-                        disabled={!isAdmin}
-                        onClick={() => setPersonStatus(p.id, option)}
-                      >
-                        {statusMeta[option].icon} {statusMeta[option].label}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
+                    <div className="flex gap-2 wrap mt-4">
+                      <span className="streak-badge">🔥 {stats.streak} streak</span>
+                      <span className="tag tag-purple">{stats.pct}% overall</span>
+                      {stats.firstTimer && <span className="tag tag-present">First-time</span>}
+                    </div>
+                    <div className="text-xs color-muted mt-2">
+                      Last attended: {stats.last ? `${stats.last.name} (${fmtDate(stats.last.date)})` : "No previous attendance"}
+                    </div>
+                    <div className="status-picker" onClick={e => e.stopPropagation()}>
+                      {statusOrder.map(option => (
+                        <button
+                          key={option}
+                          className={`status-choice ${status === option ? "active" : ""}`}
+                          style={{ "--status-color": statusMeta[option].color }}
+                          disabled={!isAdmin}
+                          onClick={() => setPersonStatus(p.id, option)}
+                        >
+                          {statusMeta[option].icon} {statusMeta[option].label}
+                        </button>
+                      ))}
+                    </div>
+                  </motion.div>
+                );
+              })}
+            </AnimatePresence>
+          </motion.div>
           {filtered.length === 0 && <EmptyState icon="🔎" msg="No people match the selected attendance filters" />}
           {isAdmin && (
             <div style={{ marginTop: 20, textAlign: "right" }}>
@@ -4070,7 +4161,22 @@ function Avatar({ name, size = 34, color }) {
 }
 
 function EmptyState({ icon, msg }) {
-  return <div className="empty-state"><div className="empty-icon">{icon}</div><div>{msg}</div></div>;
+  return (
+    <motion.div
+      initial={{ opacity: 0, scale: 0.9 }}
+      animate={{ opacity: 1, scale: 1 }}
+      className="empty-state"
+    >
+      <motion.div
+        animate={{ y: [0, -10, 0] }}
+        transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
+        className="empty-icon"
+      >
+        {icon}
+      </motion.div>
+      <div>{msg}</div>
+    </motion.div>
+  );
 }
 
 function getGreeting() {
