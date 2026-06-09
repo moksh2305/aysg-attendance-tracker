@@ -58,6 +58,65 @@ const AnimatedNumber = ({ value }) => {
   return <>{displayValue}</>;
 };
 
+const CircularProgress = ({ percentage, color }) => {
+  const radius = 34;
+  const circumference = 2 * Math.PI * radius;
+  return (
+    <div style={{ position: "relative", width: 80, height: 80, display: "flex", alignItems: "center", justifyContent: "center" }}>
+      <svg width={80} height={80} style={{ transform: "rotate(-90deg)", position: "absolute" }}>
+        <circle cx={40} cy={40} r={radius} fill="none" stroke="var(--bg4)" strokeWidth={7} />
+        <motion.circle
+          cx={40} cy={40} r={radius} fill="none"
+          stroke={color} strokeWidth={7} strokeLinecap="round"
+          strokeDasharray={circumference}
+          initial={{ strokeDashoffset: circumference }}
+          animate={{ strokeDashoffset: circumference - (percentage / 100) * circumference }}
+          transition={{ duration: 1.5, ease: "easeOut" }}
+        />
+      </svg>
+      <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18, fontWeight: 800, color }}>
+        <AnimatedNumber value={percentage} />%
+      </div>
+    </div>
+  );
+};
+
+const MemberAttendanceBarChart = ({ history }) => {
+  const chartEvents = history.slice(0, 12).reverse(); // Last 12 events chronologically
+  
+  return (
+    <div style={{ marginTop: 20 }}>
+      <h3 style={{ fontSize: 13, color: "var(--text2)", marginBottom: 12, fontWeight: 600, textTransform: "uppercase", letterSpacing: 1 }}>Recent Attendance (Last 12)</h3>
+      <div style={{ display: "flex", alignItems: "flex-end", gap: 6, height: 120 }}>
+        {chartEvents.map((item, i) => {
+          const { event, present } = item;
+          let color = "var(--bg4)";
+          let height = 15;
+          if (present) { color = "var(--emerald)"; height = 100; }
+          else { color = "var(--rose)"; height = 30; }
+          
+          return (
+            <div key={event.id} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 6 }} title={`${event.name}: ${present ? 'Present' : 'Absent'}`}>
+              <div style={{ width: "100%", height: 100, background: "var(--bg3)", borderRadius: 6, display: "flex", alignItems: "flex-end", overflow: "hidden" }}>
+                <motion.div
+                  initial={{ height: 0 }}
+                  animate={{ height: `${height}%` }}
+                  transition={{ duration: 0.8, delay: i * 0.04, type: "spring", stiffness: 150, damping: 15 }}
+                  style={{ width: "100%", background: color, borderRadius: 6 }}
+                />
+              </div>
+              <div style={{ fontSize: 9, color: "var(--text2)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", width: "100%", textAlign: "center", fontWeight: 600 }}>
+                {event.name.substring(0, 3)}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+};
+
+
 const SpotlightCard = ({ children, className = "", ...props }) => {
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [isHovering, setIsHovering] = useState(false);
@@ -1638,16 +1697,31 @@ function Dashboard({ members, events, attendance, getEventStats, getMemberStats,
       )}
       <div className="grid-4 mb-6">
         {loading ? [1, 2, 3, 4].map(n => <div key={n} className="skeleton-card" />) : statCards.map((s, index) => (
-          <SpotlightCard key={s.label} className="stat-card">
-            <div className="stat-icon" style={{ background: s.color + "22" }}>{s.icon}</div>
-            <div className="stat-label">{s.label}</div>
-            <div className="stat-value" style={{ color: s.color }}>
-              <AnimatedNumber value={s.numValue} />{s.suffix}
-            </div>
-            <div className="stat-sub">{s.sub}</div>
-            <div className={`trend ${s.trend.className}`} style={{ animationDelay: `${index * 0.05}s` }}>
-              <span>{s.trend.icon}</span><span>{s.trend.text}</span>
-            </div>
+          <SpotlightCard key={s.label} className="stat-card" style={s.label === "Avg Attendance" ? { display: "flex", alignItems: "center", gap: "20px" } : {}}>
+            {s.label === "Avg Attendance" ? (
+              <>
+                <CircularProgress percentage={s.numValue} color={s.color} />
+                <div style={{ flex: 1 }}>
+                  <div className="stat-label">{s.label}</div>
+                  <div className="stat-sub" style={{ margin: "4px 0 10px 0" }}>{s.sub}</div>
+                  <div className={`trend ${s.trend.className}`}>
+                    <span>{s.trend.icon}</span><span>{s.trend.text}</span>
+                  </div>
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="stat-icon" style={{ background: s.color + "22" }}>{s.icon}</div>
+                <div className="stat-label">{s.label}</div>
+                <div className="stat-value" style={{ color: s.color }}>
+                  <AnimatedNumber value={s.numValue} />{s.suffix}
+                </div>
+                <div className="stat-sub">{s.sub}</div>
+                <div className={`trend ${s.trend.className}`} style={{ animationDelay: `${index * 0.05}s` }}>
+                  <span>{s.trend.icon}</span><span>{s.trend.text}</span>
+                </div>
+              </>
+            )}
           </SpotlightCard>
         ))}
       </div>
@@ -2088,17 +2162,11 @@ function Members({ members, setMembers, newJoinees, setNewJoinees, events, atten
               ))}
             </div>
             <div className="card mb-4" style={{ padding: 14 }}>
-              <div className="flex items-center justify-between mb-3">
-                <div style={{ fontWeight: 800, fontSize: 13.5 }}>Attendance Trend</div>
+              <div className="flex items-center justify-between">
+                <div style={{ fontWeight: 800, fontSize: 13.5 }}>Attendance Pattern</div>
                 <span className={`tag ${selectedMember.active ? "tag-present" : "tag-absent"}`}>{selectedMember.active ? "Active" : "Inactive"}</span>
               </div>
-              <div style={{ display: "grid", gridTemplateColumns: `repeat(${Math.max(selectedInsights.history.slice(0, 10).length, 1)},1fr)`, gap: 5 }}>
-                {selectedInsights.history.slice(0, 10).reverse().map(({ event, present }) => (
-                  <div key={event.id} title={event.name} style={{ height: 42, borderRadius: 7, background: present ? "rgba(16,212,126,0.22)" : "rgba(244,63,94,0.16)", border: `1px solid ${present ? "rgba(16,212,126,0.35)" : "rgba(244,63,94,0.28)"}`, display: "flex", alignItems: "center", justifyContent: "center", color: present ? "var(--emerald)" : "var(--rose)", fontWeight: 800 }}>
-                    {present ? "✓" : "×"}
-                  </div>
-                ))}
-              </div>
+              <MemberAttendanceBarChart history={selectedInsights.history} />
             </div>
             <div className="grid-2 mb-4">
               <div className="analytics-tile"><div className="stat-label">Last Attended</div><div style={{ fontWeight: 700, fontSize: 13 }}>{selectedInsights.lastAttended ? selectedInsights.lastAttended.name : "Never"}</div><div className="text-xs color-muted">{selectedInsights.lastAttended ? fmtDate(selectedInsights.lastAttended.date) : "No recorded presence"}</div></div>
