@@ -2829,11 +2829,12 @@ function Attendance({ events, members, newJoinees, attendance, setAttendance, ne
           </motion.div>
           {filtered.length === 0 && <EmptyState icon="🔎" msg="No people match the selected attendance filters" />}
           {isAdmin && (
-            <div style={{ marginTop: 20, textAlign: "right" }}>
+            <div style={{ marginTop: 30, marginBottom: 40, textAlign: "right", paddingRight: 10 }}>
               <button 
                 className="btn btn-primary" 
+                style={{ padding: "12px 24px", fontSize: "15px", boxShadow: "0 8px 16px rgba(124, 106, 248, 0.25)" }}
                 onClick={(e) => {
-                  setBurst({ x: e.clientX, y: e.clientY });
+                  setBurst({ x: e.clientX, y: e.clientY, id: Date.now() });
                   setTimeout(() => setBurst(null), 1500);
                   showToast("Attendance saved!", "success");
                 }}
@@ -2844,7 +2845,7 @@ function Attendance({ events, members, newJoinees, attendance, setAttendance, ne
           )}
         </>
       )}
-      <ParticleBurst trigger={!!burst} x={burst?.x} y={burst?.y} />
+      <ParticleBurst key={burst?.id || "none"} trigger={!!burst} x={burst?.x} y={burst?.y} />
       <AnimatedModal isOpen={showBulkNames} onClose={() => setShowBulkNames(false)} maxWidth={520}>
         <h2>Mark {groupLabel} Present</h2>
         <div className="field">
