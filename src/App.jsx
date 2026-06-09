@@ -84,6 +84,39 @@ const SpotlightCard = ({ children, className = "", ...props }) => {
   );
 };
 
+const ParticleBurst = ({ trigger, x, y, color = "#10d47e" }) => {
+  if (!trigger) return null;
+  const particles = Array.from({ length: 20 });
+  return (
+    <div style={{ position: "fixed", top: y, left: x, pointerEvents: "none", zIndex: 9999 }}>
+      {particles.map((_, i) => {
+        const angle = (i / particles.length) * Math.PI * 2;
+        const velocity = 60 + Math.random() * 120;
+        return (
+          <motion.div
+            key={i}
+            initial={{ x: 0, y: 0, scale: 0, opacity: 1 }}
+            animate={{ 
+              x: Math.cos(angle) * velocity, 
+              y: Math.sin(angle) * velocity + 50, // slight gravity
+              scale: [0, 1.5, 0],
+              opacity: [1, 1, 0]
+            }}
+            transition={{ duration: 0.6 + Math.random() * 0.4, ease: "easeOut" }}
+            style={{
+              position: "absolute",
+              width: 6 + Math.random() * 6, 
+              height: 6 + Math.random() * 6,
+              borderRadius: Math.random() > 0.5 ? "50%" : "2px",
+              background: color
+            }}
+          />
+        );
+      })}
+    </div>
+  );
+};
+
 const ALLOWED_ADMIN_NAMES = new Set(["moksh", "moksh shah", "dheer sheth"]);
 const FIRESTORE_STATE_COLLECTION = "appState";
 const DATA_SCHEMA_VERSION = 1;
@@ -1994,7 +2027,7 @@ function Members({ members, setMembers, newJoinees, setNewJoinees, events, atten
                   const s = insight.stats;
                   const bucket = performanceBucket(s.pct);
                   return (
-                    <tr key={m.id} className="member-row" onClick={() => setSelectedMember(m)}>
+                    <motion.tr layoutId={`member-${m.id}`} key={m.id} className="member-row" onClick={() => setSelectedMember(m)}>
                       <td><div className="flex items-center gap-3"><Avatar name={m.name} size={30} /><div><div className="flex items-center gap-1"><div style={{ fontWeight: 700, fontSize: 13 }}>{m.name}</div>{insight.badges && insight.badges.length > 0 && <div className="flex gap-1" style={{ marginLeft: 4 }}>{insight.badges.map((b, i) => <span key={i} title={b.tooltip} style={{ cursor: "help" }}>{b.icon}</span>)}</div>}</div><div className="text-xs color-muted">{m.id} · {m.mobile || "No mobile"}</div></div></div></td>
                       <td>
                         <div className="attendance-meter">
@@ -2018,7 +2051,7 @@ function Members({ members, setMembers, newJoinees, setNewJoinees, events, atten
                           {isAdmin && <button className="btn btn-sm btn-danger" onClick={e => { e.stopPropagation(); setDeleteConfirmId(m.id); }}>Delete</button>}
                         </div>
                       </td>
-                    </tr>
+                    </motion.tr>
                   );
                 })}
               </tbody>
@@ -2028,7 +2061,7 @@ function Members({ members, setMembers, newJoinees, setNewJoinees, events, atten
       </div>
       {selectedMember && selectedInsights && (
         <div className="drawer-bg" onClick={e => e.target === e.currentTarget && setSelectedMember(null)}>
-          <div className="profile-drawer">
+          <motion.div layoutId={`member-${selectedMember.id}`} className="profile-drawer" style={{ borderRadius: "16px 0 0 16px" }}>
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-3">
                 <Avatar name={selectedMember.name} size={44} />
@@ -2089,7 +2122,7 @@ function Members({ members, setMembers, newJoinees, setNewJoinees, events, atten
                 </div>
               ))}
             </div>
-          </div>
+          </motion.div>
         </div>
       )}
       <AnimatedModal isOpen={showForm} onClose={() => setShowForm(false)}>
@@ -2405,6 +2438,7 @@ function Attendance({ events, members, newJoinees, attendance, setAttendance, ne
   
   const [showQR, setShowQR] = useState(false);
   const [showPending, setShowPending] = useState(false);
+  const [burst, setBurst] = useState(null);
   const [search, setSearch] = useState("");
   const [group, setGroup] = useState("members");
   const [statusFilter, setStatusFilter] = useState("");
@@ -2796,11 +2830,21 @@ function Attendance({ events, members, newJoinees, attendance, setAttendance, ne
           {filtered.length === 0 && <EmptyState icon="🔎" msg="No people match the selected attendance filters" />}
           {isAdmin && (
             <div style={{ marginTop: 20, textAlign: "right" }}>
-              <button className="btn btn-primary" onClick={() => showToast("Attendance saved!", "success")}>Save Attendance</button>
+              <button 
+                className="btn btn-primary" 
+                onClick={(e) => {
+                  setBurst({ x: e.clientX, y: e.clientY });
+                  setTimeout(() => setBurst(null), 1500);
+                  showToast("Attendance saved!", "success");
+                }}
+              >
+                Save Attendance
+              </button>
             </div>
           )}
         </>
       )}
+      <ParticleBurst trigger={!!burst} x={burst?.x} y={burst?.y} />
       <AnimatedModal isOpen={showBulkNames} onClose={() => setShowBulkNames(false)} maxWidth={520}>
         <h2>Mark {groupLabel} Present</h2>
         <div className="field">
