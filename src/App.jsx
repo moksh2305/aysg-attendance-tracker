@@ -2277,14 +2277,14 @@ function RolesDashboard({ members, setMembers, isAdmin, attendance, events }) {
             <div key={team.id} className="card" style={{ position: "relative", overflow: "hidden", border: `1px solid ${team.color}40`, background: `linear-gradient(145deg, var(--bg2) 0%, rgba(0,0,0,0.5) 100%)`, display: "flex", flexDirection: "column" }}>
               <div style={{ position: "absolute", top: -40, right: -40, width: 120, height: 120, background: team.color, filter: "blur(60px)", opacity: 0.15, pointerEvents: "none" }} />
               
-              <div style={{ padding: 20, flex: 1 }}>
+              <div style={{ padding: 20, flex: 1, display: "flex", flexDirection: "column" }}>
                 <div className="flex items-center gap-3 mb-4">
                   <div style={{ width: 48, height: 48, borderRadius: 12, background: `${team.color}20`, color: team.color, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 24, flexShrink: 0 }}>
                     {team.icon}
                   </div>
                   <div style={{ flex: 1 }}>
                     <div style={{ fontWeight: 800, fontSize: 18, color: "var(--text)" }}>{team.name}</div>
-                    <div style={{ fontSize: 12, color: "var(--text2)" }}>{team.desc}</div>
+                    <div style={{ fontSize: 12, color: "var(--text2)", minHeight: 36, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{team.desc}</div>
                   </div>
                 </div>
                 
@@ -2312,7 +2312,7 @@ function RolesDashboard({ members, setMembers, isAdmin, attendance, events }) {
                   <div style={{ fontSize: 11, fontWeight: 700, color: "var(--accent)", marginBottom: 4, display: "flex", alignItems: "center", gap: 4 }}>
                     <span>🤖</span> AI Insight
                   </div>
-                  <div style={{ fontSize: 12, color: "var(--text)", lineHeight: 1.4 }}>
+                  <div style={{ fontSize: 12, color: "var(--text)", lineHeight: 1.4, minHeight: 34, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>
                     {stats.insight}
                   </div>
                 </div>
