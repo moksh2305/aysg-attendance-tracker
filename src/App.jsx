@@ -3754,7 +3754,7 @@ function buildReportHtml({ template, data, options }) {
     <header class="report-header">
       <div class="header-logo-container">
         <!-- Logo cropped to exclude the bottom text -->
-        <img src="/aysg-logo.jpg" alt="AYSG Logo" class="header-logo" onerror="this.style.display='none'" />
+        <img src="/logo.png" alt="AYSG Logo" class="header-logo" onerror="this.style.display='none'" />
       </div>
       <div class="header-details">
         <h1 class="report-title">AYSG Ghatkopar Attendance Report</h1>
