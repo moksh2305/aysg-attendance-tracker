@@ -8,9 +8,9 @@ import { LineChart, Line, XAxis, YAxis, Tooltip as RechartsTooltip, ResponsiveCo
 import { Canvas, useFrame } from "@react-three/fiber";
 import { OrbitControls, Stars, Html } from "@react-three/drei";
 import { motion, AnimatePresence, animate } from "framer-motion";
-import { 
-  Users, CalendarDays, ClipboardCheck, LayoutDashboard, Settings, 
-  LogOut, Plus, Edit2, Trash2, Search, Filter, Download, 
+import {
+  Users, CalendarDays, ClipboardCheck, LayoutDashboard, Settings,
+  LogOut, Plus, Edit2, Trash2, Search, Filter, Download,
   MapPin, Clock, Phone, AlertCircle, CheckCircle2, ChevronDown, Activity, UserPlus
 } from "lucide-react";
 import { auth, db, googleProvider } from "./firebase";
@@ -58,65 +58,6 @@ const AnimatedNumber = ({ value }) => {
   return <>{displayValue}</>;
 };
 
-const CircularProgress = ({ percentage, color }) => {
-  const radius = 34;
-  const circumference = 2 * Math.PI * radius;
-  return (
-    <div style={{ position: "relative", width: 80, height: 80, display: "flex", alignItems: "center", justifyContent: "center" }}>
-      <svg width={80} height={80} style={{ transform: "rotate(-90deg)", position: "absolute" }}>
-        <circle cx={40} cy={40} r={radius} fill="none" stroke="var(--bg4)" strokeWidth={7} />
-        <motion.circle
-          cx={40} cy={40} r={radius} fill="none"
-          stroke={color} strokeWidth={7} strokeLinecap="round"
-          strokeDasharray={circumference}
-          initial={{ strokeDashoffset: circumference }}
-          animate={{ strokeDashoffset: circumference - (percentage / 100) * circumference }}
-          transition={{ duration: 1.5, ease: "easeOut" }}
-        />
-      </svg>
-      <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18, fontWeight: 800, color }}>
-        <AnimatedNumber value={percentage} />%
-      </div>
-    </div>
-  );
-};
-
-const MemberAttendanceBarChart = ({ history }) => {
-  const chartEvents = history.slice(0, 12).reverse(); // Last 12 events chronologically
-  
-  return (
-    <div style={{ marginTop: 20 }}>
-      <h3 style={{ fontSize: 13, color: "var(--text2)", marginBottom: 12, fontWeight: 600, textTransform: "uppercase", letterSpacing: 1 }}>Recent Attendance (Last 12)</h3>
-      <div style={{ display: "flex", alignItems: "flex-end", gap: 6, height: 120 }}>
-        {chartEvents.map((item, i) => {
-          const { event, present } = item;
-          let color = "var(--bg4)";
-          let height = 15;
-          if (present) { color = "var(--emerald)"; height = 100; }
-          else { color = "var(--rose)"; height = 30; }
-          
-          return (
-            <div key={event.id} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 6 }} title={`${event.name}: ${present ? 'Present' : 'Absent'}`}>
-              <div style={{ width: "100%", height: 100, background: "var(--bg3)", borderRadius: 6, display: "flex", alignItems: "flex-end", overflow: "hidden" }}>
-                <motion.div
-                  initial={{ height: 0 }}
-                  animate={{ height: `${height}%` }}
-                  transition={{ duration: 0.8, delay: i * 0.04, type: "spring", stiffness: 150, damping: 15 }}
-                  style={{ width: "100%", background: color, borderRadius: 6 }}
-                />
-              </div>
-              <div style={{ fontSize: 9, color: "var(--text2)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", width: "100%", textAlign: "center", fontWeight: 600 }}>
-                {event.name.substring(0, 3)}
-              </div>
-            </div>
-          );
-        })}
-      </div>
-    </div>
-  );
-};
-
-
 const SpotlightCard = ({ children, className = "", ...props }) => {
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [isHovering, setIsHovering] = useState(false);
@@ -157,8 +98,8 @@ const ParticleBurst = ({ trigger, x, y, color = "#10d47e" }) => {
           <motion.div
             key={i}
             initial={{ x: 0, y: 0, scale: 0, opacity: 1 }}
-            animate={{ 
-              x: Math.cos(angle) * velocity, 
+            animate={{
+              x: Math.cos(angle) * velocity,
               y: Math.sin(angle) * velocity + 50, // slight gravity
               scale: [0, 1.5, 0],
               opacity: [1, 1, 0]
@@ -166,7 +107,7 @@ const ParticleBurst = ({ trigger, x, y, color = "#10d47e" }) => {
             transition={{ duration: 0.6 + Math.random() * 0.4, ease: "easeOut" }}
             style={{
               position: "absolute",
-              width: 6 + Math.random() * 6, 
+              width: 6 + Math.random() * 6,
               height: 6 + Math.random() * 6,
               borderRadius: Math.random() > 0.5 ? "50%" : "2px",
               background: color
@@ -391,12 +332,12 @@ const passthrough = value => value;
 function getDistanceInMeters(lat1, lon1, lat2, lon2) {
   if (!lat1 || !lon1 || !lat2 || !lon2) return 0;
   const R = 6371e3;
-  const p1 = lat1 * Math.PI/180;
-  const p2 = lat2 * Math.PI/180;
-  const dp = (lat2-lat1) * Math.PI/180;
-  const dl = (lon2-lon1) * Math.PI/180;
-  const a = Math.sin(dp/2) * Math.sin(dp/2) + Math.cos(p1) * Math.cos(p2) * Math.sin(dl/2) * Math.sin(dl/2);
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  const p1 = lat1 * Math.PI / 180;
+  const p2 = lat2 * Math.PI / 180;
+  const dp = (lat2 - lat1) * Math.PI / 180;
+  const dl = (lon2 - lon1) * Math.PI / 180;
+  const a = Math.sin(dp / 2) * Math.sin(dp / 2) + Math.cos(p1) * Math.cos(p2) * Math.sin(dl / 2) * Math.sin(dl / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   return R * c;
 }
 
@@ -424,11 +365,11 @@ function isDemoMemberList(members) {
 function migrateMembers(value) {
   if (!Array.isArray(value)) return INITIAL_MEMBERS;
   if (value.length === 0 || isDemoMemberList(value)) return INITIAL_MEMBERS;
-  
+
   const usedIds = new Set();
   const dedupedBase = [];
   let changed = false;
-  
+
   for (const member of value) {
     let m = { ...member };
     // Inject phone number if it exists in our mapping and is currently empty
@@ -436,7 +377,7 @@ function migrateMembers(value) {
       m.mobile = PHONES[m.name];
       changed = true;
     }
-    
+
     if (!m.id || usedIds.has(m.id)) {
       const newId = genId("M");
       usedIds.add(newId);
@@ -807,7 +748,7 @@ select.input{cursor:pointer}
 .locked-screen{text-align:center;padding:40px 0}
 .lock-icon{font-size:64px;margin-bottom:20px;animation:shake 0.5s ease}
 @keyframes shake{0%,100%{transform:rotate(0)}25%{transform:rotate(-10deg)}75%{transform:rotate(10deg)}}
-.flex{display:flex}.flex-col{flex-direction:column}.items-center{align-items:center}.justify-center{justify-content:center}.justify-between{justify-content:space-between}.gap-2{gap:8px}.gap-3{gap:12px}.gap-4{gap:16px}.gap-6{gap:24px}.mb-2{margin-bottom:8px}.mb-3{margin-bottom:12px}.mb-4{margin-bottom:16px}.mb-6{margin-bottom:24px}.mt-2{margin-top:8px}.mt-4{margin-top:16px}.flex-1{flex:1}.text-sm{font-size:12.5px}.text-xs{font-size:11.5px}.font-bold{font-weight:700}.font-semi{font-weight:600}.color-muted{color:var(--text2)}.color-accent{color:var(--accent2)}.color-green{color:var(--emerald)}.color-red{color:var(--rose)}.color-gold{color:var(--gold)}.wrap{flex-wrap:wrap}
+.flex{display:flex}.items-center{align-items:center}.justify-between{justify-content:space-between}.gap-2{gap:8px}.gap-3{gap:12px}.gap-4{gap:16px}.mb-2{margin-bottom:8px}.mb-3{margin-bottom:12px}.mb-4{margin-bottom:16px}.mb-6{margin-bottom:24px}.mt-2{margin-top:8px}.mt-4{margin-top:16px}.flex-1{flex:1}.text-sm{font-size:12.5px}.text-xs{font-size:11.5px}.font-bold{font-weight:700}.font-semi{font-weight:600}.color-muted{color:var(--text2)}.color-accent{color:var(--accent2)}.color-green{color:var(--emerald)}.color-red{color:var(--rose)}.color-gold{color:var(--gold)}.wrap{flex-wrap:wrap}
 .ring-chart{position:relative;display:inline-flex;align-items:center;justify-content:center}
 .bar-item{height:32px;border-radius:6px;display:flex;align-items:center;padding:0 12px;font-size:12.5px;font-weight:500;color:var(--text2);margin-bottom:6px;background:var(--bg4);overflow:hidden;position:relative}
 .bar-fill{position:absolute;left:0;top:0;bottom:0;border-radius:6px;opacity:0.25;transition:width 0.5s ease}
@@ -929,8 +870,19 @@ select.input{cursor:pointer}
 .assistant-form button{min-width:64px;justify-content:center}
 `;
 
-const VIEWS = ["Dashboard", "Members", "New Joinees", "Events", "Attendance", "Analytics", "Reports"];
-const VIEW_ICONS = { Dashboard: "D", Members: "M", "New Joinees": "N", Events: "E", Attendance: "A", Analytics: "Y", Reports: "R" };
+const VIEWS = ["Dashboard", "Members", "New Joinees", "Roles", "Events", "Attendance", "Analytics", "Reports"];
+const VIEW_ICONS = { Dashboard: "D", Members: "M", "New Joinees": "N", Roles: "🎭", Events: "E", Attendance: "A", Analytics: "Y", Reports: "R" };
+
+const TEAMS = [
+  { id: "research", name: "Research Team", color: "#10b981", icon: "🔍", desc: "Identify and maintain a database of Gaushalas, Orphanages, etc." },
+  { id: "logistics", name: "Logistics Team", color: "#3b82f6", icon: "📦", desc: "Source quality materials at the best prices." },
+  { id: "activity", name: "Activity Planning", color: "#f97316", icon: "📋", desc: "Design the activity end-to-end, deciding beneficiaries." },
+  { id: "graphics", name: "Graphics Team", color: "#eab308", icon: "🎨", desc: "Create engaging creatives, slides and announcements." },
+  { id: "operations", name: "Operations Team", color: "#8b5cf6", icon: "⚙️", desc: "Manage activity execution, volunteer coordination, setup." },
+  { id: "post_activity", name: "Post Activity Team", color: "#d946ef", icon: "📹", desc: "Create videos, reels, and reports capturing impact." },
+  { id: "finance", name: "Finance Team", color: "#14b8a6", icon: "💰", desc: "Manage funds, budgeting, and financial tracking." },
+  { id: "database", name: "Database Management", color: "#64748b", icon: "🗄️", desc: "Maintain records, member data, and analytics." }
+];
 
 
 function PublicCheckIn({ event }) {
@@ -1043,15 +995,15 @@ function PendingRow({ docId, data, members, onApprove, onReject }) {
         setTimeout(() => setMatchId(m.id), 0);
       }
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [members, data.name]);
   return (
-    <div style={{ border: '1px solid var(--border)', padding: 16, borderRadius: 12, background: "var(--bg2)" }} className="flex wrap items-center justify-between gap-4">
-      <div style={{ flex: "1 1 150px" }}>
-        <div style={{ fontWeight: 600, fontSize: 15, color: "var(--text)" }}>{data.name}</div>
-        <div style={{ fontSize: 13, color: 'var(--text2)', marginTop: 2 }}>{data.mobile || "No mobile"}</div>
+    <div style={{ border: '1px solid var(--border)', padding: 12, borderRadius: 8, background: "white" }} className="flex items-center justify-between gap-4">
+      <div style={{ flex: 1 }}>
+        <div style={{ fontWeight: 600, fontSize: 14 }}>{data.name}</div>
+        <div style={{ fontSize: 12, color: 'var(--text2)' }}>{data.mobile || "No mobile"}</div>
       </div>
-      <select value={matchId} onChange={e => setMatchId(e.target.value)} className="input" style={{ flex: "1 1 150px", minWidth: 150 }}>
+      <select value={matchId} onChange={e => setMatchId(e.target.value)} className="input" style={{ flex: 1 }}>
         <option value="">-- Match Member --</option>
         <option value="NEW_JOINEE">+ Add as New Joinee</option>
         <optgroup label="Members">
@@ -1116,17 +1068,14 @@ function CinematicTVMode({ events, members, attendance, setView }) {
   const rec = activeEvent ? (attendance[activeEvent.id] || {}) : {};
   const activeMembers = members.filter(m => m.active);
   const presentMembers = activeMembers.filter(m => normalizeAttendanceStatus(rec[m.id]) === 'present' || normalizeAttendanceStatus(rec[m.id]) === 'late');
-  
+
   return (
     <div style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', background: '#000', color: '#fff', zIndex: 9999, display: 'flex', flexDirection: 'column', overflow: 'hidden', fontFamily: "'Syne', sans-serif" }}>
       <div style={{ position: 'absolute', top: '-50%', left: '-50%', width: '200%', height: '200%', background: 'radial-gradient(circle at center, #1a1a2e 0%, #000 100%)', zIndex: -1, animation: 'pulse 10s infinite alternate' }} />
-      
+
       <div style={{ padding: '40px 60px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(255,255,255,0.03)', backdropFilter: 'blur(20px)', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
         <div>
-          <div className="flex items-center gap-4">
-            <img src="/logo.png" alt="AYSG Logo" style={{ height: 56, background: 'white', padding: '4px', borderRadius: '8px', objectFit: 'contain' }} />
-            <h1 style={{ fontSize: 48, margin: 0, fontWeight: 800, background: 'linear-gradient(90deg, #fff, #a5b4fc)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>Live</h1>
-          </div>
+          <h1 style={{ fontSize: 48, margin: 0, fontWeight: 800, background: 'linear-gradient(90deg, #fff, #a5b4fc)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>AYSG Live</h1>
           <p style={{ fontSize: 24, margin: '10px 0 0 0', color: 'rgba(255,255,255,0.6)' }}>{activeEvent?.name || "No Active Event"} &bull; {activeEvent?.venue || ""}</p>
         </div>
         <div style={{ textAlign: 'right' }}>
@@ -1144,26 +1093,26 @@ function CinematicTVMode({ events, members, attendance, setView }) {
             <div style={{ fontSize: 120, fontWeight: 800, lineHeight: 1, color: '#10d47e' }}>{presentMembers.length}</div>
             <div style={{ fontSize: 24, color: 'rgba(255,255,255,0.4)', marginTop: 10 }}>out of {activeMembers.length} expected</div>
           </div>
-          
+
           <div style={{ flex: 1, background: 'rgba(255,255,255,0.02)', padding: '40px', borderRadius: '32px', border: '1px solid rgba(255,255,255,0.05)', overflow: 'hidden', position: 'relative' }}>
-             <div style={{ fontSize: 24, color: 'rgba(255,255,255,0.6)', textTransform: 'uppercase', letterSpacing: 2, marginBottom: 30 }}>Present Members</div>
-             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '15px' }}>
-               {presentMembers.map(m => (
-                 <div key={m.id} style={{ background: 'rgba(16, 212, 126, 0.1)', border: '1px solid rgba(16, 212, 126, 0.3)', padding: '12px 24px', borderRadius: '100px', color: '#10d47e', fontSize: 20, fontWeight: 700 }}>
-                   {m.name}
-                 </div>
-               ))}
-               {presentMembers.length === 0 && <div style={{ fontSize: 24, color: 'rgba(255,255,255,0.3)' }}>Waiting for members to arrive...</div>}
-             </div>
+            <div style={{ fontSize: 24, color: 'rgba(255,255,255,0.6)', textTransform: 'uppercase', letterSpacing: 2, marginBottom: 30 }}>Present Members</div>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '15px' }}>
+              {presentMembers.map(m => (
+                <div key={m.id} style={{ background: 'rgba(16, 212, 126, 0.1)', border: '1px solid rgba(16, 212, 126, 0.3)', padding: '12px 24px', borderRadius: '100px', color: '#10d47e', fontSize: 20, fontWeight: 700 }}>
+                  {m.name}
+                </div>
+              ))}
+              {presentMembers.length === 0 && <div style={{ fontSize: 24, color: 'rgba(255,255,255,0.3)' }}>Waiting for members to arrive...</div>}
+            </div>
           </div>
         </div>
 
         <div style={{ width: '450px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: 'rgba(255,255,255,0.05)', padding: '60px', borderRadius: '40px', border: '1px solid rgba(255,255,255,0.1)', backdropFilter: 'blur(20px)' }}>
-           <h2 style={{ fontSize: 32, fontWeight: 700, marginBottom: 20, textAlign: 'center' }}>Scan to Check-in</h2>
-           <div style={{ background: '#fff', padding: '30px', borderRadius: '32px', boxShadow: '0 20px 50px rgba(0,0,0,0.5)' }}>
-             <QRCodeCanvas value={`${window.location.origin}/?checkin=${activeEvent?.id}`} size={300} level="H" />
-           </div>
-           <p style={{ fontSize: 20, color: 'rgba(255,255,255,0.5)', marginTop: 40, textAlign: 'center' }}>Point your camera at the screen</p>
+          <h2 style={{ fontSize: 32, fontWeight: 700, marginBottom: 20, textAlign: 'center' }}>Scan to Check-in</h2>
+          <div style={{ background: '#fff', padding: '30px', borderRadius: '32px', boxShadow: '0 20px 50px rgba(0,0,0,0.5)' }}>
+            <QRCodeCanvas value={`${window.location.origin}/?checkin=${activeEvent?.id}`} size={300} level="H" />
+          </div>
+          <p style={{ fontSize: 20, color: 'rgba(255,255,255,0.5)', marginTop: 40, textAlign: 'center' }}>Point your camera at the screen</p>
         </div>
       </div>
     </div>
@@ -1173,7 +1122,7 @@ function CinematicTVMode({ events, members, attendance, setView }) {
 function MemberStar({ member, stat, position }) {
   const meshRef = useRef();
   const [hovered, setHover] = useState(false);
-  
+
   useFrame((state, delta) => {
     if (meshRef.current) {
       meshRef.current.rotation.y += delta * 0.2;
@@ -1210,7 +1159,7 @@ function MemberStar({ member, stat, position }) {
 
 function GalaxyVisualizer({ members, getMemberStats }) {
   const activeMembers = members.filter(m => m.active);
-  
+
   const starData = activeMembers.map((m, i) => {
     const stat = getMemberStats(m.id);
     const angle = i * 0.5;
@@ -1344,7 +1293,7 @@ export default function App() {
     }
     const today = new Date();
     const joinedRecently = member.joinDate ? new Date(member.joinDate) >= new Date(today.setDate(today.getDate() - 60)) : false;
-    
+
     const badges = [];
     if (streak >= 3) badges.push({ icon: "🔥", label: "On Fire", tooltip: `Attended ${streak} events in a row` });
     if (stats.pct === 100 && stats.total >= 3) badges.push({ icon: "🌟", label: "Perfect", tooltip: "100% Attendance (3+ events)" });
@@ -1369,106 +1318,107 @@ export default function App() {
       ) : (
         <>
           <div className={`app ${isAdmin ? "admin-mode" : "view-mode"}`}>
-        <Sidebar
-          view={view}
-          setView={setView}
-          members={members}
-          newJoinees={newJoinees}
-          events={events}
-          isAdmin={isAdmin}
-          collapsed={sidebarCollapsed}
-          setCollapsed={setSidebarCollapsed}
-          onAdminClick={isAdmin ? handleAdminLogout : openAdminLogin}
-          darkMode={darkMode}
-          toggleDark={toggleDark}
-        />
-        <div className="main">
-          <Topbar
-            view={view}
-            setView={setView}
+            <Sidebar
+              view={view}
+              setView={setView}
+              members={members}
+              newJoinees={newJoinees}
+              events={events}
+              isAdmin={isAdmin}
+              collapsed={sidebarCollapsed}
+              setCollapsed={setSidebarCollapsed}
+              onAdminClick={isAdmin ? handleAdminLogout : openAdminLogin}
+              darkMode={darkMode}
+              toggleDark={toggleDark}
+            />
+            <div className="main">
+              <Topbar
+                view={view}
+                setView={setView}
+                members={members}
+                newJoinees={newJoinees}
+                events={events}
+                isAdmin={isAdmin}
+                onAdminClick={openAdminLogin}
+                onAdminExit={handleAdminLogout}
+                adminUser={adminUser}
+                authReady={authReady}
+              />
+              <div className="content scroll-area">
+                <AnimatePresence mode="wait">
+                  <motion.div
+                    key={view}
+                    initial={{ opacity: 0, y: 10, filter: "blur(4px)" }}
+                    animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+                    exit={{ opacity: 0, y: -10, filter: "blur(4px)" }}
+                    transition={{ duration: 0.25, ease: "easeInOut" }}
+                    style={{ height: "100%", width: "100%" }}
+                  >
+                    {view === "Dashboard" && <Dashboard members={members} events={events} attendance={attendance} getEventStats={getEventStats} getMemberStats={getMemberStats} setView={setView} setAttendanceEventId={setAttendanceEventId} isAdmin={isAdmin} getMemberBadges={getMemberBadges} />}
+                    {view === "Members" && <Members members={members} setMembers={setMembers} newJoinees={newJoinees} setNewJoinees={setNewJoinees} events={events} attendance={attendance} getMemberStats={getMemberStats} showToast={showToast} isAdmin={isAdmin} setView={setView} getMemberBadges={getMemberBadges} />}
+                    {view === "New Joinees" && <NewJoinees newJoinees={newJoinees} setNewJoinees={setNewJoinees} showToast={showToast} isAdmin={isAdmin} />}
+                    {view === "Roles" && <RolesDashboard members={members} setMembers={setMembers} isAdmin={isAdmin} />}
+                    {view === "Events" && <Events events={events} setEvents={setEvents} getEventStats={getEventStats} showToast={showToast} isAdmin={isAdmin} />}
+                    {view === "Attendance" && <Attendance events={events} members={members} newJoinees={newJoinees} attendance={attendance} setAttendance={setAttendance} newJoineeAttendance={newJoineeAttendance} setNewJoineeAttendance={setNewJoineeAttendance} setNewJoinees={setNewJoinees} showToast={showToast} isAdmin={isAdmin} attendanceEventId={attendanceEventId} setAttendanceEventId={setAttendanceEventId} />}
+                    {view === "Analytics" && <Analytics members={members} newJoinees={newJoinees} events={events} getMemberStats={getMemberStats} attendance={attendance} newJoineeAttendance={newJoineeAttendance} isAdmin={isAdmin} />}
+                    {view === "Reports" && <Reports members={members} newJoinees={newJoinees} events={events} attendance={attendance} newJoineeAttendance={newJoineeAttendance} getEventStats={getEventStats} showToast={showToast} isAdmin={isAdmin} />}
+                  </motion.div>
+                </AnimatePresence>
+              </div>
+            </div>
+          </div>
+          <AnimatePresence>
+            {toast && (
+              <motion.div
+                initial={{ opacity: 0, y: 50, scale: 0.3 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.5, transition: { duration: 0.2 } }}
+                drag="x"
+                dragConstraints={{ left: 0, right: 300 }}
+                dragElastic={0.2}
+                onDragEnd={(e, { offset, velocity }) => {
+                  if (offset.x > 100 || velocity.x > 500) {
+                    setToast(null);
+                  }
+                }}
+                className="toast"
+                style={{ borderColor: toast.type === "success" ? "rgba(16,212,126,0.3)" : toast.type === "error" ? "rgba(244,63,94,0.3)" : "var(--border2)" }}
+              >
+                {toast.type === "success" ? "✅ " : toast.type === "error" ? "❌ " : "ℹ️ "}{toast.msg}
+              </motion.div>
+            )}
+          </AnimatePresence>
+          <AnimatePresence>
+            {adminErr && (
+              <motion.div
+                initial={{ opacity: 0, y: 50, scale: 0.3 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.5, transition: { duration: 0.2 } }}
+                drag="x"
+                dragConstraints={{ left: 0, right: 300 }}
+                dragElastic={0.2}
+                onDragEnd={(e, { offset, velocity }) => {
+                  if (offset.x > 100 || velocity.x > 500) {
+                    setAdminErr("");
+                  }
+                }}
+                className="toast"
+                style={{ bottom: 82, borderColor: "rgba(244,63,94,0.3)" }}
+              >
+                Unauthorized admin account: {adminErr}
+              </motion.div>
+            )}
+          </AnimatePresence>
+          <AttendanceAssistant
             members={members}
             newJoinees={newJoinees}
             events={events}
-            isAdmin={isAdmin}
-            onAdminClick={openAdminLogin}
-            onAdminExit={handleAdminLogout}
-            adminUser={adminUser}
-            authReady={authReady}
+            attendance={attendance}
+            newJoineeAttendance={newJoineeAttendance}
+            getMemberStats={getMemberStats}
+            getEventStats={getEventStats}
           />
-          <div className="content scroll-area">
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={view}
-                initial={{ opacity: 0, y: 10, filter: "blur(4px)" }}
-                animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-                exit={{ opacity: 0, y: -10, filter: "blur(4px)" }}
-                transition={{ duration: 0.25, ease: "easeInOut" }}
-                style={{ height: "100%", width: "100%" }}
-              >
-                {view === "Dashboard" && <Dashboard members={members} events={events} attendance={attendance} getEventStats={getEventStats} getMemberStats={getMemberStats} setView={setView} setAttendanceEventId={setAttendanceEventId} isAdmin={isAdmin} getMemberBadges={getMemberBadges} />}
-                {view === "Members" && <Members members={members} setMembers={setMembers} newJoinees={newJoinees} setNewJoinees={setNewJoinees} events={events} attendance={attendance} getMemberStats={getMemberStats} showToast={showToast} isAdmin={isAdmin} setView={setView} getMemberBadges={getMemberBadges} />}
-                {view === "New Joinees" && <NewJoinees newJoinees={newJoinees} setNewJoinees={setNewJoinees} showToast={showToast} isAdmin={isAdmin} />}
-                {view === "Events" && <Events events={events} setEvents={setEvents} getEventStats={getEventStats} showToast={showToast} isAdmin={isAdmin} />}
-                {view === "Attendance" && <Attendance events={events} members={members} newJoinees={newJoinees} attendance={attendance} setAttendance={setAttendance} newJoineeAttendance={newJoineeAttendance} setNewJoineeAttendance={setNewJoineeAttendance} setNewJoinees={setNewJoinees} showToast={showToast} isAdmin={isAdmin} attendanceEventId={attendanceEventId} setAttendanceEventId={setAttendanceEventId} />}
-                {view === "Analytics" && <Analytics members={members} newJoinees={newJoinees} events={events} getMemberStats={getMemberStats} attendance={attendance} newJoineeAttendance={newJoineeAttendance} isAdmin={isAdmin} />}
-                {view === "Reports" && <Reports members={members} newJoinees={newJoinees} events={events} attendance={attendance} newJoineeAttendance={newJoineeAttendance} getEventStats={getEventStats} showToast={showToast} isAdmin={isAdmin} />}
-              </motion.div>
-            </AnimatePresence>
-          </div>
-        </div>
-      </div>
-      <AnimatePresence>
-        {toast && (
-          <motion.div
-            initial={{ opacity: 0, y: 50, scale: 0.3 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.5, transition: { duration: 0.2 } }}
-            drag="x"
-            dragConstraints={{ left: 0, right: 300 }}
-            dragElastic={0.2}
-            onDragEnd={(e, { offset, velocity }) => {
-              if (offset.x > 100 || velocity.x > 500) {
-                setToast(null);
-              }
-            }}
-            className="toast"
-            style={{ borderColor: toast.type === "success" ? "rgba(16,212,126,0.3)" : toast.type === "error" ? "rgba(244,63,94,0.3)" : "var(--border2)" }}
-          >
-            {toast.type === "success" ? "✅ " : toast.type === "error" ? "❌ " : "ℹ️ "}{toast.msg}
-          </motion.div>
-        )}
-      </AnimatePresence>
-      <AnimatePresence>
-        {adminErr && (
-          <motion.div
-            initial={{ opacity: 0, y: 50, scale: 0.3 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.5, transition: { duration: 0.2 } }}
-            drag="x"
-            dragConstraints={{ left: 0, right: 300 }}
-            dragElastic={0.2}
-            onDragEnd={(e, { offset, velocity }) => {
-              if (offset.x > 100 || velocity.x > 500) {
-                setAdminErr("");
-              }
-            }}
-            className="toast"
-            style={{ bottom: 82, borderColor: "rgba(244,63,94,0.3)" }}
-          >
-            Unauthorized admin account: {adminErr}
-          </motion.div>
-        )}
-      </AnimatePresence>
-      <AttendanceAssistant
-        members={members}
-        newJoinees={newJoinees}
-        events={events}
-        attendance={attendance}
-        newJoineeAttendance={newJoineeAttendance}
-        getMemberStats={getMemberStats}
-        getEventStats={getEventStats}
-      />
-      </>
+        </>
       )}
     </>
   );
@@ -1482,7 +1432,7 @@ function Sidebar({ view, setView, members, newJoinees, events, isAdmin, collapse
         {collapsed ? "›" : "‹"}
       </button>
       <div className="brand">
-        <img src="/logo.png" className="brand-icon" style={{ background: 'white', objectFit: 'contain', padding: '2px' }} alt="AYSG Logo" />
+        <div className="brand-icon">AY</div>
         <div className="brand-copy">
           <div className="brand-title">Arham Yuva Seva Group</div>
           <div className="brand-sub">Attendance Tracker</div>
@@ -1700,35 +1650,20 @@ function Dashboard({ members, events, attendance, getEventStats, getMemberStats,
       )}
       <div className="grid-4 mb-6">
         {loading ? [1, 2, 3, 4].map(n => <div key={n} className="skeleton-card" />) : statCards.map((s, index) => (
-          <SpotlightCard key={s.label} className="stat-card" style={s.label === "Avg Attendance" ? { display: "flex", alignItems: "center", gap: "20px" } : {}}>
-            {s.label === "Avg Attendance" ? (
-              <>
-                <CircularProgress percentage={s.numValue} color={s.color} />
-                <div style={{ flex: 1 }}>
-                  <div className="stat-label">{s.label}</div>
-                  <div className="stat-sub" style={{ margin: "4px 0 10px 0" }}>{s.sub}</div>
-                  <div className={`trend ${s.trend.className}`}>
-                    <span>{s.trend.icon}</span><span>{s.trend.text}</span>
-                  </div>
-                </div>
-              </>
-            ) : (
-              <>
-                <div className="stat-icon" style={{ background: s.color + "22" }}>{s.icon}</div>
-                <div className="stat-label">{s.label}</div>
-                <div className="stat-value" style={{ color: s.color }}>
-                  <AnimatedNumber value={s.numValue} />{s.suffix}
-                </div>
-                <div className="stat-sub">{s.sub}</div>
-                <div className={`trend ${s.trend.className}`} style={{ animationDelay: `${index * 0.05}s` }}>
-                  <span>{s.trend.icon}</span><span>{s.trend.text}</span>
-                </div>
-              </>
-            )}
+          <SpotlightCard key={s.label} className="stat-card">
+            <div className="stat-icon" style={{ background: s.color + "22" }}>{s.icon}</div>
+            <div className="stat-label">{s.label}</div>
+            <div className="stat-value" style={{ color: s.color }}>
+              <AnimatedNumber value={s.numValue} />{s.suffix}
+            </div>
+            <div className="stat-sub">{s.sub}</div>
+            <div className={`trend ${s.trend.className}`} style={{ animationDelay: `${index * 0.05}s` }}>
+              <span>{s.trend.icon}</span><span>{s.trend.text}</span>
+            </div>
           </SpotlightCard>
         ))}
       </div>
-      
+
       {!loading && events.length > 0 && (
         <div className="grid-2 mb-6">
           <div className="card" style={{ padding: 24 }}>
@@ -1744,7 +1679,7 @@ function Dashboard({ members, events, attendance, getEventStats, getMemberStats,
               </ResponsiveContainer>
             </div>
           </div>
-          
+
           <div className="card" style={{ padding: 24 }}>
             <h2 className="section-title mb-4">📍 Members by Area</h2>
             <div style={{ height: 260, width: "100%" }}>
@@ -1763,7 +1698,7 @@ function Dashboard({ members, events, attendance, getEventStats, getMemberStats,
       )}
 
       {!loading && members.length > 0 && (
-         <GalaxyVisualizer members={members} getMemberStats={getMemberStats} />
+        <GalaxyVisualizer members={members} getMemberStats={getMemberStats} />
       )}
 
       <div className="grid-2">
@@ -1931,73 +1866,6 @@ function Dashboard({ members, events, attendance, getEventStats, getMemberStats,
     </div>
   );
 }
-const IDCardModal = ({ member, onClose }) => {
-  if (!member) return null;
-  return (
-    <AnimatedModal isOpen={true} onClose={onClose} maxWidth={380} style={{ padding: 0, background: 'transparent', boxShadow: 'none' }}>
-      <div style={{ 
-        background: 'linear-gradient(135deg, #130b2e 0%, #2e1e5b 100%)', 
-        borderRadius: 24, 
-        overflow: 'hidden', 
-        border: '1px solid rgba(255,255,255,0.1)', 
-        position: 'relative',
-        boxShadow: '0 25px 50px -12px rgba(0,0,0,0.5)'
-      }}>
-        {/* Glow Effects */}
-        <div style={{ position: 'absolute', top: -50, left: -50, width: 200, height: 200, background: 'var(--accent)', filter: 'blur(100px)', opacity: 0.5, borderRadius: '50%' }} />
-        <div style={{ position: 'absolute', bottom: -50, right: -50, width: 200, height: 200, background: 'var(--rose)', filter: 'blur(100px)', opacity: 0.3, borderRadius: '50%' }} />
-        
-        {/* Header */}
-        <div style={{ padding: '24px 24px 0 24px', display: 'flex', justifyContent: 'center', position: 'relative', zIndex: 10 }}>
-          <img src="/logo.png" alt="AYSG Logo" style={{ height: 60, width: 60, background: '#fff', borderRadius: '50%', objectFit: 'contain', boxShadow: "0 8px 24px rgba(0,0,0,0.4)", border: "2px solid rgba(255,255,255,0.2)" }} />
-        </div>
-
-        {/* Profile */}
-        <div style={{ padding: "32px 24px 24px 24px", textAlign: 'center', position: 'relative', zIndex: 10 }}>
-          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 16 }}>
-             <div style={{ width: 90, height: 90, borderRadius: '50%', background: 'linear-gradient(135deg, var(--accent), var(--accent2))', padding: 4, boxShadow: '0 8px 24px rgba(0,0,0,0.3)' }}>
-               <div style={{ width: '100%', height: '100%', borderRadius: '50%', background: 'var(--bg2)', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                 <Avatar name={member.name} size={82} />
-               </div>
-             </div>
-          </div>
-          
-          <h3 style={{ fontSize: 26, fontWeight: 800, margin: '0 0 6px 0', color: '#fff', letterSpacing: -0.5 }}>{member.name}</h3>
-          <div style={{ display: 'inline-block', background: 'rgba(255,255,255,0.1)', padding: '4px 12px', borderRadius: 20, color: '#e2e8f0', fontWeight: 600, fontSize: 12, textTransform: 'uppercase', letterSpacing: 1, marginBottom: 24, border: '1px solid rgba(255,255,255,0.05)' }}>
-            {member.role || 'Volunteer'}
-          </div>
-          
-          {/* Glassmorphic Details Grid */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, background: 'rgba(0,0,0,0.25)', backdropFilter: 'blur(12px)', padding: 18, borderRadius: 16, textAlign: 'left', border: "1px solid rgba(255,255,255,0.08)", marginBottom: 24 }}>
-            <div>
-              <span style={{ fontSize: 10, color: '#94a3b8', textTransform: "uppercase", letterSpacing: 1 }}>Mobile</span>
-              <div style={{ fontWeight: 600, fontSize: 14, color: '#fff', marginTop: 4 }}>{member.mobile || 'N/A'}</div>
-            </div>
-            <div>
-              <span style={{ fontSize: 10, color: '#94a3b8', textTransform: "uppercase", letterSpacing: 1 }}>Gender</span>
-              <div style={{ fontWeight: 600, fontSize: 14, color: '#fff', marginTop: 4 }}>{member.gender || 'N/A'}</div>
-            </div>
-            <div style={{ gridColumn: '1 / -1', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: 12, marginTop: 4 }}>
-              <span style={{ fontSize: 10, color: '#94a3b8', textTransform: "uppercase", letterSpacing: 1 }}>Locality</span>
-              <div style={{ fontWeight: 600, fontSize: 15, color: '#fff', marginTop: 4 }}>{member.area || 'Ghatkopar'}</div>
-            </div>
-          </div>
-          
-          {/* QR Code */}
-          <div style={{ display: 'flex', justifyContent: 'center' }}>
-            <div style={{ padding: 12, background: '#fff', borderRadius: 16, boxShadow: "0 12px 30px rgba(0,0,0,0.4)", position: 'relative' }}>
-              <div style={{ position: 'absolute', top: -10, left: '50%', transform: 'translateX(-50%)', background: 'var(--accent)', color: 'white', fontSize: 10, padding: '2px 10px', borderRadius: 12, fontWeight: 700, letterSpacing: 0.5, boxShadow: '0 4px 10px rgba(0,0,0,0.3)' }}>SCAN ME</div>
-              <QRCodeCanvas value={`Arham Yuva Seva Group Ghatkopar Gen Next Member\nName: ${member.name}\nNumber: ${member.mobile || 'N/A'}\nGender: ${member.gender || 'N/A'}\nLocality: ${member.area || 'Ghatkopar'}`} size={120} />
-            </div>
-          </div>
-          <div style={{ marginTop: 20, fontSize: 11, color: 'rgba(255,255,255,0.5)', fontFamily: 'monospace', letterSpacing: 2 }}>ID: {member.id}</div>
-        </div>
-
-        <button className="btn" style={{ position: 'absolute', top: 16, right: 16, background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.1)', color: 'white', padding: '6px 12px', fontSize: 12, backdropFilter: "blur(10px)", zIndex: 20, transition: 'all 0.2s' }} onClick={onClose} onMouseOver={(e) => e.target.style.background = 'rgba(255,255,255,0.2)'} onMouseOut={(e) => e.target.style.background = 'rgba(255,255,255,0.1)'}>Close</button>
-      </div>
-    </AnimatedModal>
-  );
-};
 
 function Members({ members, setMembers, newJoinees, setNewJoinees, events, attendance, getMemberStats, showToast, isAdmin, setView, getMemberBadges }) {
   const [search, setSearch] = useState("");
@@ -2008,7 +1876,6 @@ function Members({ members, setMembers, newJoinees, setNewJoinees, events, atten
   const [selectedMember, setSelectedMember] = useState(null);
   const [editMember, setEditMember] = useState(null);
   const [deleteConfirmId, setDeleteConfirmId] = useState(null);
-  const [showIdCardFor, setShowIdCardFor] = useState(null);
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState({ name: "", mobile: "", area: "", gender: "Male", role: "Member", notes: "", joinDate: "", dob: "", active: true });
   const [duplicateReport, setDuplicateReport] = useState(null);
@@ -2042,7 +1909,7 @@ function Members({ members, setMembers, newJoinees, setNewJoinees, events, atten
     const missed = history.filter(h => !h.present).length;
     const joinedRecently = m.joinDate ? new Date(m.joinDate) >= daysAgo(60) : false;
     const inactiveByAttendance = stats.total > 0 && !lastAttended;
-    
+
     const badges = getMemberBadges(m);
 
     return { stats, history, presentHistory, lastAttended, streak, recentPct, missed, joinedRecently, inactiveByAttendance, badges };
@@ -2080,15 +1947,15 @@ function Members({ members, setMembers, newJoinees, setNewJoinees, events, atten
     showToast("Member removed", "success");
     setDeleteConfirmId(null);
   };
-  
+
   const cleanAllDuplicates = () => {
     if (!window.confirm("Are you sure you want to run the automatic deduplication tool? This will remove all duplicate members and joinees with the exact same name. Make sure you haven't made changes in other tabs first.")) return;
-    
+
     let removedCount = 0;
     const removedNames = [];
     const uniqueNames = new Set();
     const cleanMembers = [];
-    
+
     for (const m of members) {
       const norm = normalizeName(m.name);
       if (uniqueNames.has(norm)) {
@@ -2099,7 +1966,7 @@ function Members({ members, setMembers, newJoinees, setNewJoinees, events, atten
         cleanMembers.push(m);
       }
     }
-    
+
     const uniqueJoineeNames = new Set();
     const cleanJoinees = [];
     for (const j of newJoinees) {
@@ -2113,7 +1980,7 @@ function Members({ members, setMembers, newJoinees, setNewJoinees, events, atten
         cleanJoinees.push(j);
       }
     }
-    
+
     if (removedCount > 0) {
       setMembers(cleanMembers);
       setNewJoinees(cleanJoinees);
@@ -2188,15 +2055,9 @@ function Members({ members, setMembers, newJoinees, setNewJoinees, events, atten
                       </td>
                       <td><span className="streak-badge">🔥 {insight.streak}</span></td>
                       <td style={{ fontSize: 12.5, color: "var(--text2)" }}>{insight.lastAttended ? <><span style={{ color: "var(--text)" }}>{insight.lastAttended.name}</span><br />{fmtDate(insight.lastAttended.date)}</> : "No attendance yet"}</td>
-                      <td><span className="tag tag-purple">{roleOf(m)}</span></td>
+                      <td><div className="flex gap-1" style={{ flexWrap: 'wrap' }}><span className="tag tag-purple">{roleOf(m)}</span>{m.team && TEAMS.find(t => t.id === m.team) && <span className="tag" style={{ background: `${TEAMS.find(t => t.id === m.team).color}20`, color: TEAMS.find(t => t.id === m.team).color, borderColor: `${TEAMS.find(t => t.id === m.team).color}40` }}>{TEAMS.find(t => t.id === m.team).icon} {TEAMS.find(t => t.id === m.team).name}</span>}</div></td>
                       <td style={{ color: "var(--text2)", fontSize: 12.5 }}>{m.area || "—"}</td>
-                      <td>
-                        <div className="flex items-center gap-2">
-                          <span className={`tag ${m.active ? "tag-present" : "tag-absent"}`}>{m.active ? "Active" : "Inactive"}</span>
-                          {insight.joinedRecently && <span className="tag tag-purple">New</span>}
-                          <button className="btn btn-sm" style={{ padding: "2px 6px", fontSize: 16, background: "transparent", border: "none" }} onClick={e => { e.stopPropagation(); setShowIdCardFor(m); }} title="Digital ID Card">🪪</button>
-                        </div>
-                      </td>
+                      <td><span className={`tag ${m.active ? "tag-present" : "tag-absent"}`}>{m.active ? "Active" : "Inactive"}</span>{insight.joinedRecently && <span className="tag tag-purple" style={{ marginLeft: 6 }}>New</span>}</td>
                       <td>
                         <div className="row-actions">
                           <button className="btn btn-sm" onClick={e => { e.stopPropagation(); setSelectedMember(m); }}>Profile</button>
@@ -2239,11 +2100,17 @@ function Members({ members, setMembers, newJoinees, setNewJoinees, events, atten
               ))}
             </div>
             <div className="card mb-4" style={{ padding: 14 }}>
-              <div className="flex items-center justify-between">
-                <div style={{ fontWeight: 800, fontSize: 13.5 }}>Attendance Pattern</div>
+              <div className="flex items-center justify-between mb-3">
+                <div style={{ fontWeight: 800, fontSize: 13.5 }}>Attendance Trend</div>
                 <span className={`tag ${selectedMember.active ? "tag-present" : "tag-absent"}`}>{selectedMember.active ? "Active" : "Inactive"}</span>
               </div>
-              <MemberAttendanceBarChart history={selectedInsights.history} />
+              <div style={{ display: "grid", gridTemplateColumns: `repeat(${Math.max(selectedInsights.history.slice(0, 10).length, 1)},1fr)`, gap: 5 }}>
+                {selectedInsights.history.slice(0, 10).reverse().map(({ event, present }) => (
+                  <div key={event.id} title={event.name} style={{ height: 42, borderRadius: 7, background: present ? "rgba(16,212,126,0.22)" : "rgba(244,63,94,0.16)", border: `1px solid ${present ? "rgba(16,212,126,0.35)" : "rgba(244,63,94,0.28)"}`, display: "flex", alignItems: "center", justifyContent: "center", color: present ? "var(--emerald)" : "var(--rose)", fontWeight: 800 }}>
+                    {present ? "✓" : "×"}
+                  </div>
+                ))}
+              </div>
             </div>
             <div className="grid-2 mb-4">
               <div className="analytics-tile"><div className="stat-label">Last Attended</div><div style={{ fontWeight: 700, fontSize: 13 }}>{selectedInsights.lastAttended ? selectedInsights.lastAttended.name : "Never"}</div><div className="text-xs color-muted">{selectedInsights.lastAttended ? fmtDate(selectedInsights.lastAttended.date) : "No recorded presence"}</div></div>
@@ -2297,6 +2164,14 @@ function Members({ members, setMembers, newJoinees, setNewJoinees, events, atten
         </div>
         <div className="grid-2">
           <div className="field"><label>Role</label><input className="input" value={form.role || ""} onChange={e => setForm({ ...form, role: e.target.value })} placeholder="Member / Lead / Volunteer" /></div>
+          <div className="field"><label>Assigned Team</label>
+            <select className="input" value={form.team || ""} onChange={e => setForm({ ...form, team: e.target.value })}>
+              <option value="">No Team</option>
+              {TEAMS.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
+            </select>
+          </div>
+        </div>
+        <div className="grid-2">
           <div className="field"><label>Status</label>
             <select className="input" value={form.active ? "active" : "inactive"} onChange={e => setForm({ ...form, active: e.target.value === "active" })}>
               <option value="active">Active</option><option value="inactive">Inactive</option>
@@ -2331,7 +2206,114 @@ function Members({ members, setMembers, newJoinees, setNewJoinees, events, atten
           <button className="btn btn-primary" onClick={() => setDuplicateReport(null)}>Done</button>
         </div>
       </AnimatedModal>
-      {showIdCardFor && <IDCardModal member={showIdCardFor} onClose={() => setShowIdCardFor(null)} />}
+    </div>
+  );
+}
+
+function RolesDashboard({ members, setMembers, isAdmin }) {
+  const [selectedTeam, setSelectedTeam] = useState(null);
+  const [search, setSearch] = useState("");
+
+  const getTeamMembers = (teamId) => members.filter(m => m.team === teamId);
+
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <h1 className="page-title">Roles Command Center</h1>
+          <p className="color-muted text-sm" style={{ marginTop: 4 }}>Manage active teams and volunteer duties</p>
+        </div>
+      </div>
+      
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 20 }}>
+        {TEAMS.map(team => {
+          const teamMembers = getTeamMembers(team.id);
+          return (
+            <div key={team.id} className="card" style={{ cursor: "pointer", position: "relative", overflow: "hidden", border: `1px solid ${team.color}40`, background: `linear-gradient(145deg, var(--bg2) 0%, rgba(0,0,0,0.5) 100%)` }} onClick={() => setSelectedTeam(team)}>
+              <div style={{ position: "absolute", top: -40, right: -40, width: 120, height: 120, background: team.color, filter: "blur(60px)", opacity: 0.15 }} />
+              <div className="flex items-center gap-3 mb-3">
+                <div style={{ width: 44, height: 44, borderRadius: 12, background: `${team.color}20`, color: team.color, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20 }}>
+                  {team.icon}
+                </div>
+                <div>
+                  <div style={{ fontWeight: 700, fontSize: 16 }}>{team.name}</div>
+                  <div style={{ fontSize: 12, color: "var(--text2)" }}>{teamMembers.length} volunteers</div>
+                </div>
+              </div>
+              <p style={{ fontSize: 12, color: "var(--text2)", lineHeight: 1.4, marginBottom: 16, height: 34 }}>{team.desc}</p>
+              
+              <div className="flex items-center">
+                {teamMembers.slice(0, 5).map((m, i) => (
+                  <div key={m.id} style={{ marginLeft: i === 0 ? 0 : -8, border: "2px solid var(--bg2)", borderRadius: "50%", zIndex: 10 - i }}>
+                    <Avatar name={m.name} size={28} />
+                  </div>
+                ))}
+                {teamMembers.length > 5 && (
+                  <div style={{ marginLeft: -8, width: 28, height: 28, borderRadius: "50%", background: "var(--bg3)", border: "2px solid var(--bg2)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 10, fontWeight: 700, zIndex: 0 }}>
+                    +{teamMembers.length - 5}
+                  </div>
+                )}
+                {teamMembers.length === 0 && <span style={{ fontSize: 12, color: "var(--text-muted)" }}>No members assigned</span>}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      <AnimatedModal isOpen={!!selectedTeam} onClose={() => { setSelectedTeam(null); setSearch(""); }} maxWidth={500}>
+        {selectedTeam && (() => {
+          const teamMembers = getTeamMembers(selectedTeam.id);
+          const unassigned = members.filter(m => m.team !== selectedTeam.id && m.name.toLowerCase().includes(search.toLowerCase()));
+          
+          return (
+            <div>
+              <div className="flex items-center gap-3 mb-6" style={{ paddingBottom: 16, borderBottom: "1px solid var(--border)" }}>
+                <div style={{ width: 48, height: 48, borderRadius: 12, background: `${selectedTeam.color}20`, color: selectedTeam.color, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 24 }}>
+                  {selectedTeam.icon}
+                </div>
+                <div>
+                  <h2 style={{ margin: 0, fontSize: 22, fontWeight: 800 }}>{selectedTeam.name}</h2>
+                  <p style={{ margin: 0, color: "var(--text2)", fontSize: 13 }}>{selectedTeam.desc}</p>
+                </div>
+              </div>
+              
+              <h3 style={{ fontSize: 14, fontWeight: 600, marginBottom: 12, color: "var(--text)" }}>Assigned Volunteers ({teamMembers.length})</h3>
+              <div style={{ maxHeight: 200, overflowY: "auto", marginBottom: 24, background: "rgba(0,0,0,0.2)", borderRadius: 12, padding: 8 }}>
+                {teamMembers.length === 0 ? <p style={{ textAlign: "center", color: "var(--text2)", fontSize: 13, padding: "12px 0" }}>No volunteers assigned yet.</p> : teamMembers.map(m => (
+                  <div key={m.id} className="flex items-center justify-between" style={{ padding: "8px 12px", background: "var(--bg2)", borderRadius: 8, marginBottom: 4 }}>
+                    <div className="flex items-center gap-3">
+                      <Avatar name={m.name} size={28} />
+                      <div style={{ fontWeight: 600, fontSize: 13 }}>{m.name}</div>
+                    </div>
+                    {isAdmin && <button className="btn btn-sm btn-danger" style={{ padding: "4px 8px", fontSize: 11 }} onClick={() => setMembers(members.map(x => x.id === m.id ? { ...x, team: null } : x))}>Remove</button>}
+                  </div>
+                ))}
+              </div>
+
+              {isAdmin && (
+                <>
+                  <h3 style={{ fontSize: 14, fontWeight: 600, marginBottom: 12, color: "var(--text)" }}>Add Volunteers</h3>
+                  <input className="input mb-3" placeholder="Search members to add..." value={search} onChange={e => setSearch(e.target.value)} />
+                  <div style={{ maxHeight: 200, overflowY: "auto", background: "var(--bg)", borderRadius: 12, padding: 8, border: "1px solid var(--border)" }}>
+                    {search ? unassigned.map(m => (
+                      <div key={m.id} className="flex items-center justify-between" style={{ padding: "8px 12px", borderBottom: "1px solid var(--border)" }}>
+                        <div className="flex items-center gap-3">
+                          <Avatar name={m.name} size={28} />
+                          <div>
+                            <div style={{ fontWeight: 600, fontSize: 13 }}>{m.name}</div>
+                            <div style={{ fontSize: 11, color: "var(--text2)" }}>{TEAMS.find(t => t.id === m.team)?.name || "Unassigned"}</div>
+                          </div>
+                        </div>
+                        <button className="btn btn-sm btn-primary" style={{ padding: "4px 10px", fontSize: 11 }} onClick={() => setMembers(members.map(x => x.id === m.id ? { ...x, team: selectedTeam.id } : x))}>Assign</button>
+                      </div>
+                    )) : <p style={{ textAlign: "center", color: "var(--text2)", fontSize: 13, padding: "12px 0" }}>Search for a member to assign them to {selectedTeam.name}</p>}
+                  </div>
+                </>
+              )}
+            </div>
+          );
+        })()}
+      </AnimatedModal>
     </div>
   );
 }
@@ -2342,7 +2324,6 @@ function NewJoinees({ newJoinees, setNewJoinees, showToast, isAdmin }) {
   const [deleteConfirmId, setDeleteConfirmId] = useState(null);
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState({ name: "", joinDate: "", notes: "", active: true });
-  const [showIdCardFor, setShowIdCardFor] = useState(null);
 
   const filtered = newJoinees.filter(j =>
     !search ||
@@ -2410,12 +2391,7 @@ function NewJoinees({ newJoinees, setNewJoinees, showToast, isAdmin }) {
                   <td><span className="tag tag-purple">{j.id}</span></td>
                   <td style={{ fontSize: 12.5, color: "var(--text2)" }}>{fmtDate(j.joinDate)}</td>
                   <td style={{ fontSize: 13, color: "var(--text2)" }}>{j.notes}</td>
-                  <td>
-                    <div className="flex items-center gap-2">
-                      <span className={`tag ${j.active ? "tag-present" : "tag-absent"}`}>{j.active ? "Active" : "Inactive"}</span>
-                      <button className="btn btn-sm" style={{ padding: "2px 6px", fontSize: 16, background: "transparent", border: "none" }} onClick={() => setShowIdCardFor(j)} title="Digital ID Card">🪪</button>
-                    </div>
-                  </td>                  {isAdmin && (
+                  <td><span className={`tag ${j.active ? "tag-present" : "tag-absent"}`}>{j.active ? "Active" : "Inactive"}</span></td>                  {isAdmin && (
                     <td>
                       <div className="flex gap-2">
                         <button className="btn btn-sm" onClick={() => openEdit(j)}>Edit</button>
@@ -2457,7 +2433,6 @@ function NewJoinees({ newJoinees, setNewJoinees, showToast, isAdmin }) {
           <button className="btn" onClick={() => setDeleteConfirmId(null)}>Cancel</button>
         </div>
       </AnimatedModal>
-      {showIdCardFor && <IDCardModal member={showIdCardFor} onClose={() => setShowIdCardFor(null)} />}
     </div>
   );
 }
@@ -2591,7 +2566,7 @@ function Attendance({ events, members, newJoinees, attendance, setAttendance, ne
       setSelEvent(sortedEvents[0].id);
     }
   }, [attendanceEventId, setAttendanceEventId, selEvent, sortedEvents]);
-  
+
   const [showQR, setShowQR] = useState(false);
   const [showPending, setShowPending] = useState(false);
   const [burst, setBurst] = useState(null);
@@ -2610,7 +2585,7 @@ function Attendance({ events, members, newJoinees, attendance, setAttendance, ne
   const rec = store[selEvent] || {};
   const groupLabel = isNewJoineeGroup ? "New Joinees" : "Members";
   const event = events.find(e => e.id === selEvent);
-  
+
   const statusOrder = ["present", "absent", "late", "excused"];
   const statusMeta = {
     present: { label: "Present", icon: "✓", color: "#10d47e" },
@@ -2756,7 +2731,7 @@ function Attendance({ events, members, newJoinees, attendance, setAttendance, ne
   }, {});
   const present = counts.present + counts.late;
   const pct = activePeople.length ? Math.round(present / activePeople.length * 100) : 0;
-  
+
   const [isListening, setIsListening] = useState(false);
 
   const startVoiceAttendance = () => {
@@ -2785,16 +2760,16 @@ function Attendance({ events, members, newJoinees, attendance, setAttendance, ne
 
       let matchCount = 0;
       const updated = {};
-      
+
       activePeople.forEach(p => {
         const nameParts = p.name.toLowerCase().split(' ').filter(part => part.length > 2);
         const matches = nameParts.some(part => transcript.includes(part));
         if (matches) {
-           updated[p.id] = statusToSet;
-           matchCount++;
+          updated[p.id] = statusToSet;
+          matchCount++;
         }
       });
-      
+
       if (matchCount > 0) {
         setStore(prev => ({ ...prev, [selEvent]: { ...(prev[selEvent] || {}), ...updated } }));
         showToast(`Voice matched ${matchCount} member(s) to ${statusMeta[statusToSet]?.label || statusToSet}`, "success");
@@ -2807,7 +2782,7 @@ function Attendance({ events, members, newJoinees, attendance, setAttendance, ne
       showToast("Voice recognition error: " + e.error, "error");
       setIsListening(false);
     };
-    
+
     recognition.onend = () => {
       setIsListening(false);
     };
@@ -2873,13 +2848,13 @@ function Attendance({ events, members, newJoinees, attendance, setAttendance, ne
             <div className="flex gap-3 mb-4 wrap">
               <button className={`btn btn-sm${!isNewJoineeGroup ? " btn-primary" : ""}`} onClick={() => { setGroup("members"); setAreaFilter(""); }}>Members</button>
               <button className={`btn btn-sm${isNewJoineeGroup ? " btn-primary" : ""}`} onClick={() => { setGroup("newJoinees"); setAreaFilter(""); }}>New Joinees</button>
-              
+
               {isAdmin && selEvent && (
                 <button className={`btn btn-sm ${isListening ? "btn-danger pulse-anim" : "btn-primary"}`} onClick={startVoiceAttendance} title="AI Voice Attendance">
                   {isListening ? "🎙 Listening..." : "🎙 AI Voice"}
                 </button>
               )}
-              
+
               <div className="search-box flex-1" style={{ minWidth: 220 }}>
                 <input className="input" placeholder={`Search ${groupLabel.toLowerCase()}...`} value={search} onChange={e => setSearch(e.target.value)} />
               </div>
@@ -2986,8 +2961,8 @@ function Attendance({ events, members, newJoinees, attendance, setAttendance, ne
           {filtered.length === 0 && <EmptyState icon="🔎" msg="No people match the selected attendance filters" />}
           {isAdmin && (
             <div style={{ padding: "40px 20px 60px", textAlign: "right", display: "flex", justifyContent: "flex-end" }}>
-              <button 
-                className="btn btn-primary" 
+              <button
+                className="btn btn-primary"
                 style={{ padding: "12px 28px", fontSize: "16px", boxShadow: "0 8px 24px rgba(124, 106, 248, 0.3)" }}
                 onClick={(e) => {
                   setBurst({ x: e.clientX, y: e.clientY, id: Date.now() });
@@ -3194,7 +3169,7 @@ function Analytics({ members, newJoinees, events, getMemberStats, attendance, ne
   const currentSmartList = getSmartTabData();
 
   return (
-    <div className="ac-dashboard" style={{ paddingBottom: "40px" }}>
+    <div className="ac-dashboard">
       <div style={{ marginBottom: "20px" }}>
         <h1 className="page-title" style={{ fontSize: "24px" }}>Analytics Intelligence Center</h1>
         <p className="color-muted text-sm">Real-time insights and smart analysis of attendance patterns</p>
@@ -3338,23 +3313,23 @@ function Analytics({ members, newJoinees, events, getMemberStats, attendance, ne
         {/* Area-wise Participation */}
         <div className="ac-card col-3">
           <div className="ac-card-title">Area-wise Participation</div>
-          <div className="flex items-center justify-center gap-6" style={{ height: "100%", paddingBottom: "20px" }}>
+          <div className="flex items-center justify-center gap-6" style={{ height: "100%" }}>
             <div style={{ position: "relative", width: "120px", height: "120px" }}>
               <svg viewBox="0 0 100 100" style={{ transform: "rotate(-90deg)", width: "100%", height: "100%" }}>
                 {donutSegments.map(segment => (
-                  <circle key={segment.name} cx="50" cy="50" r="40" fill="none" stroke={segment.color} strokeWidth="18" strokeDasharray={segment.dashArray} strokeDashoffset={segment.dashOffset} strokeLinecap="round" />
+                  <circle key={segment.name} cx="50" cy="50" r="40" fill="none" stroke={segment.color} strokeWidth="20" strokeDasharray={segment.dashArray} strokeDashoffset={segment.dashOffset} />
                 ))}
               </svg>
-              <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyItems: "center", justifyContent: "center" }}>
+              <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
                 <span style={{ fontSize: "20px", fontWeight: "bold" }}>{active.length}</span>
                 <span style={{ fontSize: "9px", color: "var(--text2)" }}>Members</span>
               </div>
             </div>
-            <div className="flex flex-col gap-3">
+            <div className="flex flex-col gap-2">
               {areaData.slice(0, 5).map((a, i) => (
                 <div key={a.name} className="flex items-center gap-2 text-xs">
                   <span style={{ width: 10, height: 10, background: donutColors[i % donutColors.length], borderRadius: "50%" }}></span>
-                  <span style={{ width: 70, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{a.name || "Unknown"}</span>
+                  <span style={{ width: 60, overflow: "hidden", textOverflow: "ellipsis" }}>{a.name}</span>
                   <span className="font-bold">{a.count}</span>
                 </div>
               ))}
@@ -3365,31 +3340,31 @@ function Analytics({ members, newJoinees, events, getMemberStats, attendance, ne
         {/* Attendance Categories */}
         <div className="ac-card col-4">
           <div className="ac-card-title">Attendance Categories</div>
-          <div className="flex flex-col gap-6 mt-4">
+          <div className="flex flex-col gap-4" style={{ flex: 1, justifyContent: "center" }}>
             <div>
-              <div className="flex justify-between text-sm mb-2">
+              <div className="flex justify-between text-xs mb-2">
                 <span style={{ color: "#10d47e", fontWeight: 600 }}>Consistent (≥80%)</span>
-                <span>{consistent.length} <span className="color-muted text-xs">({active.length ? Math.round((consistent.length / active.length) * 100) : 0}%)</span></span>
+                <span>{consistent.length} ({active.length ? Math.round((consistent.length / active.length) * 100) : 0}%)</span>
               </div>
-              <div style={{ height: 12, background: "var(--bg4)", borderRadius: 6, overflow: "hidden" }}>
+              <div style={{ height: 8, background: "var(--bg4)", borderRadius: 4, overflow: "hidden" }}>
                 <div style={{ height: "100%", width: `${active.length ? (consistent.length / active.length) * 100 : 0}%`, background: "#10d47e" }} />
               </div>
             </div>
             <div>
-              <div className="flex justify-between text-sm mb-2">
+              <div className="flex justify-between text-xs mb-2">
                 <span style={{ color: "#f0b429", fontWeight: 600 }}>Irregular (40% - 79%)</span>
-                <span>{irregular.length} <span className="color-muted text-xs">({active.length ? Math.round((irregular.length / active.length) * 100) : 0}%)</span></span>
+                <span>{irregular.length} ({active.length ? Math.round((irregular.length / active.length) * 100) : 0}%)</span>
               </div>
-              <div style={{ height: 12, background: "var(--bg4)", borderRadius: 6, overflow: "hidden" }}>
+              <div style={{ height: 8, background: "var(--bg4)", borderRadius: 4, overflow: "hidden" }}>
                 <div style={{ height: "100%", width: `${active.length ? (irregular.length / active.length) * 100 : 0}%`, background: "#f0b429" }} />
               </div>
             </div>
             <div>
-              <div className="flex justify-between text-sm mb-2">
+              <div className="flex justify-between text-xs mb-2">
                 <span style={{ color: "#f43f5e", fontWeight: 600 }}>Inactive (&lt;40%)</span>
-                <span>{inactive.length} <span className="color-muted text-xs">({active.length ? Math.round((inactive.length / active.length) * 100) : 0}%)</span></span>
+                <span>{inactive.length} ({active.length ? Math.round((inactive.length / active.length) * 100) : 0}%)</span>
               </div>
-              <div style={{ height: 12, background: "var(--bg4)", borderRadius: 6, overflow: "hidden" }}>
+              <div style={{ height: 8, background: "var(--bg4)", borderRadius: 4, overflow: "hidden" }}>
                 <div style={{ height: "100%", width: `${active.length ? (inactive.length / active.length) * 100 : 0}%`, background: "#f43f5e" }} />
               </div>
             </div>
@@ -3449,8 +3424,8 @@ function Analytics({ members, newJoinees, events, getMemberStats, attendance, ne
         {/* Top Performers */}
         <div className="ac-card col-5">
           <div className="ac-card-title">🏆 Top Performers</div>
-          <div className="flex flex-col gap-4">
-            {sortedMembers.slice(0, 8).map((m, i) => {
+          <div className="flex flex-col gap-3">
+            {sortedMembers.slice(0, 5).map((m, i) => {
               const s = getMemberStats(m.id);
               return (
                 <div key={m.id} className="flex items-center gap-3">
@@ -3561,7 +3536,7 @@ function buildReportHtml({ template, data, options }) {
     <header class="report-header">
       <div class="header-logo-container">
         <!-- Logo cropped to exclude the bottom text -->
-        <img src="/logo.png" alt="AYSG Logo" class="header-logo" onerror="this.style.display='none'" />
+        <img src="/aysg-logo.jpg" alt="AYSG Logo" class="header-logo" onerror="this.style.display='none'" />
       </div>
       <div class="header-details">
         <h1 class="report-title">AYSG Ghatkopar Attendance Report</h1>
@@ -3613,10 +3588,10 @@ function buildReportHtml({ template, data, options }) {
           <h3>Attendance Trend</h3>
           <div class="chart-container">
             ${filteredEvents.slice(0, 10).map((e) => {
-              const count = allPeople.filter(p => attendanceGetter(e.id, p.id) === 'present' || attendanceGetter(e.id, p.id) === 'late').length;
-              const h = Math.max(10, Math.min(100, (count / (allPeople.length || 1)) * 100));
-              return `<div class="chart-bar" style="height: ${h}%;" title="${e.name}"></div>`;
-            }).join("")}
+        const count = allPeople.filter(p => attendanceGetter(e.id, p.id) === 'present' || attendanceGetter(e.id, p.id) === 'late').length;
+        const h = Math.max(10, Math.min(100, (count / (allPeople.length || 1)) * 100));
+        return `<div class="chart-bar" style="height: ${h}%;" title="${e.name}"></div>`;
+      }).join("")}
           </div>
         </div>
       `;
@@ -3643,17 +3618,17 @@ function buildReportHtml({ template, data, options }) {
         </thead>
         <tbody>
           ${peopleList.map((p) => {
-            let presentCount = 0;
-            const eventHtml = filteredEvents.map(e => {
-              const s = getStatus(p, e.id);
-              if (s.label === "Present" || s.label === "Late") presentCount++;
-              return `<td style="text-align: center; background: ${s.bg}; color: ${s.color}; font-weight: bold; font-size: 14px;">${s.icon}</td>`;
-            }).join("");
-            
-            const attendancePct = filteredEvents.length > 0 ? Math.round((presentCount / filteredEvents.length) * 100) : 0;
-            const pctColor = attendancePct >= 80 ? "#10b981" : attendancePct >= 50 ? "#f59e0b" : "#ef4444";
+      let presentCount = 0;
+      const eventHtml = filteredEvents.map(e => {
+        const s = getStatus(p, e.id);
+        if (s.label === "Present" || s.label === "Late") presentCount++;
+        return `<td style="text-align: center; background: ${s.bg}; color: ${s.color}; font-weight: bold; font-size: 14px;">${s.icon}</td>`;
+      }).join("");
 
-            return `
+      const attendancePct = filteredEvents.length > 0 ? Math.round((presentCount / filteredEvents.length) * 100) : 0;
+      const pctColor = attendancePct >= 80 ? "#10b981" : attendancePct >= 50 ? "#f59e0b" : "#ef4444";
+
+      return `
             <tr>
               <td style="font-weight: 500;">${p.name}</td>
               ${includePhone ? `<td style="color: #6b7280;">${p.phone || '-'}</td>` : ""}
@@ -3661,7 +3636,7 @@ function buildReportHtml({ template, data, options }) {
               <td style="text-align: center; font-weight: bold; color: ${pctColor}; background: ${pctColor}15;">${attendancePct}%</td>
             </tr>
             `;
-          }).join("")}
+    }).join("")}
         </tbody>
       </table>
     `;
@@ -3679,13 +3654,13 @@ function buildReportHtml({ template, data, options }) {
         </thead>
         <tbody>
           ${filteredEvents.map((e) => {
-            const pCount = allPeople.filter(p => attendanceGetter(e.id, p.id) === 'present' || attendanceGetter(e.id, p.id) === 'late').length;
-            const aCount = allPeople.filter(p => attendanceGetter(e.id, p.id) === 'absent').length;
-            const total = pCount + aCount;
-            const eventPct = total > 0 ? Math.round((pCount / total) * 100) : 0;
-            const pctColor = eventPct >= 80 ? "#10b981" : eventPct >= 50 ? "#f59e0b" : "#ef4444";
+      const pCount = allPeople.filter(p => attendanceGetter(e.id, p.id) === 'present' || attendanceGetter(e.id, p.id) === 'late').length;
+      const aCount = allPeople.filter(p => attendanceGetter(e.id, p.id) === 'absent').length;
+      const total = pCount + aCount;
+      const eventPct = total > 0 ? Math.round((pCount / total) * 100) : 0;
+      const pctColor = eventPct >= 80 ? "#10b981" : eventPct >= 50 ? "#f59e0b" : "#ef4444";
 
-            return `
+      return `
               <tr>
                 <td><strong>${new Date(e.date).toLocaleDateString()}</strong> - ${e.name}</td>
                 <td style="text-align: center; color: #10b981; font-weight: 500;">${pCount}</td>
@@ -3693,7 +3668,7 @@ function buildReportHtml({ template, data, options }) {
                 <td style="text-align: center; font-weight: bold; color: ${pctColor}; background: ${pctColor}15;">${eventPct}%</td>
               </tr>
             `;
-          }).join("")}
+    }).join("")}
         </tbody>
       </table>
     `;
@@ -4235,12 +4210,12 @@ function AttendanceAssistant({ members, newJoinees, events, attendance, newJoine
   const ask = async (question) => {
     const clean = question.trim();
     if (!clean) return;
-    
+
     setMessages(prev => [...prev, { from: "user", text: clean }, { from: "bot", text: "..." }]);
     setInput("");
-    
+
     const answer = await answerAttendanceQuestionWithGemini(clean, { members, newJoinees, events, attendance, newJoineeAttendance, getMemberStats, getEventStats }, localStorage.getItem("gemini_key"));
-    
+
     setMessages(prev => {
       const newMsg = [...prev];
       newMsg[newMsg.length - 1] = { from: "bot", text: answer };
@@ -4282,7 +4257,7 @@ async function answerAttendanceQuestionWithGemini(question, data, apiKey) {
   if (!apiKey) {
     return "Error: Gemini API Key is missing. Please add it in the settings.";
   }
-  
+
   try {
     const ai = new GoogleGenAI({ apiKey });
     // Create complete context payload with individual data and specific event history
@@ -4323,7 +4298,7 @@ Instructions:
       model: 'gemini-2.5-flash',
       contents: prompt,
     });
-    
+
     return response.text;
   } catch (err) {
     console.error(err);
