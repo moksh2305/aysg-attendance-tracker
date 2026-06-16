@@ -1435,7 +1435,7 @@ function Sidebar({ view, setView, members, newJoinees, events, isAdmin, collapse
         {collapsed ? "›" : "‹"}
       </button>
       <div className="brand">
-        <div className="brand-icon">AY</div>
+        <img src="/logo.png" className="brand-icon" style={{ padding: 0, border: "none", background: "transparent", objectFit: "contain" }} alt="AYSG Logo" />
         <div className="brand-copy">
           <div className="brand-title">Arham Yuva Seva Group</div>
           <div className="brand-sub">Attendance Tracker</div>
