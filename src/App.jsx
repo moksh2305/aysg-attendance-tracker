@@ -129,6 +129,7 @@ const PERSISTED_DATA_KEYS = Object.freeze({
   events: "aysg_events",
   attendance: "aysg_attendance",
   newJoineeAttendance: "aysg_new_joinee_attendance",
+  teamChats: "aysg_team_chats",
 });
 
 const MEMBER_NAMES = [
@@ -1221,6 +1222,7 @@ export default function App() {
   const [events, setEvents] = useSyncedStorage(PERSISTED_DATA_KEYS.events, INITIAL_EVENTS);
   const [attendance, setAttendance] = useSyncedStorage(PERSISTED_DATA_KEYS.attendance, INITIAL_ATTENDANCE, migrateAttendance);
   const [newJoineeAttendance, setNewJoineeAttendance] = useSyncedStorage(PERSISTED_DATA_KEYS.newJoineeAttendance, INITIAL_ATTENDANCE);
+  const [teamChats, setTeamChats] = useSyncedStorage(PERSISTED_DATA_KEYS.teamChats, {});
   const [adminUser, setAdminUser] = useState(null);
   const [authReady, setAuthReady] = useState(false);
   const [adminErr, setAdminErr] = useState("");
@@ -1295,7 +1297,8 @@ export default function App() {
     const joinedRecently = member.joinDate ? new Date(member.joinDate) >= new Date(today.setDate(today.getDate() - 60)) : false;
 
     const badges = [];
-    if (streak >= 3) badges.push({ icon: "🔥", label: "On Fire", tooltip: `Attended ${streak} events in a row` });
+    if (streak >= 10) badges.push({ icon: "⚠️", label: "Burnout Risk", tooltip: "Attended 10+ consecutive events. Suggested: 1 week break" });
+    else if (streak >= 3) badges.push({ icon: "🔥", label: "On Fire", tooltip: `Attended ${streak} events in a row` });
     if (stats.pct === 100 && stats.total >= 3) badges.push({ icon: "🌟", label: "Perfect", tooltip: "100% Attendance (3+ events)" });
     if (joinedRecently && stats.pct >= 75 && stats.total >= 1) badges.push({ icon: "🚀", label: "Rising Star", tooltip: "New member with great attendance" });
     if (stats.total >= 10 && stats.pct >= 80) badges.push({ icon: "👑", label: "Veteran", tooltip: "Long-term high attendance" });
@@ -1357,7 +1360,7 @@ export default function App() {
                     {view === "Dashboard" && <Dashboard members={members} events={events} attendance={attendance} getEventStats={getEventStats} getMemberStats={getMemberStats} setView={setView} setAttendanceEventId={setAttendanceEventId} isAdmin={isAdmin} getMemberBadges={getMemberBadges} />}
                     {view === "Members" && <Members members={members} setMembers={setMembers} newJoinees={newJoinees} setNewJoinees={setNewJoinees} events={events} attendance={attendance} getMemberStats={getMemberStats} showToast={showToast} isAdmin={isAdmin} setView={setView} getMemberBadges={getMemberBadges} />}
                     {view === "New Joinees" && <NewJoinees newJoinees={newJoinees} setNewJoinees={setNewJoinees} showToast={showToast} isAdmin={isAdmin} />}
-                    {view === "Roles" && <RolesDashboard members={members} setMembers={setMembers} isAdmin={isAdmin} attendance={attendance} events={events} />}
+                    {view === "Roles" && <RolesDashboard members={members} setMembers={setMembers} isAdmin={isAdmin} attendance={attendance} events={events} teamChats={teamChats} setTeamChats={setTeamChats} />}
                     {view === "Events" && <Events events={events} setEvents={setEvents} getEventStats={getEventStats} showToast={showToast} isAdmin={isAdmin} />}
                     {view === "Attendance" && <Attendance events={events} members={members} newJoinees={newJoinees} attendance={attendance} setAttendance={setAttendance} newJoineeAttendance={newJoineeAttendance} setNewJoineeAttendance={setNewJoineeAttendance} setNewJoinees={setNewJoinees} showToast={showToast} isAdmin={isAdmin} attendanceEventId={attendanceEventId} setAttendanceEventId={setAttendanceEventId} />}
                     {view === "Analytics" && <Analytics members={members} newJoinees={newJoinees} events={events} getMemberStats={getMemberStats} attendance={attendance} newJoineeAttendance={newJoineeAttendance} isAdmin={isAdmin} />}
@@ -2210,7 +2213,111 @@ function Members({ members, setMembers, newJoinees, setNewJoinees, events, atten
   );
 }
 
-function RolesDashboard({ members, setMembers, isAdmin, attendance, events }) {
+function TeamChatView({ team, teamMembers, teamChats, setTeamChats }) {
+  const [message, setMessage] = useState("");
+  const [sendAs, setSendAs] = useState(teamMembers.length > 0 ? teamMembers[0].id : "");
+  const messagesEndRef = useRef(null);
+
+  const messages = teamChats?.[team.id] || [];
+
+  const sendMessage = (e) => {
+    e.preventDefault();
+    if (!message.trim() || !sendAs) return;
+    
+    const sender = teamMembers.find(m => m.id === sendAs);
+    if (!sender) return;
+
+    const newMsg = {
+      id: Date.now().toString(),
+      text: message,
+      senderId: sender.id,
+      senderName: sender.name,
+      timestamp: new Date().toISOString()
+    };
+
+    setTeamChats({
+      ...teamChats,
+      [team.id]: [...messages, newMsg]
+    });
+    setMessage("");
+    setTimeout(() => {
+      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    }, 100);
+  };
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView();
+  }, [messages.length]);
+
+  return (
+    <div style={{ flex: 1, display: "flex", flexDirection: "column", minHeight: 0 }}>
+      <div style={{ flex: 1, overflowY: "auto", paddingRight: 8, paddingBottom: 16, display: "flex", flexDirection: "column", gap: 12 }}>
+        {messages.length === 0 ? (
+          <div style={{ margin: "auto", textAlign: "center", color: "var(--text2)" }}>
+            <div style={{ fontSize: 40, marginBottom: 12 }}>💬</div>
+            <h3 style={{ fontWeight: 600, color: "var(--text)", marginBottom: 4 }}>Welcome to {team.name} Chat</h3>
+            <p style={{ fontSize: 13 }}>Start the conversation with your team.</p>
+          </div>
+        ) : messages.map((msg, idx) => {
+          const isMe = msg.senderId === sendAs;
+          const showAvatar = idx === 0 || messages[idx-1].senderId !== msg.senderId;
+          return (
+            <div key={msg.id} style={{ display: "flex", gap: 8, alignSelf: isMe ? "flex-end" : "flex-start", maxWidth: "85%" }}>
+              {!isMe && (
+                <div style={{ width: 28, flexShrink: 0, opacity: showAvatar ? 1 : 0 }}>
+                  <Avatar name={msg.senderName} size={28} />
+                </div>
+              )}
+              <div style={{ display: "flex", flexDirection: "column", alignItems: isMe ? "flex-end" : "flex-start" }}>
+                {!isMe && showAvatar && <span style={{ fontSize: 11, color: "var(--text2)", marginBottom: 2, marginLeft: 4 }}>{msg.senderName}</span>}
+                <div style={{ 
+                  background: isMe ? team.color : "var(--bg2)", 
+                  color: isMe ? "#fff" : "var(--text)", 
+                  padding: "8px 12px", 
+                  borderRadius: 16, 
+                  borderTopLeftRadius: !isMe && showAvatar ? 4 : 16,
+                  borderTopRightRadius: isMe && showAvatar ? 4 : 16,
+                  fontSize: 13,
+                  lineHeight: 1.4,
+                  border: isMe ? "none" : "1px solid var(--border)"
+                }}>
+                  {msg.text}
+                </div>
+                <span style={{ fontSize: 9, color: "var(--text-muted)", marginTop: 4, opacity: 0.6 }}>{new Date(msg.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+              </div>
+            </div>
+          )
+        })}
+        <div ref={messagesEndRef} />
+      </div>
+
+      <form onSubmit={sendMessage} style={{ background: "rgba(0,0,0,0.2)", borderRadius: 12, padding: 12, border: "1px solid var(--border)", display: "flex", flexDirection: "column", gap: 8, marginTop: 8, flexShrink: 0 }}>
+        {teamMembers.length > 0 ? (
+          <>
+            <div className="flex items-center gap-2">
+              <span style={{ fontSize: 11, color: "var(--text2)", fontWeight: 600 }}>SEND AS:</span>
+              <select className="input" style={{ padding: "4px 8px", height: 28, fontSize: 12, width: "auto", flex: 1, background: "var(--bg2)" }} value={sendAs} onChange={e => setSendAs(e.target.value)}>
+                {teamMembers.map(m => <option key={m.id} value={m.id}>{m.name}</option>)}
+              </select>
+            </div>
+            <div className="flex gap-2">
+              <input className="input" placeholder="Type a message..." value={message} onChange={e => setMessage(e.target.value)} style={{ flex: 1, background: "var(--bg)" }} />
+              <button type="submit" className="btn btn-primary" disabled={!message.trim()} style={{ width: 44, padding: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                ➤
+              </button>
+            </div>
+          </>
+        ) : (
+          <div style={{ textAlign: "center", fontSize: 12, color: "var(--text2)", padding: 8 }}>
+            Assign members to this team to start chatting.
+          </div>
+        )}
+      </form>
+    </div>
+  );
+}
+
+function RolesDashboard({ members, setMembers, isAdmin, attendance, events, teamChats, setTeamChats }) {
   const [selectedTeam, setSelectedTeam] = useState(null);
   const [search, setSearch] = useState("");
 
@@ -2334,56 +2441,73 @@ function RolesDashboard({ members, setMembers, isAdmin, attendance, events }) {
         })}
       </div>
 
-      <AnimatedModal isOpen={!!selectedTeam} onClose={() => { setSelectedTeam(null); setSearch(""); }} maxWidth={500}>
+      <AnimatedModal isOpen={!!selectedTeam} onClose={() => { setSelectedTeam(null); setSearch(""); }} maxWidth={600}>
         {selectedTeam && (() => {
           const stats = getTeamStats(selectedTeam.id);
           const teamMembers = stats.teamMembers;
           const unassigned = members.filter(m => m.team !== selectedTeam.id && m.name.toLowerCase().includes(search.toLowerCase().trim()));
+          const teamMessages = teamChats?.[selectedTeam.id] || [];
           
           return (
-            <div>
-              <div className="flex items-center gap-3 mb-6" style={{ paddingBottom: 16, borderBottom: "1px solid var(--border)" }}>
+            <div style={{ display: "flex", flexDirection: "column", height: "70vh" }}>
+              <div className="flex items-center gap-3 mb-4" style={{ paddingBottom: 16, borderBottom: "1px solid var(--border)", flexShrink: 0 }}>
                 <div style={{ width: 48, height: 48, borderRadius: 12, background: `${selectedTeam.color}20`, color: selectedTeam.color, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 24 }}>
                   {selectedTeam.icon}
                 </div>
                 <div>
-                  <h2 style={{ margin: 0, fontSize: 22, fontWeight: 800 }}>{selectedTeam.name}</h2>
+                  <h2 style={{ margin: 0, fontSize: 22, fontWeight: 800 }}>{selectedTeam.name} Workspace</h2>
                   <p style={{ margin: 0, color: "var(--text2)", fontSize: 13 }}>{selectedTeam.desc}</p>
                 </div>
               </div>
-              
-              <h3 style={{ fontSize: 14, fontWeight: 600, marginBottom: 12, color: "var(--text)" }}>Assigned Volunteers ({teamMembers.length})</h3>
-              <div style={{ maxHeight: 200, overflowY: "auto", marginBottom: 24, background: "rgba(0,0,0,0.2)", borderRadius: 12, padding: 8 }}>
-                {teamMembers.length === 0 ? <p style={{ textAlign: "center", color: "var(--text2)", fontSize: 13, padding: "12px 0" }}>No volunteers assigned yet.</p> : teamMembers.map(m => (
-                  <div key={m.id} className="flex items-center justify-between" style={{ padding: "8px 12px", background: "var(--bg2)", borderRadius: 8, marginBottom: 4 }}>
-                    <div className="flex items-center gap-3">
-                      <Avatar name={m.name} size={28} />
-                      <div style={{ fontWeight: 600, fontSize: 13 }}>{m.name}</div>
-                    </div>
-                    {isAdmin && <button className="btn btn-sm btn-danger" style={{ padding: "4px 8px", fontSize: 11 }} onClick={() => setMembers(members.map(x => x.id === m.id ? { ...x, team: null } : x))}>Remove</button>}
-                  </div>
-                ))}
-              </div>
 
-              {isAdmin && (
-                <>
-                  <h3 style={{ fontSize: 14, fontWeight: 600, marginBottom: 12, color: "var(--text)" }}>Add Volunteers</h3>
-                  <input className="input mb-3" placeholder="Search members to add..." value={search} onChange={e => setSearch(e.target.value)} />
-                  <div style={{ maxHeight: 200, overflowY: "auto", background: "var(--bg)", borderRadius: 12, padding: 8, border: "1px solid var(--border)" }}>
-                    {search ? unassigned.map(m => (
-                      <div key={m.id} className="flex items-center justify-between" style={{ padding: "8px 12px", borderBottom: "1px solid var(--border)" }}>
+              <div className="flex gap-2 mb-4" style={{ borderBottom: "1px solid var(--border)", paddingBottom: 8, flexShrink: 0 }}>
+                <button className={`btn btn-sm ${search === "chat" ? "" : "btn-primary"}`} onClick={() => setSearch("")} style={{ background: search === "chat" ? "transparent" : "", color: search === "chat" ? "var(--text2)" : "" }}>👥 Team Roster</button>
+                <button className={`btn btn-sm ${search === "chat" ? "btn-primary" : ""}`} onClick={() => setSearch("chat")} style={{ background: search === "chat" ? "" : "transparent", color: search === "chat" ? "" : "var(--text2)" }}>💬 Team Chat</button>
+              </div>
+              
+              {search !== "chat" ? (
+                <div style={{ flex: 1, overflowY: "auto", paddingRight: 8 }}>
+                  <h3 style={{ fontSize: 14, fontWeight: 600, marginBottom: 12, color: "var(--text)" }}>Assigned Volunteers ({teamMembers.length})</h3>
+                  <div style={{ background: "rgba(0,0,0,0.2)", borderRadius: 12, padding: 8, marginBottom: 24 }}>
+                    {teamMembers.length === 0 ? <p style={{ textAlign: "center", color: "var(--text2)", fontSize: 13, padding: "12px 0" }}>No volunteers assigned yet.</p> : teamMembers.map(m => (
+                      <div key={m.id} className="flex items-center justify-between" style={{ padding: "8px 12px", background: "var(--bg2)", borderRadius: 8, marginBottom: 4 }}>
                         <div className="flex items-center gap-3">
                           <Avatar name={m.name} size={28} />
-                          <div>
-                            <div style={{ fontWeight: 600, fontSize: 13 }}>{m.name}</div>
-                            <div style={{ fontSize: 11, color: "var(--text2)" }}>{TEAMS.find(t => t.id === m.team)?.name || "Unassigned"}</div>
-                          </div>
+                          <div style={{ fontWeight: 600, fontSize: 13 }}>{m.name}</div>
                         </div>
-                        <button className="btn btn-sm btn-primary" style={{ padding: "4px 10px", fontSize: 11 }} onClick={() => setMembers(members.map(x => x.id === m.id ? { ...x, team: selectedTeam.id } : x))}>Assign</button>
+                        {isAdmin && <button className="btn btn-sm btn-danger" style={{ padding: "4px 8px", fontSize: 11 }} onClick={() => setMembers(members.map(x => x.id === m.id ? { ...x, team: null } : x))}>Remove</button>}
                       </div>
-                    )) : <p style={{ textAlign: "center", color: "var(--text2)", fontSize: 13, padding: "12px 0" }}>Search for a member to assign them to {selectedTeam.name}</p>}
+                    ))}
                   </div>
-                </>
+
+                  {isAdmin && (
+                    <>
+                      <h3 style={{ fontSize: 14, fontWeight: 600, marginBottom: 12, color: "var(--text)" }}>Add Volunteers</h3>
+                      <input className="input mb-3" placeholder="Search members to add..." value={search} onChange={e => setSearch(e.target.value)} />
+                      <div style={{ background: "var(--bg)", borderRadius: 12, padding: 8, border: "1px solid var(--border)" }}>
+                        {search ? unassigned.map(m => (
+                          <div key={m.id} className="flex items-center justify-between" style={{ padding: "8px 12px", borderBottom: "1px solid var(--border)" }}>
+                            <div className="flex items-center gap-3">
+                              <Avatar name={m.name} size={28} />
+                              <div>
+                                <div style={{ fontWeight: 600, fontSize: 13 }}>{m.name}</div>
+                                <div style={{ fontSize: 11, color: "var(--text2)" }}>{TEAMS.find(t => t.id === m.team)?.name || "Unassigned"}</div>
+                              </div>
+                            </div>
+                            <button className="btn btn-sm btn-primary" style={{ padding: "4px 10px", fontSize: 11 }} onClick={() => setMembers(members.map(x => x.id === m.id ? { ...x, team: selectedTeam.id } : x))}>Assign</button>
+                          </div>
+                        )) : <p style={{ textAlign: "center", color: "var(--text2)", fontSize: 13, padding: "12px 0" }}>Search for a member to assign them to {selectedTeam.name}</p>}
+                      </div>
+                    </>
+                  )}
+                </div>
+              ) : (
+                <TeamChatView 
+                  team={selectedTeam} 
+                  teamMembers={teamMembers} 
+                  teamChats={teamChats} 
+                  setTeamChats={setTeamChats} 
+                />
               )}
             </div>
           );
@@ -3231,6 +3355,17 @@ function Analytics({ members, newJoinees, events, getMemberStats, attendance, ne
 
   const highPerformersList = active.filter(m => getMemberStats(m.id).pct >= 85 && getMemberStats(m.id).total >= 3);
 
+  const burnoutRisks = active.filter(m => {
+    let streak = 0;
+    const sortedEvents = [...events].sort((a, b) => new Date(b.date) - new Date(a.date));
+    for (const e of sortedEvents) {
+      if (isAttendedStatus(attendance[e.id]?.[m.id])) streak += 1;
+      else break;
+    }
+    m._currentStreak = streak;
+    return streak >= 10;
+  });
+
   const getSmartTabData = () => {
     switch (smartTab) {
       case 'missed3': return missedLast3;
@@ -3238,6 +3373,7 @@ function Analytics({ members, newJoinees, events, getMemberStats, attendance, ne
       case 'firstTimers': return firstTimers;
       case 'inactive60': return inactive60;
       case 'highPerformers': return highPerformersList;
+      case 'burnoutRisks': return burnoutRisks;
       default: return [];
     }
   };
@@ -3455,6 +3591,7 @@ function Analytics({ members, newJoinees, events, getMemberStats, attendance, ne
           <div className="ac-card-title" style={{ color: "var(--accent)" }}>💡 Smart Alerts</div>
           <div className="ac-tabs" style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
             <div className={`ac-tab ${smartTab === 'missed3' ? 'active' : ''}`} onClick={() => setSmartTab('missed3')}>Missed Last 3 ({missedLast3.length})</div>
+            <div className={`ac-tab ${smartTab === 'burnoutRisks' ? 'active' : ''}`} onClick={() => setSmartTab('burnoutRisks')} style={smartTab === 'burnoutRisks' ? { background: "rgba(244, 63, 94, 0.2)", color: "#f43f5e", borderColor: "#f43f5e" } : {}}>⚠️ Burnout Risk ({burnoutRisks.length})</div>
             <div className={`ac-tab ${smartTab === 'below40' ? 'active' : ''}`} onClick={() => setSmartTab('below40')}>Below 40% ({below40.length})</div>
             <div className={`ac-tab ${smartTab === 'firstTimers' ? 'active' : ''}`} onClick={() => setSmartTab('firstTimers')}>First Timers ({firstTimers.length})</div>
             <div className={`ac-tab ${smartTab === 'inactive60' ? 'active' : ''}`} onClick={() => setSmartTab('inactive60')}>Inactive 60 Days ({inactive60.length})</div>
@@ -3467,7 +3604,7 @@ function Analytics({ members, newJoinees, events, getMemberStats, attendance, ne
                 <tr>
                   <th>Member Name</th>
                   <th>Attendance %</th>
-                  <th>Recent Activity</th>
+                  <th>Recent Activity / Details</th>
                 </tr>
               </thead>
               <tbody>
@@ -3478,12 +3615,18 @@ function Analytics({ members, newJoinees, events, getMemberStats, attendance, ne
                       <td style={{ fontWeight: 500 }}>{m.name}</td>
                       <td style={{ color: s.pct >= 75 ? "var(--emerald)" : s.pct >= 40 ? "var(--gold)" : "var(--rose)", fontWeight: 600 }}>{s.pct}%</td>
                       <td>
-                        <div className="flex gap-2">
-                          {recentEvents.slice(0, 3).reverse().map(e => {
-                            const att = attendance[e.id]?.[m.id] || newJoineeAttendance[e.id]?.[m.id];
-                            return <span key={e.id} style={{ fontSize: 14 }}>{att === 'present' ? '✅' : att === 'late' ? '⏱️' : '❌'}</span>
-                          })}
-                        </div>
+                        {smartTab === 'burnoutRisks' ? (
+                          <div style={{ color: "#f43f5e", fontSize: 13, fontWeight: 600 }}>
+                            🔥 {m._currentStreak} consecutive events! <span style={{ color: "var(--text2)", fontWeight: 400 }}>(Give 1 week break)</span>
+                          </div>
+                        ) : (
+                          <div className="flex gap-2">
+                            {recentEvents.slice(0, 3).reverse().map(e => {
+                              const att = attendance[e.id]?.[m.id] || newJoineeAttendance[e.id]?.[m.id];
+                              return <span key={e.id} style={{ fontSize: 14 }}>{att === 'present' ? '✅' : att === 'late' ? '⏱️' : '❌'}</span>
+                            })}
+                          </div>
+                        )}
                       </td>
                     </tr>
                   )
