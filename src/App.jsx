@@ -130,6 +130,7 @@ const PERSISTED_DATA_KEYS = Object.freeze({
   attendance: "aysg_attendance",
   newJoineeAttendance: "aysg_new_joinee_attendance",
   teamChats: "aysg_team_chats",
+  teams: "aysg_teams",
 });
 
 const MEMBER_NAMES = [
@@ -881,7 +882,7 @@ select.input{cursor:pointer}
 const VIEWS = ["Dashboard", "Members", "New Joinees", "Roles", "Events", "Attendance", "Analytics", "Reports"];
 const VIEW_ICONS = { Dashboard: "D", Members: "M", "New Joinees": "N", Roles: "🎭", Events: "E", Attendance: "A", Analytics: "Y", Reports: "R" };
 
-const TEAMS = [
+const INITIAL_TEAMS = [
   { id: "research", name: "Research Team", color: "#10b981", icon: "🔍", desc: "Identify and maintain a database of Gaushalas, Orphanages, etc." },
   { id: "logistics", name: "Logistics Team", color: "#3b82f6", icon: "📦", desc: "Source quality materials at the best prices." },
   { id: "activity", name: "Activity Planning", color: "#f97316", icon: "📋", desc: "Design the activity end-to-end, deciding beneficiaries." },
@@ -1230,6 +1231,7 @@ export default function App() {
   const [attendance, setAttendance] = useSyncedStorage(PERSISTED_DATA_KEYS.attendance, INITIAL_ATTENDANCE, migrateAttendance);
   const [newJoineeAttendance, setNewJoineeAttendance] = useSyncedStorage(PERSISTED_DATA_KEYS.newJoineeAttendance, INITIAL_ATTENDANCE);
   const [teamChats, setTeamChats] = useSyncedStorage(PERSISTED_DATA_KEYS.teamChats, {});
+  const [teams, setTeams] = useSyncedStorage(PERSISTED_DATA_KEYS.teams, INITIAL_TEAMS);
   const [adminUser, setAdminUser] = useState(null);
   const [authReady, setAuthReady] = useState(false);
   const [adminErr, setAdminErr] = useState("");
@@ -2069,7 +2071,7 @@ function Members({ members, setMembers, newJoinees, setNewJoinees, events, atten
                         <div className="flex gap-1" style={{ flexWrap: 'wrap' }}>
                           <span className="tag tag-purple">{roleOf(m)}</span>
                           {(m.teams || []).map(tId => {
-                            const t = TEAMS.find(x => x.id === tId);
+                            const t = teams.find(x => x.id === tId);
                             if (!t) return null;
                             return (
                               <span key={tId} className="tag" style={{ background: `${t.color}20`, color: t.color, borderColor: `${t.color}40` }}>
@@ -2189,7 +2191,7 @@ function Members({ members, setMembers, newJoinees, setNewJoinees, events, atten
           <div className="field"><label>Role</label><input className="input" value={form.role || ""} onChange={e => setForm({ ...form, role: e.target.value })} placeholder="Member / Lead / Volunteer" /></div>
           <div className="field"><label>Assigned Teams (Ctrl+Click to select multiple)</label>
             <select className="input" multiple value={form.teams || []} onChange={e => setForm({ ...form, teams: Array.from(e.target.selectedOptions, option => option.value) })} style={{ height: "100px", padding: "8px" }}>
-              {TEAMS.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
+              {teams.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
             </select>
           </div>
         </div>
@@ -2336,7 +2338,7 @@ function TeamChatView({ team, teamMembers, teamChats, setTeamChats }) {
   );
 }
 
-function RolesDashboard({ members, setMembers, isAdmin, attendance, events, teamChats, setTeamChats }) {
+function RolesDashboard({ members, setMembers, isAdmin, attendance, events, teamChats, setTeamChats, teams, setTeams }) {
   const [selectedTeam, setSelectedTeam] = useState(null);
   const [search, setSearch] = useState("");
 
@@ -2381,7 +2383,7 @@ function RolesDashboard({ members, setMembers, isAdmin, attendance, events, team
           <span style={{ fontSize: 20 }}>📊</span> Team Engagement Heatmap
         </h2>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: 16 }}>
-          {TEAMS.map(team => {
+          {teams.map(team => {
             const stats = getTeamStats(team.id);
             return (
               <div key={`heat-${team.id}`} className="flex items-center gap-4">
@@ -2397,7 +2399,7 @@ function RolesDashboard({ members, setMembers, isAdmin, attendance, events, team
       </div>
       
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))", gap: 20 }}>
-        {TEAMS.map(team => {
+        {teams.map(team => {
           const stats = getTeamStats(team.id);
           return (
             <div key={team.id} className="card" style={{ position: "relative", overflow: "hidden", border: `1px solid ${team.color}40`, background: `linear-gradient(145deg, var(--bg2) 0%, rgba(0,0,0,0.5) 100%)`, display: "flex", flexDirection: "column" }}>
@@ -2409,7 +2411,23 @@ function RolesDashboard({ members, setMembers, isAdmin, attendance, events, team
                     {team.icon}
                   </div>
                   <div style={{ flex: 1 }}>
-                    <div style={{ fontWeight: 800, fontSize: 18, color: "var(--text)" }}>{team.name}</div>
+                    <div style={{ fontWeight: 800, fontSize: 18, color: "var(--text)", display: "flex", alignItems: "center", gap: 8 }}>
+                      {team.name}
+                      {isAdmin && (
+                        <button 
+                          style={{ background: "transparent", border: "none", cursor: "pointer", fontSize: 14, opacity: 0.6 }} 
+                          onClick={() => {
+                            const newName = prompt("Enter new team name:", team.name);
+                            if (newName && newName.trim() !== "") {
+                              setTeams(teams.map(t => t.id === team.id ? { ...t, name: newName.trim() } : t));
+                            }
+                          }}
+                          title="Edit Team Name"
+                        >
+                          ✏️
+                        </button>
+                      )}
+                    </div>
                     <div style={{ fontSize: 12, color: "var(--text2)", minHeight: 36, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{team.desc}</div>
                   </div>
                 </div>
@@ -2474,7 +2492,25 @@ function RolesDashboard({ members, setMembers, isAdmin, attendance, events, team
                   {selectedTeam.icon}
                 </div>
                 <div>
-                  <h2 style={{ margin: 0, fontSize: 22, fontWeight: 800 }}>{selectedTeam.name} Workspace</h2>
+                  <h2 style={{ margin: 0, fontSize: 22, fontWeight: 800, display: "flex", alignItems: "center", gap: 8 }}>
+                    {selectedTeam.name} Workspace
+                    {isAdmin && (
+                      <button 
+                        style={{ background: "transparent", border: "none", cursor: "pointer", fontSize: 16, opacity: 0.6 }} 
+                        onClick={() => {
+                          const newName = prompt("Enter new team name:", selectedTeam.name);
+                          if (newName && newName.trim() !== "") {
+                            const updatedName = newName.trim();
+                            setTeams(teams.map(t => t.id === selectedTeam.id ? { ...t, name: updatedName } : t));
+                            setSelectedTeam({ ...selectedTeam, name: updatedName });
+                          }
+                        }}
+                        title="Edit Team Name"
+                      >
+                        ✏️
+                      </button>
+                    )}
+                  </h2>
                   <p style={{ margin: 0, color: "var(--text2)", fontSize: 13 }}>{selectedTeam.desc}</p>
                 </div>
               </div>
@@ -2511,7 +2547,7 @@ function RolesDashboard({ members, setMembers, isAdmin, attendance, events, team
                               <div>
                                 <div style={{ fontWeight: 600, fontSize: 13 }}>{m.name}</div>
                                 <div style={{ fontSize: 11, color: "var(--text2)" }}>
-                                  {(m.teams || []).length > 0 ? (m.teams || []).map(tId => TEAMS.find(t => t.id === tId)?.name).filter(Boolean).join(", ") : "Unassigned"}
+                                  {(m.teams || []).length > 0 ? (m.teams || []).map(tId => teams.find(t => t.id === tId)?.name).filter(Boolean).join(", ") : "Unassigned"}
                                 </div>
                               </div>
                             </div>
