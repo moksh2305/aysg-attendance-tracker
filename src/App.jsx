@@ -373,11 +373,18 @@ function migrateMembers(value) {
 
   for (const member of value) {
     let m = { ...member };
-    // Inject phone number if it exists in our mapping and is currently empty
     if (!m.mobile && PHONES[m.name]) {
       m.mobile = PHONES[m.name];
       changed = true;
     }
+    
+    if (m.team !== undefined) {
+      if (m.team) m.teams = [m.team];
+      else m.teams = [];
+      delete m.team;
+      changed = true;
+    }
+    if (!m.teams) m.teams = [];
 
     if (!m.id || usedIds.has(m.id)) {
       const newId = genId("M");
@@ -2058,7 +2065,20 @@ function Members({ members, setMembers, newJoinees, setNewJoinees, events, atten
                       </td>
                       <td><span className="streak-badge">🔥 {insight.streak}</span></td>
                       <td style={{ fontSize: 12.5, color: "var(--text2)" }}>{insight.lastAttended ? <><span style={{ color: "var(--text)" }}>{insight.lastAttended.name}</span><br />{fmtDate(insight.lastAttended.date)}</> : "No attendance yet"}</td>
-                      <td><div className="flex gap-1" style={{ flexWrap: 'wrap' }}><span className="tag tag-purple">{roleOf(m)}</span>{m.team && TEAMS.find(t => t.id === m.team) && <span className="tag" style={{ background: `${TEAMS.find(t => t.id === m.team).color}20`, color: TEAMS.find(t => t.id === m.team).color, borderColor: `${TEAMS.find(t => t.id === m.team).color}40` }}>{TEAMS.find(t => t.id === m.team).icon} {TEAMS.find(t => t.id === m.team).name}</span>}</div></td>
+                      <td>
+                        <div className="flex gap-1" style={{ flexWrap: 'wrap' }}>
+                          <span className="tag tag-purple">{roleOf(m)}</span>
+                          {(m.teams || []).map(tId => {
+                            const t = TEAMS.find(x => x.id === tId);
+                            if (!t) return null;
+                            return (
+                              <span key={tId} className="tag" style={{ background: `${t.color}20`, color: t.color, borderColor: `${t.color}40` }}>
+                                {t.icon} {t.name}
+                              </span>
+                            );
+                          })}
+                        </div>
+                      </td>
                       <td style={{ color: "var(--text2)", fontSize: 12.5 }}>{m.area || "—"}</td>
                       <td><span className={`tag ${m.active ? "tag-present" : "tag-absent"}`}>{m.active ? "Active" : "Inactive"}</span>{insight.joinedRecently && <span className="tag tag-purple" style={{ marginLeft: 6 }}>New</span>}</td>
                       <td>
@@ -2167,9 +2187,8 @@ function Members({ members, setMembers, newJoinees, setNewJoinees, events, atten
         </div>
         <div className="grid-2">
           <div className="field"><label>Role</label><input className="input" value={form.role || ""} onChange={e => setForm({ ...form, role: e.target.value })} placeholder="Member / Lead / Volunteer" /></div>
-          <div className="field"><label>Assigned Team</label>
-            <select className="input" value={form.team || ""} onChange={e => setForm({ ...form, team: e.target.value })}>
-              <option value="">No Team</option>
+          <div className="field"><label>Assigned Teams (Ctrl+Click to select multiple)</label>
+            <select className="input" multiple value={form.teams || []} onChange={e => setForm({ ...form, teams: Array.from(e.target.selectedOptions, option => option.value) })} style={{ height: "100px", padding: "8px" }}>
               {TEAMS.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
             </select>
           </div>
@@ -2321,7 +2340,7 @@ function RolesDashboard({ members, setMembers, isAdmin, attendance, events, team
   const [selectedTeam, setSelectedTeam] = useState(null);
   const [search, setSearch] = useState("");
 
-  const getTeamMembers = (teamId) => members.filter(m => m.team === teamId);
+  const getTeamMembers = (teamId) => members.filter(m => m.teams?.includes(teamId));
 
   const getTeamStats = (teamId) => {
     const teamMembers = getTeamMembers(teamId);
@@ -2445,7 +2464,7 @@ function RolesDashboard({ members, setMembers, isAdmin, attendance, events, team
         {selectedTeam && (() => {
           const stats = getTeamStats(selectedTeam.id);
           const teamMembers = stats.teamMembers;
-          const unassigned = members.filter(m => m.team !== selectedTeam.id && m.name.toLowerCase().includes(search.toLowerCase().trim()));
+          const unassigned = members.filter(m => !(m.teams || []).includes(selectedTeam.id) && m.name.toLowerCase().includes(search.toLowerCase().trim()));
           const teamMessages = teamChats?.[selectedTeam.id] || [];
           
           return (
@@ -2475,7 +2494,7 @@ function RolesDashboard({ members, setMembers, isAdmin, attendance, events, team
                           <Avatar name={m.name} size={28} />
                           <div style={{ fontWeight: 600, fontSize: 13 }}>{m.name}</div>
                         </div>
-                        {isAdmin && <button className="btn btn-sm btn-danger" style={{ padding: "4px 8px", fontSize: 11 }} onClick={() => setMembers(members.map(x => x.id === m.id ? { ...x, team: null } : x))}>Remove</button>}
+                        {isAdmin && <button className="btn btn-sm btn-danger" style={{ padding: "4px 8px", fontSize: 11 }} onClick={() => setMembers(members.map(x => x.id === m.id ? { ...x, teams: (x.teams || []).filter(t => t !== selectedTeam.id) } : x))}>Remove</button>}
                       </div>
                     ))}
                   </div>
@@ -2491,10 +2510,12 @@ function RolesDashboard({ members, setMembers, isAdmin, attendance, events, team
                               <Avatar name={m.name} size={28} />
                               <div>
                                 <div style={{ fontWeight: 600, fontSize: 13 }}>{m.name}</div>
-                                <div style={{ fontSize: 11, color: "var(--text2)" }}>{TEAMS.find(t => t.id === m.team)?.name || "Unassigned"}</div>
+                                <div style={{ fontSize: 11, color: "var(--text2)" }}>
+                                  {(m.teams || []).length > 0 ? (m.teams || []).map(tId => TEAMS.find(t => t.id === tId)?.name).filter(Boolean).join(", ") : "Unassigned"}
+                                </div>
                               </div>
                             </div>
-                            <button className="btn btn-sm btn-primary" style={{ padding: "4px 10px", fontSize: 11 }} onClick={() => setMembers(members.map(x => x.id === m.id ? { ...x, team: selectedTeam.id } : x))}>Assign</button>
+                            <button className="btn btn-sm btn-primary" style={{ padding: "4px 10px", fontSize: 11 }} onClick={() => setMembers(members.map(x => x.id === m.id ? { ...x, teams: [...(x.teams || []), selectedTeam.id] } : x))}>Assign</button>
                           </div>
                         )) : <p style={{ textAlign: "center", color: "var(--text2)", fontSize: 13, padding: "12px 0" }}>Search for a member to assign them to {selectedTeam.name}</p>}
                       </div>
