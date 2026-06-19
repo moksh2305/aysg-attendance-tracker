@@ -2402,20 +2402,21 @@ function RolesDashboard({ members, setMembers, isAdmin, attendance, events, team
         {teams.map(team => {
           const stats = getTeamStats(team.id);
           return (
-            <div key={team.id} className="card" style={{ position: "relative", overflow: "hidden", border: `1px solid ${team.color}40`, background: `linear-gradient(145deg, var(--bg2) 0%, rgba(0,0,0,0.5) 100%)`, display: "flex", flexDirection: "column" }}>
+            <div key={team.id} className="card" style={{ position: "relative", overflow: "hidden", border: `1px solid ${team.color}40`, background: `linear-gradient(145deg, var(--bg2) 0%, rgba(0,0,0,0.5) 100%)`, display: "flex", flexDirection: "column", padding: 24 }}>
               <div style={{ position: "absolute", top: -40, right: -40, width: 120, height: 120, background: team.color, filter: "blur(60px)", opacity: 0.15, pointerEvents: "none" }} />
               
-              <div style={{ padding: 20, flex: 1, display: "flex", flexDirection: "column" }}>
-                <div className="flex items-center gap-3 mb-4">
+              {/* Top Section with min-height to align cross-card differences */}
+              <div style={{ display: "flex", flexDirection: "column", minHeight: 120 }}>
+                <div className="flex items-start gap-3 mb-4">
                   <div style={{ width: 48, height: 48, borderRadius: 12, background: `${team.color}20`, color: team.color, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 24, flexShrink: 0 }}>
                     {team.icon}
                   </div>
                   <div style={{ flex: 1 }}>
-                    <div style={{ fontWeight: 800, fontSize: 18, color: "var(--text)", display: "flex", alignItems: "center", gap: 8 }}>
-                      {team.name}
+                    <div style={{ fontWeight: 800, fontSize: 18, color: "var(--text)", display: "flex", alignItems: "flex-start", gap: 8, minHeight: 48 }}>
+                      <span style={{ lineHeight: 1.2 }}>{team.name}</span>
                       {isAdmin && (
                         <button 
-                          style={{ background: "transparent", border: "none", cursor: "pointer", fontSize: 14, opacity: 0.6 }} 
+                          style={{ background: "transparent", border: "none", cursor: "pointer", fontSize: 14, opacity: 0.6, marginTop: 2 }} 
                           onClick={() => {
                             const newName = prompt("Enter new team name:", team.name);
                             if (newName && newName.trim() !== "") {
@@ -2436,47 +2437,47 @@ function RolesDashboard({ members, setMembers, isAdmin, attendance, events, team
                     )}
                   </div>
                 </div>
-                
-                {/* Metrics */}
-                <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
-                  <div style={{ flex: 1, background: "rgba(0,0,0,0.2)", borderRadius: 8, padding: "8px 12px", border: "1px solid rgba(255,255,255,0.05)" }}>
-                    <div style={{ fontSize: 10, color: "var(--text2)", textTransform: "uppercase", letterSpacing: 1, marginBottom: 4 }}>Attendance</div>
-                    <div className="flex items-center gap-2">
-                      <div style={{ flex: 1, background: "rgba(255,255,255,0.1)", height: 6, borderRadius: 3 }}>
-                        <div style={{ width: `${stats.attendancePct}%`, height: "100%", background: team.color, borderRadius: 3 }} />
-                      </div>
-                      <span style={{ fontSize: 13, fontWeight: 700, color: "var(--text)" }}>{stats.attendancePct}%</span>
+              </div>
+              
+              {/* Metrics with mt-auto to push everything below it to the bottom consistently */}
+              <div style={{ display: "flex", gap: 8, marginBottom: 16, marginTop: "auto" }}>
+                <div style={{ flex: 1, background: "rgba(0,0,0,0.2)", borderRadius: 8, padding: "8px 12px", border: "1px solid rgba(255,255,255,0.05)" }}>
+                  <div style={{ fontSize: 10, color: "var(--text2)", textTransform: "uppercase", letterSpacing: 1, marginBottom: 4 }}>Attendance</div>
+                  <div className="flex items-center gap-2">
+                    <div style={{ flex: 1, background: "rgba(255,255,255,0.1)", height: 6, borderRadius: 3 }}>
+                      <div style={{ width: `${stats.attendancePct}%`, height: "100%", background: team.color, borderRadius: 3 }} />
                     </div>
+                    <span style={{ fontSize: 13, fontWeight: 700, color: "var(--text)" }}>{stats.attendancePct}%</span>
                   </div>
                 </div>
-                
-                <div className="flex gap-2 mb-4 flex-wrap">
-                  <span className="tag" style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", color: "var(--text)" }}>👥 {stats.members} Members</span>
-                  <span className="tag" style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", color: "var(--text)" }}>🔥 {stats.activeTasks} Tasks</span>
-                  <span className="tag tag-present" style={{ background: "rgba(16, 212, 126, 0.1)", color: "var(--emerald)", borderColor: "rgba(16, 212, 126, 0.2)" }}>📈 +{stats.weeklyTrend}% This Week</span>
+              </div>
+              
+              <div className="flex gap-2 mb-4 flex-wrap">
+                <span className="tag" style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", color: "var(--text)" }}>👥 {stats.members} Members</span>
+                <span className="tag" style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", color: "var(--text)" }}>🔥 {stats.activeTasks} Tasks</span>
+                <span className="tag tag-present" style={{ background: "rgba(16, 212, 126, 0.1)", color: "var(--emerald)", borderColor: "rgba(16, 212, 126, 0.2)" }}>📈 +{stats.weeklyTrend}% This Week</span>
+              </div>
+              
+              {/* AI Insight */}
+              <div style={{ background: "rgba(124, 106, 248, 0.1)", border: "1px solid rgba(124, 106, 248, 0.2)", padding: 12, borderRadius: 8, marginBottom: 16 }}>
+                <div style={{ fontSize: 11, fontWeight: 700, color: "var(--accent)", marginBottom: 4, display: "flex", alignItems: "center", gap: 4 }}>
+                  <span>🤖</span> AI Insight
                 </div>
-                
-                {/* AI Insight */}
-                <div style={{ background: "rgba(124, 106, 248, 0.1)", border: "1px solid rgba(124, 106, 248, 0.2)", padding: 12, borderRadius: 8, marginBottom: 16 }}>
-                  <div style={{ fontSize: 11, fontWeight: 700, color: "var(--accent)", marginBottom: 4, display: "flex", alignItems: "center", gap: 4 }}>
-                    <span>🤖</span> AI Insight
-                  </div>
-                  <div style={{ fontSize: 12, color: "var(--text)", lineHeight: 1.4, minHeight: 34, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>
-                    {stats.insight}
-                  </div>
+                <div style={{ fontSize: 12, color: "var(--text)", lineHeight: 1.4, minHeight: 34, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>
+                  {stats.insight}
                 </div>
-                
-                {/* Actions */}
-                <div className="flex items-center gap-2 mt-auto">
-                  <button className="btn flex-1" style={{ background: `${team.color}20`, color: team.color, border: `1px solid ${team.color}40`, fontWeight: 600 }} onClick={() => setSelectedTeam(team)}>
-                    Open
+              </div>
+              
+              {/* Actions */}
+              <div className="flex items-center gap-2">
+                <button className="btn flex-1" style={{ background: `${team.color}20`, color: team.color, border: `1px solid ${team.color}40`, fontWeight: 600 }} onClick={() => setSelectedTeam(team)}>
+                  Open
+                </button>
+                {isAdmin && (
+                  <button className="btn flex-1" style={{ background: "rgba(255,255,255,0.1)", border: "1px solid rgba(255,255,255,0.1)", fontWeight: 600 }} onClick={() => { setSelectedTeam(team); setSearch(" "); }} title="Assign Members">
+                    Assign
                   </button>
-                  {isAdmin && (
-                    <button className="btn flex-1" style={{ background: "rgba(255,255,255,0.1)", border: "1px solid rgba(255,255,255,0.1)", fontWeight: 600 }} onClick={() => { setSelectedTeam(team); setSearch(" "); }} title="Assign Members">
-                      Assign
-                    </button>
-                  )}
-                </div>
+                )}
               </div>
             </div>
           );
