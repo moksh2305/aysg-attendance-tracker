@@ -2375,6 +2375,28 @@ function RolesDashboard({ members, setMembers, isAdmin, attendance, events, team
           <h1 className="page-title">Roles Command Center</h1>
           <p className="color-muted text-sm" style={{ marginTop: 4 }}>Manage active teams and volunteer duties</p>
         </div>
+        {isAdmin && (
+          <button className="btn btn-primary" onClick={() => {
+            const EXTENDED_COLORS = ["#ef4444", "#f43f5e", "#ec4899", "#d946ef", "#a855f7", "#8b5cf6", "#6366f1", "#3b82f6", "#0ea5e9", "#06b6d4", "#14b8a6", "#10b981", "#22c55e", "#84cc16", "#eab308", "#f59e0b", "#f97316", "#ea580c"];
+            const usedColors = new Set(teams.map(t => t.color.toLowerCase()));
+            let newColor = EXTENDED_COLORS.find(c => !usedColors.has(c));
+            if (!newColor) {
+               newColor = `hsl(${Math.floor(Math.random() * 360)}, 85%, 55%)`;
+            }
+            const name = prompt("Enter new team name:");
+            if (!name || name.trim() === "") return;
+            const desc = prompt("Enter a brief description for the team:") || "";
+            const icon = prompt("Enter a single emoji icon for the team:") || "🚀";
+            const newTeam = {
+              id: "team_" + Date.now().toString(36),
+              name: name.trim(),
+              color: newColor,
+              icon: icon.trim(),
+              desc: desc.trim()
+            };
+            setTeams([...teams, newTeam]);
+          }}>+ Add Team</button>
+        )}
       </div>
       
       {/* Visual Heatmap Section */}
