@@ -2429,6 +2429,11 @@ function RolesDashboard({ members, setMembers, isAdmin, attendance, events, team
                       )}
                     </div>
                     <div style={{ fontSize: 12, color: "var(--text2)", minHeight: 36, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{team.desc}</div>
+                    {team.captainId && (
+                      <div style={{ fontSize: 12, color: "var(--accent)", marginTop: 8, fontWeight: 600, display: "flex", alignItems: "center", gap: 6 }}>
+                        <span style={{ fontSize: 14 }}>👑</span> Captain: {members.find(m => m.id === team.captainId)?.name || "Unknown"}
+                      </div>
+                    )}
                   </div>
                 </div>
                 
@@ -2528,9 +2533,29 @@ function RolesDashboard({ members, setMembers, isAdmin, attendance, events, team
                       <div key={m.id} className="flex items-center justify-between" style={{ padding: "8px 12px", background: "var(--bg2)", borderRadius: 8, marginBottom: 4 }}>
                         <div className="flex items-center gap-3">
                           <Avatar name={m.name} size={28} />
-                          <div style={{ fontWeight: 600, fontSize: 13 }}>{m.name}</div>
+                          <div style={{ fontWeight: 600, fontSize: 13, display: "flex", alignItems: "center", gap: 4 }}>
+                            {m.name}
+                            {selectedTeam.captainId === m.id && <span title="Team Captain" style={{ fontSize: 14 }}>👑</span>}
+                          </div>
                         </div>
-                        {isAdmin && <button className="btn btn-sm btn-danger" style={{ padding: "4px 8px", fontSize: 11 }} onClick={() => setMembers(members.map(x => x.id === m.id ? { ...x, teams: (x.teams || []).filter(t => t !== selectedTeam.id) } : x))}>Remove</button>}
+                        <div className="flex gap-2">
+                          {isAdmin && selectedTeam.captainId !== m.id && (
+                            <button className="btn btn-sm" style={{ padding: "4px 8px", fontSize: 11, background: "rgba(255, 215, 0, 0.1)", color: "#FFD700", border: "1px solid rgba(255, 215, 0, 0.2)" }} onClick={() => {
+                              const updatedTeam = { ...selectedTeam, captainId: m.id };
+                              setTeams(teams.map(t => t.id === selectedTeam.id ? updatedTeam : t));
+                              setSelectedTeam(updatedTeam);
+                            }}>Make Captain</button>
+                          )}
+                          {isAdmin && <button className="btn btn-sm btn-danger" style={{ padding: "4px 8px", fontSize: 11 }} onClick={() => {
+                            setMembers(members.map(x => x.id === m.id ? { ...x, teams: (x.teams || []).filter(t => t !== selectedTeam.id) } : x));
+                            if (selectedTeam.captainId === m.id) {
+                              const updatedTeam = { ...selectedTeam };
+                              delete updatedTeam.captainId;
+                              setTeams(teams.map(t => t.id === selectedTeam.id ? updatedTeam : t));
+                              setSelectedTeam(updatedTeam);
+                            }
+                          }}>Remove</button>}
+                        </div>
                       </div>
                     ))}
                   </div>
