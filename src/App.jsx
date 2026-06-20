@@ -596,7 +596,8 @@ html.light .main{background:rgba(255, 255, 255, 0.6);border:1px solid rgba(255,2
 .topbar{height:62px;background:transparent;border-bottom:1px solid rgba(255,255,255,0.08);display:flex;align-items:center;padding:0 20px;gap:12px;flex-shrink:0;position:relative;z-index:8;border-radius:24px 24px 0 0}
 html.light .topbar{border-bottom:1px solid rgba(0,0,0,0.05)}
 .topbar.admin{border-bottom-color:rgba(16,212,126,0.32)}
-.content{flex:1;overflow-y:auto;padding:24px;scrollbar-width:thin;scrollbar-color:var(--border) transparent}
+.content{flex:1;overflow-y:auto;padding:24px 24px 60px 24px;scrollbar-width:thin;scrollbar-color:var(--border) transparent}
+.content::after{content:"";display:block;height:40px}
 .brand{padding:14px 14px 10px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;min-height:68px}
 .brand-icon{width:38px;height:38px;border-radius:10px;background:linear-gradient(135deg,var(--accent3),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:15px;box-shadow:0 4px 20px var(--glow);flex-shrink:0;font-weight:900}
 .brand-title{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;color:var(--text);line-height:1.3}
