@@ -1375,7 +1375,7 @@ export default function App() {
                     style={{ height: "100%", width: "100%" }}
                   >
                     {view === "Dashboard" && <Dashboard members={members} events={events} attendance={attendance} getEventStats={getEventStats} getMemberStats={getMemberStats} setView={setView} setAttendanceEventId={setAttendanceEventId} isAdmin={isAdmin} getMemberBadges={getMemberBadges} />}
-                    {view === "Members" && <Members members={members} setMembers={setMembers} newJoinees={newJoinees} setNewJoinees={setNewJoinees} events={events} attendance={attendance} getMemberStats={getMemberStats} showToast={showToast} isAdmin={isAdmin} setView={setView} getMemberBadges={getMemberBadges} />}
+                    {view === "Members" && <Members members={members} setMembers={setMembers} newJoinees={newJoinees} setNewJoinees={setNewJoinees} events={events} attendance={attendance} getMemberStats={getMemberStats} showToast={showToast} isAdmin={isAdmin} setView={setView} getMemberBadges={getMemberBadges} teams={teams} />}
                     {view === "New Joinees" && <NewJoinees newJoinees={newJoinees} setNewJoinees={setNewJoinees} showToast={showToast} isAdmin={isAdmin} />}
                     {view === "Roles" && <RolesDashboard members={members} setMembers={setMembers} isAdmin={isAdmin} attendance={attendance} events={events} teamChats={teamChats} setTeamChats={setTeamChats} teams={teams} setTeams={setTeams} />}
                     {view === "Events" && <Events events={events} setEvents={setEvents} getEventStats={getEventStats} showToast={showToast} isAdmin={isAdmin} />}
@@ -1889,7 +1889,7 @@ function Dashboard({ members, events, attendance, getEventStats, getMemberStats,
   );
 }
 
-function Members({ members, setMembers, newJoinees, setNewJoinees, events, attendance, getMemberStats, showToast, isAdmin, setView, getMemberBadges }) {
+function Members({ members, setMembers, newJoinees, setNewJoinees, events, attendance, getMemberStats, showToast, isAdmin, setView, getMemberBadges, teams }) {
   const [search, setSearch] = useState("");
   const [filterArea, setFilterArea] = useState("");
   const [filterPerformance, setFilterPerformance] = useState("");
