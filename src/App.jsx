@@ -1357,9 +1357,40 @@ export default function App() {
     return { present, absent: total - present, total, pct: total ? Math.round(present / total * 100) : 0 };
   };
 
+  const [splashDone, setSplashDone] = useState(false);
+  const [splashZoom, setSplashZoom] = useState(false);
+
+  useEffect(() => {
+    // After 2.5s, trigger zoom animation
+    const zoomTimer = setTimeout(() => setSplashZoom(true), 2500);
+    // After 3s total, remove splash
+    const doneTimer = setTimeout(() => setSplashDone(true), 3000);
+    return () => { clearTimeout(zoomTimer); clearTimeout(doneTimer); };
+  }, []);
+
   return (
     <>
       <style>{css}</style>
+      {!splashDone && (
+        <div style={{
+          position: "fixed", inset: 0, zIndex: 99999,
+          background: "#09090f",
+          display: "flex", alignItems: "center", justifyContent: "center",
+          transition: "opacity 0.4s ease",
+          opacity: splashZoom ? 0 : 1,
+        }}>
+          <img
+            src="/logo.png"
+            alt="AYSG Logo"
+            style={{
+              width: 160, height: 160, borderRadius: 32, objectFit: "contain",
+              transition: "transform 0.5s cubic-bezier(0.22, 1, 0.36, 1)",
+              transform: splashZoom ? "scale(8)" : "scale(1)",
+              filter: "drop-shadow(0 0 60px rgba(124,106,248,0.4))",
+            }}
+          />
+        </div>
+      )}
       {view === "TVMode" ? (
         <CinematicTVMode events={events} members={members} attendance={attendance} setView={setView} />
       ) : (
