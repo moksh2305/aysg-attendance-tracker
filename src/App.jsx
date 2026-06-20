@@ -572,13 +572,21 @@ html.light body{background:var(--bg);color:var(--text)}
 html.light .sidebar::before{background:radial-gradient(ellipse at 50% 0%,rgba(98,84,232,0.06) 0%,transparent 60%)}
 html.light .attendance-card{box-shadow:0 1px 4px rgba(0,0,0,0.06)}
 html.light .stat-card{box-shadow:0 1px 4px rgba(0,0,0,0.06)}
-.app{display:flex;height:100vh;overflow:hidden}
+.app{display:flex;height:100vh;overflow:hidden;background:var(--bg);color:var(--text);position:relative}
+.app::before, .app::after{content:'';position:absolute;width:40vw;height:40vw;border-radius:50%;filter:blur(100px);z-index:0;pointer-events:none;opacity:0.3}
+.app::before{top:-10%;left:-10%;background:rgba(124,106,248,0.5);animation:float1 20s infinite alternate ease-in-out}
+.app::after{bottom:-10%;right:-10%;background:rgba(16,212,126,0.3);animation:float2 25s infinite alternate ease-in-out}
+@keyframes float1{0%{transform:translate(0,0) scale(1)}100%{transform:translate(10vw,10vh) scale(1.2)}}
+@keyframes float2{0%{transform:translate(0,0) scale(1)}100%{transform:translate(-10vw,-10vh) scale(1.1)}}
+html.light .app::before{background:rgba(98,84,232,0.3);opacity:0.6}
+html.light .app::after{background:rgba(16,212,126,0.2);opacity:0.6}
 .app.admin-mode .topbar,.app.admin-mode .sidebar{box-shadow:inset 0 0 0 1px rgba(16,212,126,0.12),0 0 28px rgba(16,212,126,0.05)}
 .app.view-mode .topbar,.app.view-mode .sidebar{box-shadow:inset 0 0 0 1px rgba(124,106,248,0.08)}
-.sidebar{width:246px;flex-shrink:0;background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:visible;position:relative;z-index:10;transition:width 0.22s ease,border-color 0.2s}
+.sidebar{width:246px;flex-shrink:0;background:rgba(20, 20, 25, 0.45);backdrop-filter:blur(24px) saturate(180%);-webkit-backdrop-filter:blur(24px) saturate(180%);border:1px solid rgba(255,255,255,0.08);box-shadow:0 16px 40px rgba(0,0,0,0.3), inset 0 0 0 1px rgba(255,255,255,0.05);border-radius:24px;margin:16px;height:calc(100vh - 32px);display:flex;flex-direction:column;overflow:visible;position:relative;z-index:10;transition:width 0.22s ease,border-color 0.2s}
+html.light .sidebar{background:rgba(255, 255, 255, 0.6);border:1px solid rgba(255,255,255,0.8);box-shadow:0 16px 40px rgba(0,0,0,0.05), inset 0 0 0 1px rgba(255,255,255,0.5)}
 .sidebar.collapsed{width:76px}
-.sidebar.admin{border-right-color:rgba(16,212,126,0.35)}
-.sidebar.view{border-right-color:rgba(124,106,248,0.18)}
+.sidebar.admin{border-color:rgba(16,212,126,0.35)}
+.sidebar.view{border-color:rgba(124,106,248,0.18)}
 .sidebar::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 0%,rgba(124,106,248,0.08) 0%,transparent 60%);pointer-events:none}
 .main{flex:1;display:flex;flex-direction:column;overflow:hidden}
 .topbar{height:62px;background:var(--bg2);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 20px;gap:12px;flex-shrink:0;position:relative;z-index:8}
