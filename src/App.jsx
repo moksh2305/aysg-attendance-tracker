@@ -1336,6 +1336,7 @@ export default function App() {
               members={members}
               newJoinees={newJoinees}
               events={events}
+              attendance={attendance}
               isAdmin={isAdmin}
               collapsed={sidebarCollapsed}
               setCollapsed={setSidebarCollapsed}
@@ -1436,8 +1437,18 @@ export default function App() {
   );
 }
 
-function Sidebar({ view, setView, members, newJoinees, events, isAdmin, collapsed, setCollapsed, onAdminClick, darkMode, toggleDark }) {
+function Sidebar({ view, setView, members, newJoinees, events, attendance, isAdmin, collapsed, setCollapsed, onAdminClick, darkMode, toggleDark }) {
   const activeCount = members.filter(m => m.active).length;
+  
+  const totalCheckins = attendance ? Object.values(attendance).reduce((acc, eventRecord) => {
+    return acc + Object.values(eventRecord).filter(s => s === "Present" || s === "Late").length;
+  }, 0) : 0;
+
+  const today = new Date();
+  today.setHours(0,0,0,0);
+  const upcomingEvents = events.filter(e => new Date(e.date) >= today).sort((a,b) => new Date(a.date) - new Date(b.date));
+  const nextEvent = upcomingEvents[0];
+
   return (
     <div className={`sidebar ${collapsed ? "collapsed" : ""} ${isAdmin ? "admin" : "view"}`}>
       <button className="collapse-btn" onClick={() => setCollapsed(!collapsed)} title={collapsed ? "Expand sidebar" : "Collapse sidebar"}>
@@ -1451,7 +1462,12 @@ function Sidebar({ view, setView, members, newJoinees, events, isAdmin, collapse
         </div>
       </div>
       <div className="nav scroll-area">
-        <div className="nav-section">Navigation</div>
+        {!collapsed && isAdmin && (
+          <button className="btn btn-primary" style={{ margin: "16px 10px", width: "calc(100% - 20px)", display: "flex", justifyContent: "center", gap: 8 }} onClick={() => setView("Events")}>
+            <span style={{ fontSize: 16 }}>⚡</span> Quick Add Event
+          </button>
+        )}
+        <div className="nav-section" style={{ marginTop: (!collapsed && isAdmin) ? 8 : undefined }}>Navigation</div>
         {VIEWS.map(v => (
           <div key={v} data-tip={v} className={`nav-item${view === v ? " active" : ""}`} onClick={() => setView(v)}>
             <div className="nav-icon">{VIEW_ICONS[v]}</div>
@@ -1461,8 +1477,26 @@ function Sidebar({ view, setView, members, newJoinees, events, isAdmin, collapse
             {v === "Events" && <span className="badge">{events.length}</span>}
           </div>
         ))}
+        
+        {!collapsed && nextEvent && (
+          <>
+            <div className="nav-section" style={{ marginTop: 24 }}>Up Next</div>
+            <div style={{ background: "linear-gradient(135deg, rgba(124, 106, 248, 0.15) 0%, rgba(124, 106, 248, 0.05) 100%)", border: "1px solid rgba(124, 106, 248, 0.2)", borderRadius: 12, padding: "12px", margin: "0 10px 16px 10px", cursor: "pointer", transition: "transform 0.2s" }} onClick={() => setView("Events")} className="card-hover">
+              <div style={{ fontSize: 11, fontWeight: 700, color: "var(--accent)", marginBottom: 4, textTransform: "uppercase", letterSpacing: 1 }}>{new Date(nextEvent.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}</div>
+              <div style={{ fontSize: 13, fontWeight: 600, color: "var(--text)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }} title={nextEvent.name}>{nextEvent.name}</div>
+            </div>
+          </>
+        )}
       </div>
       <div className="sb-footer">
+        {!collapsed && (
+          <div style={{ padding: "0 10px 16px 10px", borderBottom: "1px solid var(--border)", marginBottom: 12 }}>
+            <div style={{ fontSize: 10, color: "var(--text2)", textTransform: "uppercase", letterSpacing: 1, marginBottom: 4 }}>Global Impact</div>
+            <div style={{ fontSize: 18, fontWeight: 800, color: "var(--text)", display: "flex", alignItems: "center", gap: 6 }}>
+              <span style={{ color: "var(--emerald)" }}>🌟</span> {totalCheckins.toLocaleString()} <span style={{ fontSize: 12, color: "var(--text2)", fontWeight: 500 }}>Check-ins</span>
+            </div>
+          </div>
+        )}
         <div className="nav-item" data-tip={isAdmin ? "Exit Admin" : "Unlock Admin"} onClick={onAdminClick} style={{ color: isAdmin ? "var(--emerald)" : "var(--accent2)", borderColor: isAdmin ? "rgba(16,212,126,0.28)" : "var(--border)" }}>
           <div className="nav-icon">{isAdmin ? "U" : "L"}</div>
           <span className="nav-label">{isAdmin ? "Exit Admin" : "Admin"}</span>
