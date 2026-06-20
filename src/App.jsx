@@ -573,13 +573,13 @@ html.light .sidebar::before{background:radial-gradient(ellipse at 50% 0%,rgba(98
 html.light .attendance-card{box-shadow:0 1px 4px rgba(0,0,0,0.06)}
 html.light .stat-card{box-shadow:0 1px 4px rgba(0,0,0,0.06)}
 .app{display:flex;height:100vh;overflow:hidden;background:var(--bg);color:var(--text);position:relative}
-.app::before, .app::after{content:'';position:absolute;width:60vw;height:60vw;border-radius:50%;filter:blur(140px);z-index:0;pointer-events:none;opacity:0.45}
-.app::before{top:-20%;left:-10%;background:rgba(124,106,248,0.7);animation:float1 20s infinite alternate ease-in-out}
-.app::after{bottom:-20%;right:-10%;background:rgba(16,212,126,0.5);animation:float2 25s infinite alternate ease-in-out}
-@keyframes float1{0%{transform:translate(0,0) scale(1)}100%{transform:translate(15vw,15vh) scale(1.3)}}
-@keyframes float2{0%{transform:translate(0,0) scale(1)}100%{transform:translate(-15vw,-15vh) scale(1.2)}}
-html.light .app::before{background:rgba(98,84,232,0.4);opacity:0.7}
-html.light .app::after{background:rgba(16,212,126,0.3);opacity:0.7}
+.app::before, .app::after{content:'';position:absolute;width:40vw;height:40vw;border-radius:50%;filter:blur(100px);z-index:0;pointer-events:none;opacity:0.3}
+.app::before{top:-10%;left:-10%;background:rgba(124,106,248,0.5);animation:float1 20s infinite alternate ease-in-out}
+.app::after{bottom:-10%;right:-10%;background:rgba(16,212,126,0.3);animation:float2 25s infinite alternate ease-in-out}
+@keyframes float1{0%{transform:translate(0,0) scale(1)}100%{transform:translate(10vw,10vh) scale(1.2)}}
+@keyframes float2{0%{transform:translate(0,0) scale(1)}100%{transform:translate(-10vw,-10vh) scale(1.1)}}
+html.light .app::before{background:rgba(98,84,232,0.3);opacity:0.6}
+html.light .app::after{background:rgba(16,212,126,0.2);opacity:0.6}
 .app.admin-mode .topbar,.app.admin-mode .sidebar{box-shadow:inset 0 0 0 1px rgba(16,212,126,0.12),0 0 28px rgba(16,212,126,0.05)}
 .app.view-mode .topbar,.app.view-mode .sidebar{box-shadow:inset 0 0 0 1px rgba(124,106,248,0.08)}
 .sidebar{width:246px;flex-shrink:0;background:rgba(20, 20, 25, 0.45);backdrop-filter:blur(24px) saturate(180%);-webkit-backdrop-filter:blur(24px) saturate(180%);border:1px solid rgba(255,255,255,0.08);box-shadow:0 16px 40px rgba(0,0,0,0.3), inset 0 0 0 1px rgba(255,255,255,0.05);border-radius:24px;margin:16px;height:calc(100vh - 32px);display:flex;flex-direction:column;overflow:visible;position:relative;z-index:10;transition:width 0.22s ease,border-color 0.2s}
@@ -588,10 +588,11 @@ html.light .sidebar{background:rgba(255, 255, 255, 0.6);border:1px solid rgba(25
 .sidebar.admin{border-color:rgba(16,212,126,0.35)}
 .sidebar.view{border-color:rgba(124,106,248,0.18)}
 .sidebar::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 0%,rgba(124,106,248,0.08) 0%,transparent 60%);pointer-events:none}
-.main{flex:1;display:flex;flex-direction:column;overflow:hidden}
-.topbar{height:62px;background:transparent;border-bottom:1px solid rgba(255,255,255,0.05);display:flex;align-items:center;padding:0 20px;gap:12px;flex-shrink:0;position:relative;z-index:8}
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden;background:rgba(20, 20, 25, 0.45);backdrop-filter:blur(24px) saturate(180%);-webkit-backdrop-filter:blur(24px) saturate(180%);border:1px solid rgba(255,255,255,0.08);box-shadow:0 16px 40px rgba(0,0,0,0.3), inset 0 0 0 1px rgba(255,255,255,0.05);border-radius:24px;margin:16px 16px 16px 0}
+html.light .main{background:rgba(255, 255, 255, 0.6);border:1px solid rgba(255,255,255,0.8);box-shadow:0 16px 40px rgba(0,0,0,0.05), inset 0 0 0 1px rgba(255,255,255,0.5)}
+.topbar{height:62px;background:transparent;border-bottom:1px solid rgba(255,255,255,0.08);display:flex;align-items:center;padding:0 20px;gap:12px;flex-shrink:0;position:relative;z-index:8;border-radius:24px 24px 0 0}
 html.light .topbar{border-bottom:1px solid rgba(0,0,0,0.05)}
-.topbar.admin{border-bottom-color:rgba(16,212,126,0.2)}
+.topbar.admin{border-bottom-color:rgba(16,212,126,0.32)}
 .content{flex:1;overflow-y:auto;padding:24px;scrollbar-width:thin;scrollbar-color:var(--border) transparent}
 .brand{padding:14px 14px 10px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;min-height:68px}
 .brand-icon{width:38px;height:38px;border-radius:10px;background:linear-gradient(135deg,var(--accent3),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:15px;box-shadow:0 4px 20px var(--glow);flex-shrink:0;font-weight:900}
@@ -625,16 +626,16 @@ html.light .topbar{border-bottom:1px solid rgba(0,0,0,0.05)}
 .mode-chip.admin{color:var(--emerald);border-color:rgba(16,212,126,0.35);background:rgba(16,212,126,0.1);box-shadow:0 0 18px rgba(16,212,126,0.12)}
 .mode-chip.view{color:var(--accent2);border-color:rgba(124,106,248,0.3);background:rgba(124,106,248,0.1)}
 .sync-dot{width:8px;height:8px;border-radius:50%;background:var(--emerald);box-shadow:0 0 12px var(--emerald)}
-.card{background:linear-gradient(135deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.01) 100%);backdrop-filter:blur(40px) saturate(200%);-webkit-backdrop-filter:blur(40px) saturate(200%);border:1px solid rgba(255,255,255,0.08);border-radius:20px;padding:24px;box-shadow:0 12px 40px rgba(0,0,0,0.2), inset 0 0 0 1px rgba(255,255,255,0.05)}
-html.light .card{background:linear-gradient(135deg, rgba(255,255,255,0.6) 0%, rgba(255,255,255,0.2) 100%);border:1px solid rgba(0,0,0,0.06);box-shadow:0 12px 40px rgba(0,0,0,0.04), inset 0 0 0 1px rgba(255,255,255,0.5)}
+.card{background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.06);border-radius:16px;padding:20px;box-shadow:0 4px 12px rgba(0,0,0,0.1), inset 0 0 0 1px rgba(255,255,255,0.02)}
+html.light .card{background:rgba(255,255,255,0.5);border:1px solid rgba(0,0,0,0.05);box-shadow:0 4px 12px rgba(0,0,0,0.02)}
 .card-hover{transition:all 0.2s}
 .card-hover:hover{background:var(--cardh);border-color:var(--border2);transform:translateY(-1px)}
 .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
 .grid-2{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
 .grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
 .stat-card{position:relative;transition:all 0.2s;animation:fadeUp 0.35s ease both}
-.spotlight-card{background:linear-gradient(135deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.01) 100%);backdrop-filter:blur(40px) saturate(200%);-webkit-backdrop-filter:blur(40px) saturate(200%);border:1px solid rgba(255,255,255,0.08);border-radius:20px;padding:24px;position:relative;overflow:hidden;transition:all 0.2s;box-shadow:0 12px 40px rgba(0,0,0,0.2), inset 0 0 0 1px rgba(255,255,255,0.05)}
-html.light .spotlight-card{background:linear-gradient(135deg, rgba(255,255,255,0.6) 0%, rgba(255,255,255,0.2) 100%);border:1px solid rgba(0,0,0,0.06);box-shadow:0 12px 40px rgba(0,0,0,0.04), inset 0 0 0 1px rgba(255,255,255,0.5)}
+.spotlight-card{background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.06);border-radius:16px;padding:20px;position:relative;overflow:hidden;transition:all 0.2s;box-shadow:0 4px 12px rgba(0,0,0,0.1), inset 0 0 0 1px rgba(255,255,255,0.02)}
+html.light .spotlight-card{background:rgba(255,255,255,0.5);border:1px solid rgba(0,0,0,0.05)}
 .spotlight-card .spotlight{position:absolute;inset:0;pointer-events:none;z-index:0}
 .spotlight-card > *{position:relative;z-index:1}
 .spotlight-card:hover{border-color:var(--border2);transform:translateY(-2px)}
