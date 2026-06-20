@@ -1400,7 +1400,7 @@ export default function App() {
                     animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
                     exit={{ opacity: 0, y: -10, filter: "blur(4px)" }}
                     transition={{ duration: 0.25, ease: "easeInOut" }}
-                    style={{ height: "100%", width: "100%" }}
+                    style={{ minHeight: "100%", width: "100%" }}
                   >
                     {view === "Dashboard" && <Dashboard members={members} events={events} attendance={attendance} getEventStats={getEventStats} getMemberStats={getMemberStats} setView={setView} setAttendanceEventId={setAttendanceEventId} isAdmin={isAdmin} getMemberBadges={getMemberBadges} />}
                     {view === "Members" && <Members members={members} setMembers={setMembers} newJoinees={newJoinees} setNewJoinees={setNewJoinees} events={events} attendance={attendance} getMemberStats={getMemberStats} showToast={showToast} isAdmin={isAdmin} setView={setView} getMemberBadges={getMemberBadges} teams={teams} />}
