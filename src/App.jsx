@@ -4101,24 +4101,23 @@ function buildReportHtml({ template, data, options }) {
         }
         
         .header-logo-container {
-          width: 140px;
+          width: 120px;
           height: 120px;
           overflow: hidden;
           position: relative;
-          border-radius: 8px;
+          border-radius: 12px;
           background: #fff;
           box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
           flex-shrink: 0;
           display: flex;
-          align-items: flex-start;
+          align-items: center;
           justify-content: center;
         }
         
         .header-logo {
           width: 100%;
-          height: 135%;
-          object-fit: cover;
-          object-position: top center;
+          height: 100%;
+          object-fit: contain;
         }
         
         .header-details {
