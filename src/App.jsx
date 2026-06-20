@@ -588,8 +588,10 @@ html.light .sidebar{background:rgba(255, 255, 255, 0.6);border:1px solid rgba(25
 .sidebar.admin{border-color:rgba(16,212,126,0.35)}
 .sidebar.view{border-color:rgba(124,106,248,0.18)}
 .sidebar::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 0%,rgba(124,106,248,0.08) 0%,transparent 60%);pointer-events:none}
-.main{flex:1;display:flex;flex-direction:column;overflow:hidden}
-.topbar{height:62px;background:var(--bg2);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 20px;gap:12px;flex-shrink:0;position:relative;z-index:8}
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden;background:rgba(20, 20, 25, 0.45);backdrop-filter:blur(24px) saturate(180%);-webkit-backdrop-filter:blur(24px) saturate(180%);border:1px solid rgba(255,255,255,0.08);box-shadow:0 16px 40px rgba(0,0,0,0.3), inset 0 0 0 1px rgba(255,255,255,0.05);border-radius:24px;margin:16px 16px 16px 0}
+html.light .main{background:rgba(255, 255, 255, 0.6);border:1px solid rgba(255,255,255,0.8);box-shadow:0 16px 40px rgba(0,0,0,0.05), inset 0 0 0 1px rgba(255,255,255,0.5)}
+.topbar{height:62px;background:transparent;border-bottom:1px solid rgba(255,255,255,0.08);display:flex;align-items:center;padding:0 20px;gap:12px;flex-shrink:0;position:relative;z-index:8;border-radius:24px 24px 0 0}
+html.light .topbar{border-bottom:1px solid rgba(0,0,0,0.05)}
 .topbar.admin{border-bottom-color:rgba(16,212,126,0.32)}
 .content{flex:1;overflow-y:auto;padding:24px;scrollbar-width:thin;scrollbar-color:var(--border) transparent}
 .brand{padding:14px 14px 10px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;min-height:68px}
@@ -624,14 +626,16 @@ html.light .sidebar{background:rgba(255, 255, 255, 0.6);border:1px solid rgba(25
 .mode-chip.admin{color:var(--emerald);border-color:rgba(16,212,126,0.35);background:rgba(16,212,126,0.1);box-shadow:0 0 18px rgba(16,212,126,0.12)}
 .mode-chip.view{color:var(--accent2);border-color:rgba(124,106,248,0.3);background:rgba(124,106,248,0.1)}
 .sync-dot{width:8px;height:8px;border-radius:50%;background:var(--emerald);box-shadow:0 0 12px var(--emerald)}
-.card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:20px}
+.card{background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.06);border-radius:16px;padding:20px;box-shadow:0 4px 12px rgba(0,0,0,0.1), inset 0 0 0 1px rgba(255,255,255,0.02)}
+html.light .card{background:rgba(255,255,255,0.5);border:1px solid rgba(0,0,0,0.05);box-shadow:0 4px 12px rgba(0,0,0,0.02)}
 .card-hover{transition:all 0.2s}
 .card-hover:hover{background:var(--cardh);border-color:var(--border2);transform:translateY(-1px)}
 .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
 .grid-2{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
 .grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
 .stat-card{position:relative;transition:all 0.2s;animation:fadeUp 0.35s ease both}
-.spotlight-card{background:var(--bg3);border:1px solid var(--border);border-radius:14px;padding:20px;position:relative;overflow:hidden;transition:all 0.2s}
+.spotlight-card{background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.06);border-radius:16px;padding:20px;position:relative;overflow:hidden;transition:all 0.2s;box-shadow:0 4px 12px rgba(0,0,0,0.1), inset 0 0 0 1px rgba(255,255,255,0.02)}
+html.light .spotlight-card{background:rgba(255,255,255,0.5);border:1px solid rgba(0,0,0,0.05)}
 .spotlight-card .spotlight{position:absolute;inset:0;pointer-events:none;z-index:0}
 .spotlight-card > *{position:relative;z-index:1}
 .spotlight-card:hover{border-color:var(--border2);transform:translateY(-2px)}
