@@ -549,6 +549,9 @@ function namesFromWorksheetRows(rows) {
 const css = `
 @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap');
 *{box-sizing:border-box;margin:0;padding:0}
+::view-transition-old(root),::view-transition-new(root){animation:none;mix-blend-mode:normal}
+::view-transition-old(root){z-index:1}
+::view-transition-new(root){z-index:9999}
 body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
 :root{
   --bg:#09090f;--bg2:#0f0f1a;--bg3:#151525;--bg4:#1c1c30;
@@ -1224,11 +1227,31 @@ export default function App() {
     else document.documentElement.classList.remove("light");
     return isDark;
   });
-  const toggleDark = () => setDarkMode(prev => {
-    const next = !prev;
-    localStorage.setItem("aysg_theme", next ? "dark" : "light");
-    return next;
-  });
+  const toggleDark = (e) => {
+    const next = !darkMode;
+    // Get the click coordinates for the circular reveal origin
+    const x = e?.clientX ?? window.innerWidth - 40;
+    const y = e?.clientY ?? window.innerHeight - 40;
+    const endRadius = Math.hypot(Math.max(x, window.innerWidth - x), Math.max(y, window.innerHeight - y));
+
+    // If View Transitions API is available, use circular reveal
+    if (document.startViewTransition) {
+      const transition = document.startViewTransition(() => {
+        localStorage.setItem("aysg_theme", next ? "dark" : "light");
+        setDarkMode(next);
+      });
+      transition.ready.then(() => {
+        document.documentElement.animate(
+          { clipPath: [`circle(0px at ${x}px ${y}px)`, `circle(${endRadius}px at ${x}px ${y}px)`] },
+          { duration: 500, easing: "ease-in-out", pseudoElement: "::view-transition-new(root)" }
+        );
+      });
+    } else {
+      // Fallback: just toggle instantly
+      localStorage.setItem("aysg_theme", next ? "dark" : "light");
+      setDarkMode(next);
+    }
+  };
   // Apply theme class to <html> so CSS variables cascade to body and all elements
   useEffect(() => {
     if (darkMode) {
