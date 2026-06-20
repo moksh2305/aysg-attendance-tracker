@@ -1463,43 +1463,7 @@ function Sidebar({ view, setView, members, newJoinees, events, isAdmin, collapse
         ))}
       </div>
       
-      {!collapsed && (() => {
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        const sortedUpcoming = [...events].filter(e => new Date(e.date) >= today).sort((a, b) => new Date(a.date) - new Date(b.date))[0];
-        const goal = 100;
-        const progress = Math.min(100, Math.round((activeCount / goal) * 100));
-        
-        return (
-          <div style={{ margin: "0 12px 16px", padding: "14px", background: "rgba(0,0,0,0.2)", borderRadius: 12, border: "1px solid rgba(255,255,255,0.05)", flexShrink: 0 }}>
-            {sortedUpcoming ? (
-              <>
-                <div style={{ fontSize: 10, fontWeight: 700, color: "var(--accent)", textTransform: "uppercase", letterSpacing: 1, marginBottom: 4 }}>Next Event</div>
-                <div style={{ fontSize: 13, fontWeight: 700, color: "var(--text)", marginBottom: 2, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{sortedUpcoming.name}</div>
-                <div style={{ fontSize: 11, color: "var(--text2)", display: "flex", alignItems: "center", gap: 4 }}>
-                  <span style={{ fontSize: 12 }}>📅</span> {new Date(sortedUpcoming.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
-                </div>
-              </>
-            ) : (
-              <>
-                <div style={{ fontSize: 10, fontWeight: 700, color: "var(--emerald)", textTransform: "uppercase", letterSpacing: 1, marginBottom: 4 }}>Global Impact</div>
-                <div style={{ fontSize: 13, fontWeight: 700, color: "var(--text)" }}>{events.length} Events Hosted</div>
-                <div style={{ fontSize: 11, color: "var(--text2)", marginTop: 2 }}>Impacting {members.length} lives</div>
-              </>
-            )}
-            
-            <div style={{ marginTop: 12, paddingTop: 12, borderTop: "1px solid rgba(255,255,255,0.05)" }}>
-              <div className="flex justify-between items-center mb-2">
-                <span style={{ fontSize: 10, color: "var(--text2)", fontWeight: 600 }}>{goal} Members Goal</span>
-                <span style={{ fontSize: 10, color: "var(--text)", fontWeight: 700 }}>{progress}%</span>
-              </div>
-              <div style={{ width: "100%", height: 4, background: "rgba(255,255,255,0.1)", borderRadius: 2, overflow: "hidden" }}>
-                <div style={{ width: `${progress}%`, height: "100%", background: "linear-gradient(90deg, var(--accent) 0%, var(--emerald) 100%)", borderRadius: 2 }} />
-              </div>
-            </div>
-          </div>
-        );
-      })()}
+
       <div className="sb-footer">
         <div className="nav-item" data-tip={isAdmin ? "Exit Admin" : "Unlock Admin"} onClick={onAdminClick} style={{ color: isAdmin ? "var(--emerald)" : "var(--accent2)", borderColor: isAdmin ? "rgba(16,212,126,0.28)" : "var(--border)" }}>
           <div className="nav-icon">{isAdmin ? "U" : "L"}</div>
