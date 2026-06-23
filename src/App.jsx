@@ -836,7 +836,7 @@ select.input{cursor:pointer}
 }
 
 .ac-card { background: var(--bg2); border: 1px solid var(--border2); border-radius: 12px; padding: 16px; display: flex; flex-direction: column; position: relative; overflow: hidden; }
-.ac-card-title { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; }
+.ac-card-title { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 12px; display: flex; justify-content: space-between; align-items: flex-start; min-height: 38px; }
 .ac-card-subtitle { font-size: 11px; color: var(--text2); margin-top: 4px; }
 
 /* Top Stat Cards */
