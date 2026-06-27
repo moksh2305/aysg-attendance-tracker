@@ -3901,7 +3901,7 @@ function buildReportHtml({ template, data, options }) {
         <img src="/logo.png" alt="AYSG Logo" class="header-logo" onerror="this.style.display='none'" />
       </div>
       <div class="header-details">
-        <h1 class="report-title">AYSG Ghatkopar Attendance Report</h1>
+        <h1 class="report-title">AYSG Ghatkopar Gen Next Attendance Report</h1>
         <p class="report-subtitle">${TEMPLATES[template].title}</p>
         <div class="metadata-grid">
           <div class="meta-item"><span class="meta-label">Total Events:</span> ${filteredEvents.length}</div>
@@ -4041,7 +4041,7 @@ function buildReportHtml({ template, data, options }) {
     <html>
     <head>
       <meta charset="utf-8">
-      <title>AYSG Ghatkopar Attendance Report - ${TEMPLATES[template].title}</title>
+      <title>AYSG Ghatkopar Gen Next Attendance Report - ${TEMPLATES[template].title}</title>
       <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
       <style>
         :root {
