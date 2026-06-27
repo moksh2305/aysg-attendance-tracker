@@ -1676,13 +1676,32 @@ function Dashboard({ members, events, attendance, getEventStats, getMemberStats,
   const pieColors = ["#7c6af8", "#06b6d4", "#10d47e", "#f0b429", "#ec4899", "#8b5cf6", "#3b82f6"];
 
   return (
-    <div>
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="page-title">Good {getGreeting()} 🙏</h1>
-          <p style={{ color: "var(--text2)", fontSize: 13.5, marginTop: 4 }}>Live AYSG overview with trends, movement, and next actions</p>
+    <div style={{ position: "relative" }}>
+      <div 
+        style={{
+          position: "absolute",
+          top: -24,
+          left: -24,
+          right: -24,
+          height: "450px",
+          backgroundImage: "url(/earth-bg.png)",
+          backgroundSize: "cover",
+          backgroundPosition: "center top",
+          opacity: 0.7,
+          maskImage: "linear-gradient(to bottom, rgba(0,0,0,1) 20%, rgba(0,0,0,0) 100%)",
+          WebkitMaskImage: "linear-gradient(to bottom, rgba(0,0,0,1) 20%, rgba(0,0,0,0) 100%)",
+          zIndex: 0,
+          pointerEvents: "none"
+        }}
+      />
+      
+      <div style={{ position: "relative", zIndex: 1 }}>
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <h1 className="page-title">Good {getGreeting()} 🙏</h1>
+            <p style={{ color: "var(--text2)", fontSize: 13.5, marginTop: 4 }}>Live AYSG overview with trends, movement, and next actions</p>
+          </div>
         </div>
-      </div>
       {isAdmin && (
         <div className="quick-actions">
           {[
@@ -1915,9 +1934,9 @@ function Dashboard({ members, events, attendance, getEventStats, getMemberStats,
         </div>
       </div>
     </div>
-  );
+  </div>
+);
 }
-
 function Members({ members, setMembers, newJoinees, setNewJoinees, events, attendance, getMemberStats, showToast, isAdmin, setView, getMemberBadges, teams }) {
   const [search, setSearch] = useState("");
   const [filterArea, setFilterArea] = useState("");
