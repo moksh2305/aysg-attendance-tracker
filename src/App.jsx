@@ -4295,9 +4295,11 @@ function Reports({ members, newJoinees, events, attendance, newJoineeAttendance,
       avgAttendance: avgAtt
     };
 
+    const sortedEvents = [...events].sort((a, b) => new Date(a.date) - new Date(b.date));
+
     return buildReportHtml({
       template,
-      data: { events, allPeople, attendanceGetter, stats, generatedAt: new Date().toLocaleString("en-IN") },
+      data: { events: sortedEvents, allPeople, attendanceGetter, stats, generatedAt: new Date().toLocaleString("en-IN") },
       options
     });
   }, [template, events, members, newJoinees, attendance, newJoineeAttendance, getEventStats, options]);
