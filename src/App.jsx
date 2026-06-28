@@ -4751,15 +4751,32 @@ function AIAssistantView({ members, newJoinees, events, attendance, newJoineeAtt
   ];
 
   return (
-    <div className="view-container ai-assistant-view">
-      <div className="view-header">
+    <div className="view-container ai-assistant-view" style={{ position: "relative" }}>
+      <div 
+        style={{
+          position: "absolute",
+          top: -24,
+          left: -24,
+          right: -24,
+          height: "450px",
+          backgroundImage: "url(/earth-bg.png)",
+          backgroundSize: "cover",
+          backgroundPosition: "center top",
+          opacity: 0.7,
+          maskImage: "linear-gradient(to bottom, rgba(0,0,0,1) 20%, rgba(0,0,0,0) 100%)",
+          WebkitMaskImage: "linear-gradient(to bottom, rgba(0,0,0,1) 20%, rgba(0,0,0,0) 100%)",
+          zIndex: 0,
+          pointerEvents: "none"
+        }}
+      />
+      <div className="view-header" style={{ position: "relative", zIndex: 1 }}>
         <h2 className="view-title" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           <span style={{ color: '#e879f9' }}>✨</span> AI Assistant
         </h2>
         <p className="view-subtitle">Powered by live data</p>
       </div>
 
-      <div className="ai-content-grid">
+      <div className="ai-content-grid" style={{ position: "relative", zIndex: 1 }}>
         <div className="ai-left-column">
           <div className="card ai-section-card" style={{ background: 'linear-gradient(145deg, rgba(167,139,250,0.1), rgba(167,139,250,0.02))', borderColor: 'rgba(167,139,250,0.2)' }}>
             <h3 style={{ fontSize: 16, marginBottom: 16, color: '#a78bfa', display: 'flex', alignItems: 'center', gap: 8 }}>
