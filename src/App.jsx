@@ -789,6 +789,28 @@ select.input{cursor:pointer}
 @media (max-width:820px){.sidebar{width:76px}.sidebar .brand-copy,.sidebar .nav-section,.sidebar .nav-label,.sidebar .sb-mode-copy{display:none}.sidebar .brand{justify-content:center;padding-left:8px;padding-right:8px}.sidebar .nav-item{justify-content:center;padding:8px}.topbar{gap:8px;padding:0 12px}.topbar-date,.quick-top-action{display:none}.top-search{min-width:120px}}
 @media (max-width:680px){.content{padding:16px}.grid-3,.grid-4,.quick-actions{grid-template-columns:1fr}.dashboard-event{align-items:flex-start;flex-wrap:wrap}.event-actions{width:100%;justify-content:flex-end}.member-rank-card{grid-template-columns:auto auto 1fr}.member-rank-card .avatar{display:none}.top-search{display:none}}
 
+.earth-bg {
+  position: absolute;
+  top: -24px;
+  left: -24px;
+  right: -24px;
+  height: 450px;
+  background-image: url(/earth-bg.png);
+  background-size: cover;
+  background-position: center top;
+  opacity: 0.7;
+  mask-image: linear-gradient(to bottom, rgba(0,0,0,1) 20%, rgba(0,0,0,0) 100%);
+  -webkit-mask-image: linear-gradient(to bottom, rgba(0,0,0,1) 20%, rgba(0,0,0,0) 100%);
+  z-index: 0;
+  pointer-events: none;
+}
+@media (min-width: 1024px) {
+  .earth-bg {
+    background-position: center -200px;
+  }
+}
+
+
 .reports-studio { display: grid; grid-template-columns: 1fr 440px; gap: 24px; align-items: start; height: 100%; }
 .report-template-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 12px; margin-bottom: 24px; }
 .template-card { background: var(--bg3); border: 1px solid var(--border); border-radius: 12px; padding: 14px; cursor: pointer; transition: all 0.2s; }
@@ -1745,23 +1767,7 @@ function Dashboard({ members, events, attendance, getEventStats, getMemberStats,
 
   return (
     <div style={{ position: "relative" }}>
-      <div 
-        style={{
-          position: "absolute",
-          top: -24,
-          left: -24,
-          right: -24,
-          height: "450px",
-          backgroundImage: "url(/earth-bg.png)",
-          backgroundSize: "cover",
-          backgroundPosition: "center top",
-          opacity: 0.7,
-          maskImage: "linear-gradient(to bottom, rgba(0,0,0,1) 20%, rgba(0,0,0,0) 100%)",
-          WebkitMaskImage: "linear-gradient(to bottom, rgba(0,0,0,1) 20%, rgba(0,0,0,0) 100%)",
-          zIndex: 0,
-          pointerEvents: "none"
-        }}
-      />
+      <div className="earth-bg" />
       
       <div style={{ position: "relative", zIndex: 1 }}>
         <div className="flex items-center justify-between mb-6">
@@ -4752,23 +4758,7 @@ function AIAssistantView({ members, newJoinees, events, attendance, newJoineeAtt
 
   return (
     <div style={{ position: "relative", width: "100%", height: "100%" }}>
-      <div 
-        style={{
-          position: "absolute",
-          top: -24,
-          left: -24,
-          right: -24,
-          height: "450px",
-          backgroundImage: "url(/earth-bg.png)",
-          backgroundSize: "cover",
-          backgroundPosition: "center top",
-          opacity: 0.7,
-          maskImage: "linear-gradient(to bottom, rgba(0,0,0,1) 20%, rgba(0,0,0,0) 100%)",
-          WebkitMaskImage: "linear-gradient(to bottom, rgba(0,0,0,1) 20%, rgba(0,0,0,0) 100%)",
-          zIndex: 0,
-          pointerEvents: "none"
-        }}
-      />
+      <div className="earth-bg" />
       
       <div className="view-container ai-assistant-view" style={{ position: "relative", zIndex: 1, height: "100%" }}>
         <div className="view-header">
