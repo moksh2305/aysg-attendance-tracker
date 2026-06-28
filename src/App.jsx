@@ -4640,7 +4640,7 @@ function AIAssistantView({ members, newJoinees, events, attendance, newJoineeAtt
   ]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
-  const messagesEndRef = useRef(null);
+  const chatContainerRef = useRef(null);
 
   useEffect(() => {
     // Generate Insights
@@ -4720,7 +4720,9 @@ function AIAssistantView({ members, newJoinees, events, attendance, newJoineeAtt
   };
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    if (chatContainerRef.current) {
+      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+    }
   }, [messages, loading]);
 
   const QUICK_ACTIONS = [
@@ -4803,14 +4805,13 @@ function AIAssistantView({ members, newJoinees, events, attendance, newJoineeAtt
               🎯 Ask Anything
             </h3>
             
-            <div className="ai-chat-history" style={{ flex: 1, overflowY: 'auto', marginBottom: 16, display: 'flex', flexDirection: 'column', gap: 12 }}>
+            <div ref={chatContainerRef} className="ai-chat-history" style={{ flex: 1, overflowY: 'auto', marginBottom: 16, display: 'flex', flexDirection: 'column', gap: 12 }}>
               {messages.map((m, i) => (
                 <div key={i} className={`ai-chat-bubble ${m.from}`}>
                   {m.text}
                 </div>
               ))}
               {loading && <div className="ai-chat-bubble bot loading">Thinking...</div>}
-              <div ref={messagesEndRef} />
             </div>
 
             <div className="ai-chat-suggestions" style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 12 }}>
