@@ -585,7 +585,7 @@ html.light .app::before{background:rgba(98,84,232,0.3);opacity:0.6}
 html.light .app::after{background:rgba(16,212,126,0.2);opacity:0.6}
 .app.admin-mode .topbar,.app.admin-mode .sidebar{box-shadow:inset 0 0 0 1px rgba(16,212,126,0.12),0 0 28px rgba(16,212,126,0.05)}
 .app.view-mode .topbar,.app.view-mode .sidebar{box-shadow:inset 0 0 0 1px rgba(124,106,248,0.08)}
-.sidebar{width:246px;flex-shrink:0;background:rgba(20, 20, 25, 0.45);backdrop-filter:blur(24px) saturate(180%);-webkit-backdrop-filter:blur(24px) saturate(180%);border:1px solid rgba(255,255,255,0.08);box-shadow:0 16px 40px rgba(0,0,0,0.3), inset 0 0 0 1px rgba(255,255,255,0.05);border-radius:24px;margin:16px;height:calc(100vh - 32px);display:flex;flex-direction:column;overflow:visible;position:relative;z-index:10;transition:width 0.22s ease,border-color 0.2s}
+.sidebar{width:280px;flex-shrink:0;background:rgba(10, 10, 15, 0.65);backdrop-filter:blur(24px) saturate(180%);-webkit-backdrop-filter:blur(24px) saturate(180%);border:1px solid rgba(124,106,248,0.25);box-shadow:0 16px 40px rgba(0,0,0,0.4), inset 0 0 0 1px rgba(255,255,255,0.02);border-radius:24px;margin:16px;height:calc(100vh - 32px);display:flex;flex-direction:column;overflow:visible;position:relative;z-index:10;transition:width 0.22s ease,border-color 0.2s}
 html.light .sidebar{background:rgba(255, 255, 255, 0.6);border:1px solid rgba(255,255,255,0.8);box-shadow:0 16px 40px rgba(0,0,0,0.05), inset 0 0 0 1px rgba(255,255,255,0.5)}
 .sidebar.collapsed{width:76px}
 .sidebar.admin{border-color:rgba(16,212,126,0.35)}
@@ -596,20 +596,27 @@ html.light .main{background:rgba(255, 255, 255, 0.6);border:1px solid rgba(255,2
 .topbar{height:62px;background:transparent;border-bottom:1px solid rgba(255,255,255,0.08);display:flex;align-items:center;padding:0 20px;gap:12px;flex-shrink:0;position:relative;z-index:8;border-radius:24px 24px 0 0}
 html.light .topbar{border-bottom:1px solid rgba(0,0,0,0.05)}
 .topbar.admin{border-bottom-color:rgba(16,212,126,0.32)}
+.sb-quick-action{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:12px;cursor:pointer;font-size:13px;font-weight:600;margin-bottom:8px;position:relative;border:1px solid transparent;min-height:44px;background:rgba(20,20,25,0.4);transition:all 0.2s}
+.sb-quick-action:hover{filter:brightness(1.2)}
+.sb-quick-action-icon{display:flex;align-items:center;justify-content:center;font-size:16px}
+.sb-quick-action-arrow{margin-left:auto;font-size:14px;display:flex;align-items:center;opacity:0.8}
+.sb-profile-card{margin-top:auto;padding:12px;border:1px solid rgba(255,255,255,0.08);border-radius:16px;background:rgba(255,255,255,0.02);display:flex;align-items:center;gap:12px;cursor:pointer;transition:all 0.2s}
+.sb-profile-card:hover{background:rgba(255,255,255,0.05);border-color:rgba(255,255,255,0.12)}
+.sb-profile-avatar{width:40px;height:40px;border-radius:50%;background:#3b1e8a;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:16px;position:relative}
+.sb-profile-status{position:absolute;bottom:0;right:0;width:10px;height:10px;background:#10d47e;border:2px solid #0b0f19;border-radius:50%}
 .content{flex:1;overflow-y:auto;padding:24px;scrollbar-width:thin;scrollbar-color:var(--border) transparent}
-.brand{padding:14px 14px 10px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;min-height:68px}
+.brand{padding:18px 18px 12px;border-bottom:none;display:flex;align-items:center;gap:12px;min-height:76px}
 .brand-icon{width:38px;height:38px;border-radius:10px;background:linear-gradient(135deg,var(--accent3),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:15px;box-shadow:0 4px 20px var(--glow);flex-shrink:0;font-weight:900}
 .brand-title{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;color:var(--text);line-height:1.3}
 .brand-sub{font-size:11px;color:var(--accent2);font-weight:500;letter-spacing:0.5px;margin-top:2px}
 .sidebar.collapsed .brand-copy,.sidebar.collapsed .nav-section,.sidebar.collapsed .nav-label,.sidebar.collapsed .sb-mode-copy{display:none}
 .sidebar.collapsed .brand{justify-content:center;padding-left:8px;padding-right:8px}
 .nav{padding:8px 8px;flex:1;overflow-y:auto;overflow-x:visible}
-.nav-item{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:9px;cursor:pointer;font-size:13px;font-weight:500;color:var(--text2);transition:all 0.2s;margin-bottom:2px;position:relative;border:1px solid transparent;min-height:38px}
-.nav-item:hover{background:var(--cardh);color:var(--text);border-color:var(--border)}
-.nav-item.active{background:var(--glass);color:var(--accent2);border-color:rgba(124,106,248,0.2)}
-.nav-item.active::before{content:'';position:absolute;left:0;top:50%;transform:translateY(-50%);width:3px;height:60%;background:var(--accent);border-radius:0 3px 3px 0}
-.nav-icon{width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:13px;background:var(--bg3);transition:all 0.2s;font-weight:800;font-family:'Syne',sans-serif;flex-shrink:0}
-.nav-item.active .nav-icon{background:rgba(124,106,248,0.2)}
+.nav-item{display:flex;align-items:center;gap:14px;padding:10px 14px;border-radius:12px;cursor:pointer;font-size:14px;font-weight:600;color:var(--text2);transition:all 0.2s;margin-bottom:4px;position:relative;border:1px solid transparent;min-height:44px}
+.nav-item:hover{background:rgba(255,255,255,0.03);color:var(--text);border-color:rgba(255,255,255,0.05)}
+.nav-item.active{background:linear-gradient(90deg, rgba(124,106,248,0.15) 0%, rgba(124,106,248,0.02) 100%);color:#fff;border-color:rgba(124,106,248,0.2);box-shadow: 0 4px 12px rgba(0,0,0,0.1)}
+.nav-item.active::before{content:'';position:absolute;left:-1px;top:-1px;bottom:-1px;width:4px;background:#a78bfa;border-radius:12px 0 0 12px;box-shadow: 2px 0 12px rgba(167, 139, 250, 0.6)}
+.nav-icon{display:flex;align-items:center;justify-content:center;transition:all 0.2s;flex-shrink:0}
 .nav-section{font-size:10px;font-weight:600;color:var(--text3);letter-spacing:1px;text-transform:uppercase;padding:12px 10px 6px}
 .badge{background:rgba(124,106,248,0.2);color:var(--accent2);font-size:11px;font-weight:600;padding:2px 8px;border-radius:20px;margin-left:auto}
 .sidebar.collapsed .nav-item{justify-content:center;padding:8px}
@@ -894,8 +901,30 @@ select.input{cursor:pointer}
 .assistant-form button{min-width:64px;justify-content:center}
 `;
 
-const VIEWS = ["Dashboard", "Members", "New Joinees", "Roles", "Events", "Attendance", "Analytics", "Reports"];
-const VIEW_ICONS = { Dashboard: "D", Members: "M", "New Joinees": "N", Roles: "🎭", Events: "E", Attendance: "A", Analytics: "Y", Reports: "R" };
+const IconTV = ({ color = "currentColor", size = 20 }) => (<svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="7" width="20" height="15" rx="2" ry="2"/><polyline points="17 2 12 7 7 2"/></svg>);
+const IconDashboard = ({ color = "currentColor", size = 20 }) => (<svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>);
+const IconMembers = ({ color = "currentColor", size = 20 }) => (<svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>);
+const IconNewJoinees = ({ color = "currentColor", size = 20 }) => (<svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>);
+const IconEvents = ({ color = "currentColor", size = 20 }) => (<svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="12" y1="14" x2="12" y2="18"/><line x1="10" y1="16" x2="14" y2="16"/></svg>);
+const IconAttendance = ({ color = "currentColor", size = 20 }) => (<svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>);
+const IconAnalytics = ({ color = "currentColor", size = 20 }) => (<svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>);
+const IconAIAssistant = ({ color = "currentColor", size = 20 }) => (<svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/><path d="M5 3v4"/><path d="M19 17v4"/><path d="M3 5h4"/><path d="M17 19h4"/></svg>);
+const IconReports = ({ color = "currentColor", size = 20 }) => (<svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>);
+const IconSettings = ({ color = "currentColor", size = 20 }) => (<svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>);
+
+const VIEWS = ["Dashboard", "Members", "New Joinees", "Events", "Attendance", "Analytics", "AI Assistant", "Reports", "Settings"];
+const VIEW_ICONS = { 
+  Dashboard: <IconDashboard color="#a78bfa" />, 
+  Members: <IconMembers color="#60a5fa" />, 
+  "New Joinees": <IconNewJoinees color="#38bdf8" />, 
+  Roles: <IconSettings color="#fcd34d" />, 
+  Events: <IconEvents color="#4ade80" />, 
+  Attendance: <IconAttendance color="#f59e0b" />, 
+  Analytics: <IconAnalytics color="#818cf8" />,
+  "AI Assistant": <IconAIAssistant color="#e879f9" />,
+  Reports: <IconReports color="#38bdf8" />,
+  Settings: <IconSettings color="#9ca3af" />
+};
 
 const INITIAL_TEAMS = [
   { id: "research", name: "Research Team", color: "#10b981", icon: "🔍", desc: "Identify and maintain a database of Gaushalas, Orphanages, etc." },
@@ -1496,28 +1525,42 @@ function Sidebar({ view, setView, members, newJoinees, events, isAdmin, collapse
             {v === "Members" && <span className="badge">{activeCount}</span>}
             {v === "New Joinees" && <span className="badge">{newJoinees.length}</span>}
             {v === "Events" && <span className="badge">{events.length}</span>}
+            {v === "AI Assistant" && <span className="badge" style={{ background: "rgba(167, 139, 250, 0.2)", color: "#a78bfa" }}>NEW</span>}
           </div>
         ))}
+        
+        {isAdmin && (
+          <>
+            <div className="nav-section" style={{ marginTop: 16 }}>Quick Actions</div>
+            {[
+              { label: "Create Event", color: "#10d47e", view: "Events", icon: <IconEvents color="#10d47e" /> },
+              { label: "Start Attendance", color: "#a3e635", view: "Attendance", icon: <IconAttendance color="#a3e635" /> },
+              { label: "Live TV Mode", color: "#a78bfa", view: "TVMode", icon: <IconTV color="#a78bfa" /> },
+              { label: "Export Report", color: "#f59e0b", view: "Reports", icon: <IconReports color="#f59e0b" /> },
+            ].map(a => (
+              <div key={a.label} className="sb-quick-action" onClick={() => setView(a.view)} style={{ borderColor: `${a.color}44` }}>
+                <div className="sb-quick-action-icon" style={{ color: a.color }}>{a.icon}</div>
+                <div style={{ color: a.color }}>{a.label}</div>
+                <div className="sb-quick-action-arrow" style={{ color: a.color }}>→</div>
+              </div>
+            ))}
+          </>
+        )}
       </div>
-      
 
-      <div className="sb-footer">
-        <div className="nav-item" data-tip={isAdmin ? "Exit Admin" : "Unlock Admin"} onClick={onAdminClick} style={{ color: isAdmin ? "var(--emerald)" : "var(--accent2)", borderColor: isAdmin ? "rgba(16,212,126,0.28)" : "var(--border)" }}>
-          <div className="nav-icon">{isAdmin ? "U" : "L"}</div>
-          <span className="nav-label">{isAdmin ? "Exit Admin" : "Admin"}</span>
-        </div>
-        <div
-          className="nav-item"
-          data-tip={darkMode ? "Light Mode" : "Dark Mode"}
-          onClick={toggleDark}
-          style={{ marginTop: 4, color: "var(--text2)", borderColor: "var(--border)" }}
-          title={darkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}
-        >
-          <div className="nav-icon" style={{ fontSize: 16 }}>{darkMode ? "☀️" : "🌙"}</div>
-          <span className="nav-label" style={{ fontSize: 13 }}>{darkMode ? "Light Mode" : "Dark Mode"}</span>
-        </div>
-        <div className="sb-mode-copy" style={{ marginTop: 8, fontSize: 11, color: isAdmin ? "var(--emerald)" : "var(--text3)", padding: "0 10px" }}>
-          {isAdmin ? "Unlocked editing" : "Locked view-only"}
+      <div style={{ padding: "0 12px 12px 12px", marginTop: "auto" }}>
+        <div className="sb-profile-card" onClick={onAdminClick}>
+          <div className="sb-profile-avatar">
+            A
+            <div className="sb-profile-status"></div>
+          </div>
+          <div style={{ flex: 1 }} className="brand-copy">
+            <div style={{ fontSize: 14, fontWeight: 700, color: "#fff" }}>Admin</div>
+            <div style={{ fontSize: 12, color: "var(--text2)" }}>Super Admin</div>
+          </div>
+          <div style={{ color: "var(--text3)" }} className="brand-copy">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
         </div>
       </div>
     </div>
