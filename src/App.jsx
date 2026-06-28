@@ -4702,11 +4702,18 @@ function AIAssistantView({ members, newJoinees, events, attendance, newJoineeAtt
     setInput("");
     setLoading(true);
 
-    if (!localStorage.getItem("gemini_key")) {
-      localStorage.setItem("gemini_key", "AIzaSyD_58MamDo810uuSsQSA5DG6rVL3cyot8U");
+    let key = localStorage.getItem("gemini_key");
+    if (!key) {
+      key = window.prompt("Please enter your Gemini API Key to use the AI Assistant (it will be saved locally):");
+      if (!key) {
+        setMessages(prev => [...prev, { from: "bot", text: "Error: Gemini API Key is missing. Please refresh and provide a key to use AI features." }]);
+        setLoading(false);
+        return;
+      }
+      localStorage.setItem("gemini_key", key);
     }
 
-    const answer = await answerAttendanceQuestionWithGemini(clean, { members, newJoinees, events, attendance, newJoineeAttendance, getMemberStats, getEventStats }, localStorage.getItem("gemini_key"));
+    const answer = await answerAttendanceQuestionWithGemini(clean, { members, newJoinees, events, attendance, newJoineeAttendance, getMemberStats, getEventStats }, key);
 
     setMessages(prev => [...prev, { from: "bot", text: answer }]);
     setLoading(false);
@@ -4834,11 +4841,7 @@ function AttendanceAssistant({ members, newJoinees, events, attendance, newJoine
     { from: "bot", text: "Hi, I'm the AYSG AI Assistant powered by Gemini! I can answer complex questions about attendance, events, members, new joinees, and overall data trends." },
   ]);
 
-  useEffect(() => {
-    if (!localStorage.getItem("gemini_key")) {
-      localStorage.setItem("gemini_key", "AIzaSyD_58MamDo810uuSsQSA5DG6rVL3cyot8U");
-    }
-  }, []);
+
 
   const suggestions = [
     "Overall attendance summary",
@@ -4854,7 +4857,21 @@ function AttendanceAssistant({ members, newJoinees, events, attendance, newJoine
     setMessages(prev => [...prev, { from: "user", text: clean }, { from: "bot", text: "..." }]);
     setInput("");
 
-    const answer = await answerAttendanceQuestionWithGemini(clean, { members, newJoinees, events, attendance, newJoineeAttendance, getMemberStats, getEventStats }, localStorage.getItem("gemini_key"));
+    let key = localStorage.getItem("gemini_key");
+    if (!key) {
+      key = window.prompt("Please enter your Gemini API Key to use the AI Assistant (it will be saved locally):");
+      if (!key) {
+        setMessages(prev => {
+          const newMsg = [...prev];
+          newMsg[newMsg.length - 1] = { from: "bot", text: "Error: Gemini API Key is missing. Please provide a key to use AI features." };
+          return newMsg;
+        });
+        return;
+      }
+      localStorage.setItem("gemini_key", key);
+    }
+
+    const answer = await answerAttendanceQuestionWithGemini(clean, { members, newJoinees, events, attendance, newJoineeAttendance, getMemberStats, getEventStats }, key);
 
     setMessages(prev => {
       const newMsg = [...prev];
