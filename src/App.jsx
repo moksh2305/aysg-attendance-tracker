@@ -919,6 +919,10 @@ select.input{cursor:pointer}
 @media (max-width: 900px) {
   .ai-content-grid { grid-template-columns: 1fr; }
 }
+@media (max-width: 600px) {
+  .ai-quick-actions-grid { grid-template-columns: 1fr; }
+  .chat-card { min-height: 400px !important; }
+}
 `;
 
 const IconTV = ({ color = "currentColor", size = 20 }) => (<svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="7" width="20" height="15" rx="2" ry="2"/><polyline points="17 2 12 7 7 2"/></svg>);
@@ -1561,8 +1565,8 @@ function Sidebar({ view, setView, members, newJoinees, events, isAdmin, collapse
             ].map(a => (
               <div key={a.label} className="sb-quick-action" onClick={() => setView(a.view)} style={{ borderColor: `${a.color}44` }}>
                 <div className="sb-quick-action-icon" style={{ color: a.color }}>{a.icon}</div>
-                <div style={{ color: a.color }}>{a.label}</div>
-                <div className="sb-quick-action-arrow" style={{ color: a.color }}>→</div>
+                <div className="nav-label" style={{ color: a.color }}>{a.label}</div>
+                <div className="sb-quick-action-arrow nav-label" style={{ color: a.color }}>→</div>
               </div>
             ))}
           </>
@@ -1579,8 +1583,8 @@ function Sidebar({ view, setView, members, newJoinees, events, isAdmin, collapse
             <div style={{ fontSize: 14, fontWeight: 700, color: "#fff" }}>Admin</div>
             <div style={{ fontSize: 12, color: "var(--text2)" }}>Super Admin</div>
           </div>
-          <div style={{ color: "var(--text3)" }} className="brand-copy">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          <div className="nav-label" style={{ marginLeft: "auto", color: "var(--text2)", opacity: 0.5 }}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
           </div>
         </div>
       </div>
