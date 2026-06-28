@@ -4703,7 +4703,7 @@ function AIAssistantView({ members, newJoinees, events, attendance, newJoineeAtt
     setLoading(true);
 
     let key = localStorage.getItem("gemini_key");
-    if (!key) {
+    if (!key || key === "AIzaSyD_58MamDo810uuSsQSA5DG6rVL3cyot8U") {
       key = window.prompt("Please enter your Gemini API Key to use the AI Assistant (it will be saved locally):");
       if (!key) {
         setMessages(prev => [...prev, { from: "bot", text: "Error: Gemini API Key is missing. Please refresh and provide a key to use AI features." }]);
@@ -4858,7 +4858,7 @@ function AttendanceAssistant({ members, newJoinees, events, attendance, newJoine
     setInput("");
 
     let key = localStorage.getItem("gemini_key");
-    if (!key) {
+    if (!key || key === "AIzaSyD_58MamDo810uuSsQSA5DG6rVL3cyot8U") {
       key = window.prompt("Please enter your Gemini API Key to use the AI Assistant (it will be saved locally):");
       if (!key) {
         setMessages(prev => {
