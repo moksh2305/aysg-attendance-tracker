@@ -4772,9 +4772,13 @@ function AIAssistantView({ members, newJoinees, events, attendance, newJoineeAtt
               <div className="ai-insight-item">
                 <span className="insight-icon">🎯</span> Next Sunday is predicted to have {insights.predicted} attendees.
               </div>
-              <div className="ai-insight-item suggestion-box">
-                <div style={{ fontWeight: 600, marginBottom: 4, color: '#10d47e' }}>💡 Suggestion:</div>
-                Plan a {insights.suggestion} activity. Historically it gets high attendance.
+              <div className="suggestion-box">
+                <div style={{ fontWeight: 600, marginBottom: 4, color: '#10d47e', display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <span style={{ fontSize: 18 }}>💡</span> Suggestion:
+                </div>
+                <div style={{ color: 'var(--text2)', fontSize: '14.5px', lineHeight: 1.5, paddingLeft: 24 }}>
+                  Plan a {insights.suggestion} activity. Historically it gets high attendance.
+                </div>
               </div>
             </div>
           </div>
