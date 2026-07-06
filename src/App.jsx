@@ -1431,6 +1431,20 @@ export default function App() {
     const total = members.filter(m => m.active).length + newJoinees.filter(j => j.active).length;
     return { present, absent: total - present, total, pct: total ? Math.round(present / total * 100) : 0 };
   };
+  const deleteEvent = (eventId) => {
+    setEvents(events.filter(e => e.id !== eventId));
+    if (attendance[eventId]) {
+      const newAttendance = { ...attendance };
+      delete newAttendance[eventId];
+      setAttendance(newAttendance);
+    }
+    if (newJoineeAttendance[eventId]) {
+      const newNjAtt = { ...newJoineeAttendance };
+      delete newNjAtt[eventId];
+      setNewJoineeAttendance(newNjAtt);
+    }
+    showToast("Event deleted", "success");
+  };
 
   return (
     <>
@@ -1480,7 +1494,7 @@ export default function App() {
                     {view === "Members" && <Members members={members} setMembers={setMembers} newJoinees={newJoinees} setNewJoinees={setNewJoinees} events={events} attendance={attendance} getMemberStats={getMemberStats} showToast={showToast} isAdmin={isAdmin} setView={setView} getMemberBadges={getMemberBadges} teams={teams} />}
                     {view === "New Joinees" && <NewJoinees newJoinees={newJoinees} setNewJoinees={setNewJoinees} showToast={showToast} isAdmin={isAdmin} />}
                     {view === "Roles" && <RolesDashboard members={members} setMembers={setMembers} isAdmin={isAdmin} attendance={attendance} events={events} teamChats={teamChats} setTeamChats={setTeamChats} teams={teams} setTeams={setTeams} />}
-                    {view === "Events" && <Events events={events} setEvents={setEvents} getEventStats={getEventStats} showToast={showToast} isAdmin={isAdmin} />}
+                    {view === "Events" && <Events events={events} setEvents={setEvents} deleteEvent={deleteEvent} getEventStats={getEventStats} showToast={showToast} isAdmin={isAdmin} />}
                     {view === "Attendance" && <Attendance events={events} members={members} newJoinees={newJoinees} attendance={attendance} setAttendance={setAttendance} newJoineeAttendance={newJoineeAttendance} setNewJoineeAttendance={setNewJoineeAttendance} setNewJoinees={setNewJoinees} showToast={showToast} isAdmin={isAdmin} attendanceEventId={attendanceEventId} setAttendanceEventId={setAttendanceEventId} />}
                     {view === "Analytics" && <Analytics members={members} newJoinees={newJoinees} events={events} getMemberStats={getMemberStats} attendance={attendance} newJoineeAttendance={newJoineeAttendance} isAdmin={isAdmin} />}
                     {view === "AI Assistant" && <AIAssistantView members={members} newJoinees={newJoinees} events={events} attendance={attendance} newJoineeAttendance={newJoineeAttendance} getMemberStats={getMemberStats} getEventStats={getEventStats} setView={setView} showToast={showToast} isAdmin={isAdmin} />}
@@ -2873,7 +2887,7 @@ function NewJoinees({ newJoinees, setNewJoinees, showToast, isAdmin }) {
   );
 }
 
-function Events({ events, setEvents, getEventStats, showToast, isAdmin }) {
+function Events({ events, setEvents, deleteEvent, getEventStats, showToast, isAdmin }) {
   const [showForm, setShowForm] = useState(false);
   const [editEvent, setEditEvent] = useState(null);
   const [form, setForm] = useState({ name: "", date: "", time: "", venue: "", category: "Religious", notes: "", color: "#7c6af8", lat: null, lng: null });
@@ -2911,6 +2925,7 @@ function Events({ events, setEvents, getEventStats, showToast, isAdmin }) {
                     <span className="tag tag-purple" style={{ fontSize: 11 }}>{e.category}</span>                    {isAdmin && (
                       <div className="flex gap-2">
                         <button className="btn btn-sm" style={{ padding: "4px 8px" }} onClick={() => openEdit(e)}>Edit</button>
+                        <button className="btn btn-sm" style={{ padding: "4px 8px", background: "rgba(239, 68, 68, 0.15)", color: "#ef4444", border: "1px solid rgba(239, 68, 68, 0.3)" }} onClick={() => { if(window.confirm(`Are you sure you want to delete '${e.name}'? All attendance records for this event will be permanently removed.`)) deleteEvent(e.id); }}>Delete</button>
                       </div>
                     )}
                   </div>
