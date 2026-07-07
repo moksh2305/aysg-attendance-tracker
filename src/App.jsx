@@ -1999,7 +1999,7 @@ function Dashboard({ members, events, attendance, getEventStats, getMemberStats,
               <div>
                 <p style={{ fontSize: 13, color: "var(--text2)", marginBottom: 12 }}>These active members missed the last 3 events:</p>
                 {slippingMembers.map(m => {
-                  const msg = encodeURIComponent(`Hi ${m.name.split(' ')[0]}, we missed you at the last few events! Hope everything is okay. Looking forward to seeing you at the next one! 🙏`);
+                  const msg = encodeURIComponent(`Hi ${m.name.split(' ')[0]}, hope you're doing well! It's been a while since we've seen you at the activities. The group isn't quite the same without you, and we'd love to have you join us again. Looking forward to seeing you soon! 😊`);
                   const waUrl = `https://wa.me/${m.mobile?.replace(/\D/g, '') || ''}?text=${msg}`;
                   return (
                     <div key={m.id} className="member-rank-card">
