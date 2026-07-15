@@ -1193,7 +1193,7 @@ function CinematicTVMode({ events, members, attendance, setView }) {
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '40px' }}>
           <div style={{ background: 'rgba(255,255,255,0.05)', padding: '40px', borderRadius: '32px', border: '1px solid rgba(255,255,255,0.1)', backdropFilter: 'blur(20px)' }}>
             <div style={{ fontSize: 24, color: 'rgba(255,255,255,0.6)', textTransform: 'uppercase', letterSpacing: 2, marginBottom: 10 }}>Total Check-ins</div>
-            <div style={{ fontSize: 120, fontWeight: 800, lineHeight: 1, color: '#10d47e' }}>{presentMembers.length}</div>
+            <div style={{ fontSize: 120, fontWeight: 800, lineHeight: 1, color: '#10d47e', fontFamily: "'Inter', system-ui, sans-serif" }}>{presentMembers.length}</div>
             <div style={{ fontSize: 24, color: 'rgba(255,255,255,0.4)', marginTop: 10 }}>out of {activeMembers.length} expected</div>
           </div>
 
