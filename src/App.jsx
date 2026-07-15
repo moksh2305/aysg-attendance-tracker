@@ -442,6 +442,7 @@ function useSyncedStorage(key, initial, migrate = passthrough) {
       return migrate(initial);
     }
   });
+  const [isReady, setIsReady] = useState(false);
   const remoteReady = useRef(false);
   const localCache = useRef(val);
   const skipNextRemoteSave = useRef(false);
@@ -460,6 +461,7 @@ function useSyncedStorage(key, initial, migrate = passthrough) {
           const remoteValue = migrate(remoteData.value);
           const shouldPersistMigration = JSON.stringify(remoteValue) !== JSON.stringify(remoteData.value);
           remoteReady.current = true;
+          setIsReady(true);
           skipNextRemoteSave.current = !shouldPersistMigration;
           setVal(remoteValue);
           try {
@@ -472,6 +474,7 @@ function useSyncedStorage(key, initial, migrate = passthrough) {
 
         const seedValue = migrate(localCache.current ?? initial);
         remoteReady.current = true;
+        setIsReady(true);
         setDoc(ref, {
           value: seedValue,
           schemaVersion: DATA_SCHEMA_VERSION,
@@ -483,6 +486,7 @@ function useSyncedStorage(key, initial, migrate = passthrough) {
       },
       error => {
         remoteReady.current = true;
+        setIsReady(true);
         console.error(`Could not sync ${key} from Firebase`, error);
       }
     );
@@ -1341,10 +1345,10 @@ export default function App() {
   }, [darkMode]);
   const [members, setMembers] = useSyncedStorage(PERSISTED_DATA_KEYS.members, INITIAL_MEMBERS, migrateMembers);
   const [newJoinees, setNewJoinees] = useSyncedStorage(PERSISTED_DATA_KEYS.newJoinees, INITIAL_NEW_JOINEES, migrateNewJoinees);
-  const [events, setEvents] = useSyncedStorage(PERSISTED_DATA_KEYS.events, INITIAL_EVENTS);
+  const [events, setEvents, eventsReady] = useSyncedStorage(PERSISTED_DATA_KEYS.events, INITIAL_EVENTS);
   const [attendance, setAttendance] = useSyncedStorage(PERSISTED_DATA_KEYS.attendance, INITIAL_ATTENDANCE, migrateAttendance);
   const [newJoineeAttendance, setNewJoineeAttendance] = useSyncedStorage(PERSISTED_DATA_KEYS.newJoineeAttendance, INITIAL_ATTENDANCE);
-  const [teamMeetings, setTeamMeetings] = useSyncedStorage(PERSISTED_DATA_KEYS.teamMeetings, []);
+  const [teamMeetings, setTeamMeetings, teamMeetingsReady] = useSyncedStorage(PERSISTED_DATA_KEYS.teamMeetings, []);
   const [teamMeetingAttendance, setTeamMeetingAttendance] = useSyncedStorage(PERSISTED_DATA_KEYS.teamMeetingAttendance, {});
   const [newJoineeTeamMeetingAttendance, setNewJoineeTeamMeetingAttendance] = useSyncedStorage(PERSISTED_DATA_KEYS.newJoineeTeamMeetingAttendance, {});
   const [teamChats, setTeamChats] = useSyncedStorage(PERSISTED_DATA_KEYS.teamChats, {});
@@ -1400,9 +1404,16 @@ export default function App() {
   };
 
   if (checkinEventId) {
-    if (events.length === 0) return <div style={{ padding: 40, textAlign: 'center' }}>Loading event details...</div>;
-    const checkinEvent = events.find(e => e.id === checkinEventId);
-    if (!checkinEvent) return <div style={{ padding: 40, textAlign: 'center' }}>Event Not Found</div>;
+    const allEvents = [...events, ...teamMeetings];
+    const checkinEvent = allEvents.find(e => e.id === checkinEventId);
+    
+    if (!checkinEvent) {
+      if (!eventsReady || !teamMeetingsReady) {
+        return <div style={{ padding: 40, textAlign: 'center' }}>Loading event details...</div>;
+      }
+      return <div style={{ padding: 40, textAlign: 'center' }}>Event Not Found</div>;
+    }
+    
     return <><style>{css}</style><PublicCheckIn event={checkinEvent} /></>;
   }
   const getMemberStats = (memberId) => {
