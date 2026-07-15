@@ -1173,49 +1173,49 @@ function CinematicTVMode({ events, members, attendance, setView }) {
   const presentMembers = activeMembers.filter(m => normalizeAttendanceStatus(rec[m.id]) === 'present' || normalizeAttendanceStatus(rec[m.id]) === 'late');
 
   return (
-    <div style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', background: '#000', color: '#fff', zIndex: 9999, display: 'flex', flexDirection: 'column', overflow: 'hidden', fontFamily: "'Syne', sans-serif" }}>
-      <div style={{ position: 'absolute', top: '-50%', left: '-50%', width: '200%', height: '200%', background: 'radial-gradient(circle at center, #1a1a2e 0%, #000 100%)', zIndex: -1, animation: 'pulse 10s infinite alternate' }} />
+    <div style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', background: '#000', color: '#fff', zIndex: 9999, display: 'flex', flexDirection: 'column', overflowY: 'auto', overflowX: 'hidden', fontFamily: "'Syne', sans-serif" }}>
+      <div style={{ position: 'fixed', top: '-50%', left: '-50%', width: '200%', height: '200%', background: 'radial-gradient(circle at center, #1a1a2e 0%, #000 100%)', zIndex: -1, animation: 'pulse 10s infinite alternate' }} />
 
-      <div style={{ padding: '40px 60px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(255,255,255,0.03)', backdropFilter: 'blur(20px)', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+      <div style={{ padding: '20px 5vw', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(255,255,255,0.03)', backdropFilter: 'blur(20px)', borderBottom: '1px solid rgba(255,255,255,0.1)', flexWrap: 'wrap', gap: 20 }}>
         <div>
-          <h1 style={{ fontSize: 48, margin: 0, fontWeight: 800, background: 'linear-gradient(90deg, #fff, #a5b4fc)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>AYSG Live</h1>
-          <p style={{ fontSize: 24, margin: '10px 0 0 0', color: 'rgba(255,255,255,0.6)' }}>{activeEvent?.name || "No Active Event"} &bull; {activeEvent?.venue || ""}</p>
+          <h1 style={{ fontSize: 'clamp(32px, 4vw, 48px)', margin: 0, fontWeight: 800, background: 'linear-gradient(90deg, #fff, #a5b4fc)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>AYSG Live</h1>
+          <p style={{ fontSize: 'clamp(16px, 2vw, 24px)', margin: '5px 0 0 0', color: 'rgba(255,255,255,0.6)' }}>{activeEvent?.name || "No Active Event"} &bull; {activeEvent?.venue || ""}</p>
         </div>
         <div style={{ textAlign: 'right' }}>
-          <div style={{ fontSize: 64, fontWeight: 800, fontFamily: 'monospace' }}>
+          <div style={{ fontSize: 'clamp(40px, 5vw, 64px)', fontWeight: 800, fontFamily: 'monospace' }}>
             {time.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
           </div>
           <button className="btn btn-outline" style={{ borderColor: 'rgba(255,255,255,0.2)', color: '#fff', marginTop: 10 }} onClick={() => setView('Dashboard')}>Exit TV Mode</button>
         </div>
       </div>
 
-      <div style={{ flex: 1, display: 'flex', padding: '60px', gap: '60px' }}>
-        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '40px' }}>
-          <div style={{ background: 'rgba(255,255,255,0.05)', padding: '40px', borderRadius: '32px', border: '1px solid rgba(255,255,255,0.1)', backdropFilter: 'blur(20px)' }}>
-            <div style={{ fontSize: 24, color: 'rgba(255,255,255,0.6)', textTransform: 'uppercase', letterSpacing: 2, marginBottom: 10 }}>Total Check-ins</div>
-            <div style={{ fontSize: 120, fontWeight: 800, lineHeight: 1, color: '#10d47e', fontFamily: "'Inter', system-ui, sans-serif" }}>{presentMembers.length}</div>
-            <div style={{ fontSize: 24, color: 'rgba(255,255,255,0.4)', marginTop: 10 }}>out of {activeMembers.length} expected</div>
+      <div style={{ flex: 1, display: 'flex', padding: '30px 5vw', gap: '30px', flexWrap: 'wrap' }}>
+        <div style={{ flex: '1 1 400px', display: 'flex', flexDirection: 'column', gap: '30px' }}>
+          <div style={{ background: 'rgba(255,255,255,0.05)', padding: '30px', borderRadius: '32px', border: '1px solid rgba(255,255,255,0.1)', backdropFilter: 'blur(20px)' }}>
+            <div style={{ fontSize: 20, color: 'rgba(255,255,255,0.6)', textTransform: 'uppercase', letterSpacing: 2, marginBottom: 10 }}>Total Check-ins</div>
+            <div style={{ fontSize: 'clamp(80px, 10vw, 120px)', fontWeight: 800, lineHeight: 1, color: '#10d47e', fontFamily: "'Inter', system-ui, sans-serif" }}>{presentMembers.length}</div>
+            <div style={{ fontSize: 20, color: 'rgba(255,255,255,0.4)', marginTop: 10 }}>out of {activeMembers.length} expected</div>
           </div>
 
-          <div style={{ flex: 1, background: 'rgba(255,255,255,0.02)', padding: '40px', borderRadius: '32px', border: '1px solid rgba(255,255,255,0.05)', overflow: 'hidden', position: 'relative' }}>
-            <div style={{ fontSize: 24, color: 'rgba(255,255,255,0.6)', textTransform: 'uppercase', letterSpacing: 2, marginBottom: 30 }}>Present Members</div>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '15px' }}>
+          <div style={{ flex: 1, background: 'rgba(255,255,255,0.02)', padding: '30px', borderRadius: '32px', border: '1px solid rgba(255,255,255,0.05)', overflowY: 'auto', position: 'relative', minHeight: '200px' }}>
+            <div style={{ fontSize: 20, color: 'rgba(255,255,255,0.6)', textTransform: 'uppercase', letterSpacing: 2, marginBottom: 20 }}>Present Members</div>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
               {presentMembers.map(m => (
-                <div key={m.id} style={{ background: 'rgba(16, 212, 126, 0.1)', border: '1px solid rgba(16, 212, 126, 0.3)', padding: '12px 24px', borderRadius: '100px', color: '#10d47e', fontSize: 20, fontWeight: 700 }}>
+                <div key={m.id} style={{ background: 'rgba(16, 212, 126, 0.1)', border: '1px solid rgba(16, 212, 126, 0.3)', padding: '8px 16px', borderRadius: '100px', color: '#10d47e', fontSize: 16, fontWeight: 700 }}>
                   {m.name}
                 </div>
               ))}
-              {presentMembers.length === 0 && <div style={{ fontSize: 24, color: 'rgba(255,255,255,0.3)' }}>Waiting for members to arrive...</div>}
+              {presentMembers.length === 0 && <div style={{ fontSize: 20, color: 'rgba(255,255,255,0.3)' }}>Waiting for members to arrive...</div>}
             </div>
           </div>
         </div>
 
-        <div style={{ width: '450px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: 'rgba(255,255,255,0.05)', padding: '60px', borderRadius: '40px', border: '1px solid rgba(255,255,255,0.1)', backdropFilter: 'blur(20px)' }}>
-          <h2 style={{ fontSize: 32, fontWeight: 700, marginBottom: 20, textAlign: 'center' }}>Scan to Check-in</h2>
-          <div style={{ background: '#fff', padding: '30px', borderRadius: '32px', boxShadow: '0 20px 50px rgba(0,0,0,0.5)' }}>
-            <QRCodeCanvas value={`${window.location.origin}/?checkin=${activeEvent?.id}`} size={300} level="H" />
+        <div style={{ flex: '1 1 350px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: 'rgba(255,255,255,0.05)', padding: '40px', borderRadius: '40px', border: '1px solid rgba(255,255,255,0.1)', backdropFilter: 'blur(20px)' }}>
+          <h2 style={{ fontSize: 'clamp(24px, 3vw, 32px)', fontWeight: 700, marginBottom: 20, textAlign: 'center' }}>Scan to Check-in</h2>
+          <div style={{ background: '#fff', padding: '20px', borderRadius: '32px', boxShadow: '0 20px 50px rgba(0,0,0,0.5)', maxWidth: '100%', aspectRatio: '1/1', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <QRCodeCanvas value={`${window.location.origin}/?checkin=${activeEvent?.id}`} style={{ width: '100%', height: '100%' }} level="H" />
           </div>
-          <p style={{ fontSize: 20, color: 'rgba(255,255,255,0.5)', marginTop: 40, textAlign: 'center' }}>Point your camera at the screen</p>
+          <p style={{ fontSize: 'clamp(16px, 2vw, 20px)', color: 'rgba(255,255,255,0.5)', marginTop: 30, textAlign: 'center' }}>Point your camera at the screen</p>
         </div>
       </div>
     </div>
