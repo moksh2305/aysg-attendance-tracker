@@ -1210,10 +1210,10 @@ function CinematicTVMode({ events, members, attendance, setView }) {
           </div>
         </div>
 
-        <div style={{ flex: '1 1 350px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: 'rgba(255,255,255,0.05)', padding: '40px', borderRadius: '40px', border: '1px solid rgba(255,255,255,0.1)', backdropFilter: 'blur(20px)' }}>
+        <div style={{ flex: '1.2 1 400px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: 'rgba(255,255,255,0.05)', padding: '40px', borderRadius: '40px', border: '1px solid rgba(255,255,255,0.1)', backdropFilter: 'blur(20px)' }}>
           <h2 style={{ fontSize: 'clamp(24px, 3vw, 32px)', fontWeight: 700, marginBottom: 20, textAlign: 'center' }}>Scan to Check-in</h2>
-          <div style={{ background: '#fff', padding: '20px', borderRadius: '32px', boxShadow: '0 20px 50px rgba(0,0,0,0.5)', maxWidth: '100%', aspectRatio: '1/1', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <QRCodeCanvas value={`${window.location.origin}/?checkin=${activeEvent?.id}`} style={{ width: '100%', height: '100%' }} level="H" />
+          <div style={{ background: '#fff', padding: '20px', borderRadius: '32px', boxShadow: '0 20px 50px rgba(0,0,0,0.5)', width: '100%', maxWidth: '500px', aspectRatio: '1/1', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <QRCodeCanvas value={`${window.location.origin}/?checkin=${activeEvent?.id}`} size={600} style={{ width: '100%', height: '100%' }} level="H" />
           </div>
           <p style={{ fontSize: 'clamp(16px, 2vw, 20px)', color: 'rgba(255,255,255,0.5)', marginTop: 30, textAlign: 'center' }}>Point your camera at the screen</p>
         </div>
