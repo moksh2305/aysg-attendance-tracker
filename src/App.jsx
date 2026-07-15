@@ -129,6 +129,9 @@ const PERSISTED_DATA_KEYS = Object.freeze({
   events: "aysg_events",
   attendance: "aysg_attendance",
   newJoineeAttendance: "aysg_new_joinee_attendance",
+  teamMeetings: "aysg_team_meetings",
+  teamMeetingAttendance: "aysg_team_meeting_attendance",
+  newJoineeTeamMeetingAttendance: "aysg_new_joinee_team_meeting_attendance",
   teamChats: "aysg_team_chats",
   teams: "aysg_teams",
 });
@@ -958,13 +961,14 @@ const IconAIAssistant = ({ color = "currentColor", size = 20 }) => (<svg xmlns="
 const IconReports = ({ color = "currentColor", size = 20 }) => (<svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>);
 const IconSettings = ({ color = "currentColor", size = 20 }) => (<svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>);
 
-const VIEWS = ["Dashboard", "Members", "New Joinees", "Events", "Attendance", "Analytics", "AI Assistant", "Reports"];
+const VIEWS = ["Dashboard", "Members", "New Joinees", "Events", "Team Meetings", "Attendance", "Analytics", "AI Assistant", "Reports"];
 const VIEW_ICONS = { 
   Dashboard: <IconDashboard color="#a78bfa" />, 
   Members: <IconMembers color="#60a5fa" />, 
   "New Joinees": <IconNewJoinees color="#38bdf8" />, 
   Roles: <IconSettings color="#fcd34d" />, 
   Events: <IconEvents color="#4ade80" />, 
+  "Team Meetings": <IconMembers color="#fb7185" />, 
   Attendance: <IconAttendance color="#f59e0b" />, 
   Analytics: <IconAnalytics color="#818cf8" />,
   "AI Assistant": <IconAIAssistant color="#e879f9" />,
@@ -1340,6 +1344,9 @@ export default function App() {
   const [events, setEvents] = useSyncedStorage(PERSISTED_DATA_KEYS.events, INITIAL_EVENTS);
   const [attendance, setAttendance] = useSyncedStorage(PERSISTED_DATA_KEYS.attendance, INITIAL_ATTENDANCE, migrateAttendance);
   const [newJoineeAttendance, setNewJoineeAttendance] = useSyncedStorage(PERSISTED_DATA_KEYS.newJoineeAttendance, INITIAL_ATTENDANCE);
+  const [teamMeetings, setTeamMeetings] = useSyncedStorage(PERSISTED_DATA_KEYS.teamMeetings, []);
+  const [teamMeetingAttendance, setTeamMeetingAttendance] = useSyncedStorage(PERSISTED_DATA_KEYS.teamMeetingAttendance, {});
+  const [newJoineeTeamMeetingAttendance, setNewJoineeTeamMeetingAttendance] = useSyncedStorage(PERSISTED_DATA_KEYS.newJoineeTeamMeetingAttendance, {});
   const [teamChats, setTeamChats] = useSyncedStorage(PERSISTED_DATA_KEYS.teamChats, {});
   const [teams, setTeams] = useSyncedStorage(PERSISTED_DATA_KEYS.teams, INITIAL_TEAMS);
   const [adminUser, setAdminUser] = useState(null);
@@ -1446,6 +1453,29 @@ export default function App() {
     showToast("Event deleted", "success");
   };
 
+  const getTeamMeetingStats = (eventId) => {
+    const rec = teamMeetingAttendance[eventId] || {};
+    const newRec = newJoineeTeamMeetingAttendance[eventId] || {};
+    const present = members.filter(m => m.active && isAttendedStatus(rec[m.id])).length + newJoinees.filter(j => j.active && isAttendedStatus(newRec[j.id])).length;
+    const total = members.filter(m => m.active).length + newJoinees.filter(j => j.active).length;
+    return { present, absent: total - present, total, pct: total ? Math.round(present / total * 100) : 0 };
+  };
+
+  const deleteTeamMeeting = (eventId) => {
+    setTeamMeetings(teamMeetings.filter(e => e.id !== eventId));
+    if (teamMeetingAttendance[eventId]) {
+      const newAttendance = { ...teamMeetingAttendance };
+      delete newAttendance[eventId];
+      setTeamMeetingAttendance(newAttendance);
+    }
+    if (newJoineeTeamMeetingAttendance[eventId]) {
+      const newNjAtt = { ...newJoineeTeamMeetingAttendance };
+      delete newNjAtt[eventId];
+      setNewJoineeTeamMeetingAttendance(newNjAtt);
+    }
+    showToast("Team meeting deleted", "success");
+  };
+
   return (
     <>
       <style>{css}</style>
@@ -1495,6 +1525,15 @@ export default function App() {
                     {view === "New Joinees" && <NewJoinees newJoinees={newJoinees} setNewJoinees={setNewJoinees} showToast={showToast} isAdmin={isAdmin} />}
                     {view === "Roles" && <RolesDashboard members={members} setMembers={setMembers} isAdmin={isAdmin} attendance={attendance} events={events} teamChats={teamChats} setTeamChats={setTeamChats} teams={teams} setTeams={setTeams} />}
                     {view === "Events" && <Events events={events} setEvents={setEvents} deleteEvent={deleteEvent} getEventStats={getEventStats} showToast={showToast} isAdmin={isAdmin} />}
+                    {view === "Team Meetings" && (
+                      <TeamMeetingsDashboard 
+                        teamMeetings={teamMeetings} setTeamMeetings={setTeamMeetings} 
+                        teamMeetingAttendance={teamMeetingAttendance} setTeamMeetingAttendance={setTeamMeetingAttendance} 
+                        newJoineeTeamMeetingAttendance={newJoineeTeamMeetingAttendance} setNewJoineeTeamMeetingAttendance={setNewJoineeTeamMeetingAttendance}
+                        members={members} newJoinees={newJoinees} setNewJoinees={setNewJoinees}
+                        getTeamMeetingStats={getTeamMeetingStats} showToast={showToast} isAdmin={isAdmin} deleteTeamMeeting={deleteTeamMeeting}
+                      />
+                    )}
                     {view === "Attendance" && <Attendance events={events} members={members} newJoinees={newJoinees} attendance={attendance} setAttendance={setAttendance} newJoineeAttendance={newJoineeAttendance} setNewJoineeAttendance={setNewJoineeAttendance} setNewJoinees={setNewJoinees} showToast={showToast} isAdmin={isAdmin} attendanceEventId={attendanceEventId} setAttendanceEventId={setAttendanceEventId} />}
                     {view === "Analytics" && <Analytics members={members} newJoinees={newJoinees} events={events} getMemberStats={getMemberStats} attendance={attendance} newJoineeAttendance={newJoineeAttendance} isAdmin={isAdmin} />}
                     {view === "AI Assistant" && <AIAssistantView members={members} newJoinees={newJoinees} events={events} attendance={attendance} newJoineeAttendance={newJoineeAttendance} getMemberStats={getMemberStats} getEventStats={getEventStats} setView={setView} showToast={showToast} isAdmin={isAdmin} />}
@@ -2887,7 +2926,63 @@ function NewJoinees({ newJoinees, setNewJoinees, showToast, isAdmin }) {
   );
 }
 
-function Events({ events, setEvents, deleteEvent, getEventStats, showToast, isAdmin }) {
+function TeamMeetingsDashboard({ teamMeetings, setTeamMeetings, teamMeetingAttendance, setTeamMeetingAttendance, newJoineeTeamMeetingAttendance, setNewJoineeTeamMeetingAttendance, members, newJoinees, setNewJoinees, getTeamMeetingStats, showToast, isAdmin, deleteTeamMeeting }) {
+  const [activeTab, setActiveTab] = useState("Meetings");
+  
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+      <div style={{ display: 'flex', gap: 12, marginBottom: 24 }}>
+        <button 
+          className={`btn ${activeTab === "Meetings" ? "btn-primary" : ""}`} 
+          onClick={() => setActiveTab("Meetings")}
+          style={activeTab !== "Meetings" ? { background: "var(--bg3)", color: "var(--text)" } : {}}
+        >
+          Manage Meetings
+        </button>
+        <button 
+          className={`btn ${activeTab === "Attendance" ? "btn-primary" : ""}`} 
+          onClick={() => setActiveTab("Attendance")}
+          style={activeTab !== "Attendance" ? { background: "var(--bg3)", color: "var(--text)" } : {}}
+        >
+          Mark Attendance
+        </button>
+      </div>
+      
+      <div style={{ flex: 1, overflowY: 'auto' }}>
+        {activeTab === "Meetings" && (
+          <Events 
+            events={teamMeetings} 
+            setEvents={setTeamMeetings} 
+            deleteEvent={deleteTeamMeeting} 
+            getEventStats={getTeamMeetingStats} 
+            showToast={showToast} 
+            isAdmin={isAdmin} 
+            title="Team Meetings" 
+            emptyMsg="No team meetings yet. Create your first meeting!"
+            itemName="Meeting"
+          />
+        )}
+        {activeTab === "Attendance" && (
+          <Attendance 
+            events={teamMeetings} 
+            members={members} 
+            newJoinees={newJoinees} 
+            attendance={teamMeetingAttendance} 
+            setAttendance={setTeamMeetingAttendance} 
+            newJoineeAttendance={newJoineeTeamMeetingAttendance} 
+            setNewJoineeAttendance={setNewJoineeTeamMeetingAttendance} 
+            setNewJoinees={setNewJoinees}
+            showToast={showToast} 
+            isAdmin={isAdmin} 
+            title="Team Meeting Attendance"
+          />
+        )}
+      </div>
+    </div>
+  );
+}
+
+function Events({ events, setEvents, deleteEvent, getEventStats, showToast, isAdmin, title = "Events", emptyMsg = "No events yet. Create your first event!", itemName = "Event" }) {
   const [showForm, setShowForm] = useState(false);
   const [editEvent, setEditEvent] = useState(null);
   const [form, setForm] = useState({ name: "", date: "", time: "", venue: "", category: "Religious", notes: "", color: "#7c6af8", lat: null, lng: null });
@@ -2908,12 +3003,12 @@ function Events({ events, setEvents, deleteEvent, getEventStats, showToast, isAd
     <div>
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="page-title">Events</h1>
+          <h1 className="page-title">{title}</h1>
           <p className="color-muted text-sm" style={{ marginTop: 4 }}>{events.length} activities tracked</p>
         </div>
-        {isAdmin && <button className="btn btn-primary" onClick={openAdd}>+ New Event</button>}
+        {isAdmin && <button className="btn btn-primary" onClick={openAdd}>+ New {itemName}</button>}
       </div>
-      {events.length === 0 ? <EmptyState icon="📅" msg="No events yet. Create your first event!" /> : (
+      {events.length === 0 ? <EmptyState icon="📅" msg={emptyMsg} /> : (
         <div className="grid-3">
           {[...events].sort((a, b) => new Date(b.date) - new Date(a.date)).map(e => {
             const s = getEventStats(e.id);
@@ -3003,7 +3098,7 @@ function Events({ events, setEvents, deleteEvent, getEventStats, showToast, isAd
   );
 }
 
-function Attendance({ events, members, newJoinees, attendance, setAttendance, newJoineeAttendance, setNewJoineeAttendance, setNewJoinees, showToast, isAdmin, attendanceEventId, setAttendanceEventId }) {
+function Attendance({ events, members, newJoinees, attendance, setAttendance, newJoineeAttendance, setNewJoineeAttendance, setNewJoinees, showToast, isAdmin, attendanceEventId, setAttendanceEventId, title = "Attendance" }) {
   const sortedEvents = [...events].sort((a, b) => new Date(b.date) - new Date(a.date));
   const [selEvent, setSelEvent] = useState(attendanceEventId || sortedEvents[0]?.id || "");
   useEffect(() => {
@@ -3245,7 +3340,7 @@ function Attendance({ events, members, newJoinees, attendance, setAttendance, ne
     <div>
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="page-title">Attendance</h1>
+          <h1 className="page-title">{title}</h1>
           <p className="color-muted text-sm" style={{ marginTop: 4 }}>{isAdmin ? "Operational attendance console for live events" : "View attendance records"}</p>
         </div>
         <span className={`status-badge ${isAdmin ? "status-completed" : "status-upcoming"}`}>{isAdmin ? "● Admin editing active" : "● View-only locked"}</span>
