@@ -3112,8 +3112,25 @@ function TeamMeetingsDashboard({
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', overflowY: 'auto', paddingRight: 10, gap: 24, color: '#e2e8f0', fontFamily: 'Inter, sans-serif' }}>
       
+      <style>{`
+        @keyframes live-glow {
+          0% { box-shadow: 0 0 5px rgba(16, 212, 126, 0.2), inset 0 0 10px rgba(16, 212, 126, 0.1); }
+          50% { box-shadow: 0 0 20px rgba(16, 212, 126, 0.6), inset 0 0 20px rgba(16, 212, 126, 0.2); border-color: rgba(16, 212, 126, 0.5); }
+          100% { box-shadow: 0 0 5px rgba(16, 212, 126, 0.2), inset 0 0 10px rgba(16, 212, 126, 0.1); }
+        }
+        @media (max-width: 1024px) {
+          .tm-grid-main { grid-template-columns: 1fr !important; }
+          .tm-grid-bottom { grid-template-columns: 1fr !important; }
+          .tm-grid-top { grid-template-columns: repeat(2, 1fr) !important; }
+        }
+        @media (max-width: 600px) {
+          .tm-grid-top { grid-template-columns: 1fr !important; }
+          .tm-today-stats { grid-template-columns: repeat(2, 1fr) !important; }
+        }
+      `}</style>
+
       {/* Top Stats Grid */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 20 }}>
+      <div className="tm-grid-top" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 20 }}>
         <div style={{ background: 'linear-gradient(145deg, rgba(30,30,40,0.8), rgba(20,20,30,0.8))', borderRadius: 24, padding: 20, border: '1px solid rgba(139, 92, 246, 0.2)', boxShadow: '0 10px 30px rgba(0,0,0,0.2)' }}>
           <div style={{ display: 'flex', gap: 10, alignItems: 'center', marginBottom: 10 }}>
             <div style={{ width: 32, height: 32, borderRadius: 8, background: 'rgba(139, 92, 246, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#8b5cf6' }}>📅</div>
@@ -3152,15 +3169,15 @@ function TeamMeetingsDashboard({
           <div style={{ fontSize: 22, fontWeight: 700, margin: '5px 0', color: '#0ea5e9' }}>
             {nextMeeting ? `${new Date(nextMeeting.date).toLocaleDateString('en-US', {weekday:'short'})}, ${nextMeeting.time}` : 'No upcoming'}
           </div>
-          <div style={{ fontSize: 12, color: '#cbd5e1' }}>{nextMeeting?.name || '-'}</div>
-          <div style={{ fontSize: 12, color: '#64748b', display: 'flex', alignItems: 'center', gap: 4, marginTop: 4 }}>
+          <div style={{ fontSize: 12, color: '#cbd5e1', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{nextMeeting?.name || '-'}</div>
+          <div style={{ fontSize: 12, color: '#64748b', display: 'flex', alignItems: 'center', gap: 4, marginTop: 4, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
             📍 {nextMeeting?.venue || 'TBA'}
           </div>
         </div>
       </div>
 
       {/* Main Grid: Left (Calendar+Lists) & Right (Today+Quick Actions) */}
-      <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: 24 }}>
+      <div className="tm-grid-main" style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: 24 }}>
         
         {/* LEFT COLUMN */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
@@ -3179,14 +3196,6 @@ function TeamMeetingsDashboard({
               background: 'radial-gradient(circle 250px at var(--mouse-x, -500px) var(--mouse-y, -500px), rgba(255,255,255,0.08), rgba(0,0,0,0.4) 100%)',
               zIndex: 10, opacity: isHoveringCalendar ? 1 : 0, transition: 'opacity 0.3s'
             }} />
-            
-            <style>{`
-              @keyframes live-glow {
-                0% { box-shadow: 0 0 5px rgba(16, 212, 126, 0.2), inset 0 0 10px rgba(16, 212, 126, 0.1); }
-                50% { box-shadow: 0 0 20px rgba(16, 212, 126, 0.6), inset 0 0 20px rgba(16, 212, 126, 0.2); border-color: rgba(16, 212, 126, 0.5); }
-                100% { box-shadow: 0 0 5px rgba(16, 212, 126, 0.2), inset 0 0 10px rgba(16, 212, 126, 0.1); }
-              }
-            `}</style>
             
             <div style={{ position: 'relative', zIndex: 1 }}>
               {/* View Tabs */}
@@ -3208,7 +3217,7 @@ function TeamMeetingsDashboard({
             </div>
 
             {/* Calendar Controls */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20, flexWrap: 'wrap', gap: 10 }}>
               <h2 style={{ fontSize: 24, fontWeight: 700, margin: 0 }}>{monthNames[currentDate.getMonth()]} {currentDate.getFullYear()}</h2>
               <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
                 <button style={{ background: 'rgba(255,255,255,0.05)', border: 'none', color: '#fff', width: 32, height: 32, borderRadius: 8, cursor: 'pointer' }} onClick={prevMonth}>&lt;</button>
@@ -3269,7 +3278,7 @@ function TeamMeetingsDashboard({
           </div>
 
           {/* Bottom Row: Recent Meetings & Insights */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24 }}>
+          <div className="tm-grid-bottom" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24 }}>
             {/* Recent Meetings */}
             <div style={{ background: 'rgba(255,255,255,0.02)', borderRadius: 24, border: '1px solid rgba(255,255,255,0.05)', padding: 24 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
@@ -3281,18 +3290,18 @@ function TeamMeetingsDashboard({
                   const stats = getTeamMeetingStats(m.id);
                   return (
                     <div key={m.id} style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                      <div style={{ width: 40, height: 40, borderRadius: 12, background: `${m.color}20`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: m.color }}>
+                      <div style={{ width: 40, height: 40, borderRadius: 12, background: `${m.color}20`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: m.color, flexShrink: 0 }}>
                         📋
                       </div>
-                      <div style={{ flex: 1 }}>
-                        <div style={{ fontSize: 14, fontWeight: 500 }}>{m.name}</div>
-                        <div style={{ fontSize: 12, color: '#64748b' }}>{new Date(m.date).toLocaleDateString('en-GB', {day:'numeric', month:'short', year:'numeric'})} &bull; {m.time}</div>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ fontSize: 14, fontWeight: 500, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{m.name}</div>
+                        <div style={{ fontSize: 12, color: '#64748b', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{new Date(m.date).toLocaleDateString('en-GB', {day:'numeric', month:'short', year:'numeric'})} &bull; {m.time}</div>
                       </div>
-                      <div style={{ textAlign: 'right' }}>
+                      <div style={{ textAlign: 'right', flexShrink: 0 }}>
                         <div style={{ fontSize: 12, fontWeight: 600 }}>{stats.present}/{stats.total}</div>
                         <div style={{ fontSize: 10, color: '#64748b' }}>Attendance</div>
                       </div>
-                      <div style={{ width: 40, height: 40, borderRadius: '50%', background: `conic-gradient(#8b5cf6 ${stats.pct}%, rgba(255,255,255,0.1) 0)`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <div style={{ width: 40, height: 40, borderRadius: '50%', background: `conic-gradient(#8b5cf6 ${stats.pct}%, rgba(255,255,255,0.1) 0)`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                         <div style={{ width: 32, height: 32, borderRadius: '50%', background: '#12121a', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, fontWeight: 700 }}>{stats.pct}%</div>
                       </div>
                     </div>
@@ -3309,36 +3318,36 @@ function TeamMeetingsDashboard({
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                  <div style={{ color: '#10d47e' }}>🏆</div>
-                  <div style={{ flex: 1 }}>
-                    <div style={{ fontSize: 12, color: '#64748b' }}>Best Attendance</div>
-                    <div style={{ fontSize: 14 }}>{bestMeeting ? `${bestMeeting.name} (${new Date(bestMeeting.date).toLocaleDateString('en-GB', {day:'numeric', month:'short'})})` : '-'}</div>
+                  <div style={{ color: '#10d47e', flexShrink: 0 }}>🏆</div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontSize: 12, color: '#64748b', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Best Attendance</div>
+                    <div style={{ fontSize: 14, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{bestMeeting ? `${bestMeeting.name} (${new Date(bestMeeting.date).toLocaleDateString('en-GB', {day:'numeric', month:'short'})})` : '-'}</div>
                   </div>
-                  <div style={{ color: '#10d47e', fontWeight: 600 }}>{bestMeeting ? `${bestMeeting.pct}%` : '-'}</div>
+                  <div style={{ color: '#10d47e', fontWeight: 600, flexShrink: 0 }}>{bestMeeting ? `${bestMeeting.pct}%` : '-'}</div>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                  <div style={{ color: '#f59e0b' }}>📉</div>
-                  <div style={{ flex: 1 }}>
-                    <div style={{ fontSize: 12, color: '#64748b' }}>Lowest Attendance</div>
-                    <div style={{ fontSize: 14 }}>{worstMeeting ? `${worstMeeting.name} (${new Date(worstMeeting.date).toLocaleDateString('en-GB', {day:'numeric', month:'short'})})` : '-'}</div>
+                  <div style={{ color: '#f59e0b', flexShrink: 0 }}>📉</div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontSize: 12, color: '#64748b', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Lowest Attendance</div>
+                    <div style={{ fontSize: 14, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{worstMeeting ? `${worstMeeting.name} (${new Date(worstMeeting.date).toLocaleDateString('en-GB', {day:'numeric', month:'short'})})` : '-'}</div>
                   </div>
-                  <div style={{ color: '#f59e0b', fontWeight: 600 }}>{worstMeeting ? `${worstMeeting.pct}%` : '-'}</div>
+                  <div style={{ color: '#f59e0b', fontWeight: 600, flexShrink: 0 }}>{worstMeeting ? `${worstMeeting.pct}%` : '-'}</div>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                  <div style={{ color: '#0ea5e9' }}>📅</div>
-                  <div style={{ flex: 1 }}>
-                    <div style={{ fontSize: 12, color: '#64748b' }}>Most Active Day</div>
-                    <div style={{ fontSize: 14 }}>{mostActiveDayStr}</div>
+                  <div style={{ color: '#0ea5e9', flexShrink: 0 }}>📅</div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontSize: 12, color: '#64748b', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Most Active Day</div>
+                    <div style={{ fontSize: 14, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{mostActiveDayStr}</div>
                   </div>
-                  <div style={{ color: '#0ea5e9', fontWeight: 600 }}>{mostActiveDayCount} Meetings</div>
+                  <div style={{ color: '#0ea5e9', fontWeight: 600, flexShrink: 0 }}>{mostActiveDayCount} Meetings</div>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                  <div style={{ color: '#8b5cf6' }}>⏱️</div>
-                  <div style={{ flex: 1 }}>
-                    <div style={{ fontSize: 12, color: '#64748b' }}>Preferred Time</div>
-                    <div style={{ fontSize: 14 }}>{preferredTimeStr}</div>
+                  <div style={{ color: '#8b5cf6', flexShrink: 0 }}>⏱️</div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontSize: 12, color: '#64748b', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Preferred Time</div>
+                    <div style={{ fontSize: 14, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{preferredTimeStr}</div>
                   </div>
-                  <div style={{ color: '#8b5cf6', fontWeight: 600 }}>{preferredTimePct}% Meetings</div>
+                  <div style={{ color: '#8b5cf6', fontWeight: 600, flexShrink: 0 }}>{preferredTimePct}% Meetings</div>
                 </div>
               </div>
             </div>
@@ -3359,45 +3368,45 @@ function TeamMeetingsDashboard({
             {todayMeeting ? (
               <>
                 <div style={{ display: 'flex', gap: 16, alignItems: 'center', marginBottom: 24 }}>
-                  <div style={{ width: 56, height: 56, borderRadius: 16, background: `${todayMeeting.color}20`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 24 }}>
+                  <div style={{ width: 56, height: 56, borderRadius: 16, background: `${todayMeeting.color}20`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 24, flexShrink: 0 }}>
                     👥
                   </div>
-                  <div>
-                    <div style={{ fontSize: 16, fontWeight: 600, color: '#fff' }}>{todayMeeting.name}</div>
-                    <div style={{ fontSize: 12, color: '#64748b', marginTop: 4 }}>Today, {todayMeeting.time}</div>
-                    <div style={{ fontSize: 12, color: '#64748b', marginTop: 2 }}>📍 {todayMeeting.venue}</div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontSize: 16, fontWeight: 600, color: '#fff', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{todayMeeting.name}</div>
+                    <div style={{ fontSize: 12, color: '#64748b', marginTop: 4, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Today, {todayMeeting.time}</div>
+                    <div style={{ fontSize: 12, color: '#64748b', marginTop: 2, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>📍 {todayMeeting.venue}</div>
                   </div>
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 10, marginBottom: 24, textAlign: 'center' }}>
+                <div className="tm-today-stats" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 10, marginBottom: 24, textAlign: 'center' }}>
                   {(() => {
                     const st = getTeamMeetingStats(todayMeeting.id);
                     return (
                       <>
                         <div>
                           <div style={{ fontSize: 18, fontWeight: 700, color: '#a5b4fc' }}>{st.total}</div>
-                          <div style={{ fontSize: 10, color: '#64748b' }}>Expected</div>
+                          <div style={{ fontSize: 10, color: '#64748b', whiteSpace: 'nowrap' }}>Expected</div>
                         </div>
                         <div>
                           <div style={{ fontSize: 18, fontWeight: 700, color: '#10d47e' }}>{st.present}</div>
-                          <div style={{ fontSize: 10, color: '#64748b' }}>Checked In</div>
+                          <div style={{ fontSize: 10, color: '#64748b', whiteSpace: 'nowrap' }}>Checked In</div>
                         </div>
                         <div>
                           <div style={{ fontSize: 18, fontWeight: 700, color: '#f59e0b' }}>{st.absent}</div>
-                          <div style={{ fontSize: 10, color: '#64748b' }}>Pending</div>
+                          <div style={{ fontSize: 10, color: '#64748b', whiteSpace: 'nowrap' }}>Pending</div>
                         </div>
                         <div>
                           <div style={{ fontSize: 18, fontWeight: 700, color: '#0ea5e9' }}>{st.pct}%</div>
-                          <div style={{ fontSize: 10, color: '#64748b' }}>Attendance</div>
+                          <div style={{ fontSize: 10, color: '#64748b', whiteSpace: 'nowrap' }}>Attendance</div>
                         </div>
                       </>
                     )
                   })()}
                 </div>
 
-                <div style={{ display: 'flex', gap: 12 }}>
-                  <button className="btn btn-primary" style={{ flex: 1, padding: '12px 0', fontSize: 14 }} onClick={() => handleTakeAttendance(todayMeeting.id)}>Take Attendance</button>
-                  <button className="btn" style={{ flex: 1, padding: '12px 0', fontSize: 14, background: 'rgba(255,255,255,0.05)', color: '#fff' }}>View Attendees</button>
+                <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+                  <button className="btn btn-primary" style={{ flex: 1, padding: '12px 16px', fontSize: 14, whiteSpace: 'nowrap', minWidth: 'max-content' }} onClick={() => handleTakeAttendance(todayMeeting.id)}>Take Attendance</button>
+                  <button className="btn" style={{ flex: 1, padding: '12px 16px', fontSize: 14, background: 'rgba(255,255,255,0.05)', color: '#fff', whiteSpace: 'nowrap', minWidth: 'max-content' }}>View Attendees</button>
                 </div>
               </>
             ) : (
@@ -3489,6 +3498,8 @@ function TeamMeetingsDashboard({
     </div>
   );
 }
+
+
 
 
 
