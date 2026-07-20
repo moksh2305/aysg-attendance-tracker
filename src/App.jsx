@@ -134,6 +134,8 @@ const PERSISTED_DATA_KEYS = Object.freeze({
   newJoineeTeamMeetingAttendance: "aysg_new_joinee_team_meeting_attendance",
   teamChats: "aysg_team_chats",
   teams: "aysg_teams",
+  actionItems: "aysg_action_items",
+  meetingTemplates: "aysg_meeting_templates",
 });
 
 const MEMBER_NAMES = [
@@ -1353,6 +1355,8 @@ export default function App() {
   const [newJoineeTeamMeetingAttendance, setNewJoineeTeamMeetingAttendance] = useSyncedStorage(PERSISTED_DATA_KEYS.newJoineeTeamMeetingAttendance, {});
   const [teamChats, setTeamChats] = useSyncedStorage(PERSISTED_DATA_KEYS.teamChats, {});
   const [teams, setTeams] = useSyncedStorage(PERSISTED_DATA_KEYS.teams, INITIAL_TEAMS);
+  const [actionItems, setActionItems] = useSyncedStorage(PERSISTED_DATA_KEYS.actionItems, []);
+  const [meetingTemplates, setMeetingTemplates] = useSyncedStorage(PERSISTED_DATA_KEYS.meetingTemplates, []);
   const [adminUser, setAdminUser] = useState(null);
   const [authReady, setAuthReady] = useState(false);
   const [adminErr, setAdminErr] = useState("");
@@ -1543,6 +1547,9 @@ export default function App() {
                         newJoineeTeamMeetingAttendance={newJoineeTeamMeetingAttendance} setNewJoineeTeamMeetingAttendance={setNewJoineeTeamMeetingAttendance}
                         members={members} newJoinees={newJoinees} setNewJoinees={setNewJoinees}
                         getTeamMeetingStats={getTeamMeetingStats} showToast={showToast} isAdmin={isAdmin} deleteTeamMeeting={deleteTeamMeeting}
+                        actionItems={actionItems} setActionItems={setActionItems}
+                        meetingTemplates={meetingTemplates} setMeetingTemplates={setMeetingTemplates}
+                        setView={setView} setAttendanceEventId={setAttendanceEventId}
                       />
                     )}
                     {view === "Attendance" && <Attendance events={events} members={members} newJoinees={newJoinees} attendance={attendance} setAttendance={setAttendance} newJoineeAttendance={newJoineeAttendance} setNewJoineeAttendance={setNewJoineeAttendance} setNewJoinees={setNewJoinees} showToast={showToast} isAdmin={isAdmin} attendanceEventId={attendanceEventId} setAttendanceEventId={setAttendanceEventId} />}
@@ -2937,61 +2944,409 @@ function NewJoinees({ newJoinees, setNewJoinees, showToast, isAdmin }) {
   );
 }
 
-function TeamMeetingsDashboard({ teamMeetings, setTeamMeetings, teamMeetingAttendance, setTeamMeetingAttendance, newJoineeTeamMeetingAttendance, setNewJoineeTeamMeetingAttendance, members, newJoinees, setNewJoinees, getTeamMeetingStats, showToast, isAdmin, deleteTeamMeeting }) {
-  const [activeTab, setActiveTab] = useState("Meetings");
+function TeamMeetingsDashboard({ 
+  teamMeetings, setTeamMeetings, 
+  teamMeetingAttendance, setTeamMeetingAttendance, 
+  newJoineeTeamMeetingAttendance, setNewJoineeTeamMeetingAttendance, 
+  members, newJoinees, setNewJoinees, 
+  getTeamMeetingStats, showToast, isAdmin, deleteTeamMeeting,
+  actionItems, setActionItems,
+  meetingTemplates, setMeetingTemplates,
+  setView,
+  setAttendanceEventId
+}) {
+  const [activeViewTab, setActiveViewTab] = useState("Calendar View");
+  const [currentDate, setCurrentDate] = useState(new Date());
+
+  const thisMonth = new Date().getMonth();
+  const thisYear = new Date().getFullYear();
+
+  const meetingsThisMonth = teamMeetings.filter(m => {
+    const d = new Date(m.date);
+    return d.getMonth() === thisMonth && d.getFullYear() === thisYear;
+  });
+
+  const avgAttendance = meetingsThisMonth.length > 0 
+    ? Math.round(meetingsThisMonth.reduce((acc, m) => acc + getTeamMeetingStats(m.id).pct, 0) / meetingsThisMonth.length)
+    : 0;
+    
+  const pendingActions = actionItems.filter(a => !a.completed).length;
+
+  const now = new Date();
+  const upcomingMeetings = [...teamMeetings].filter(m => new Date(m.date + "T" + m.time) > now).sort((a,b) => new Date(a.date+"T"+a.time) - new Date(b.date+"T"+b.time));
+  const nextMeeting = upcomingMeetings[0];
+
+  const pastMeetings = [...teamMeetings].filter(m => new Date(m.date + "T" + m.time) <= now).sort((a,b) => new Date(b.date+"T"+b.time) - new Date(a.date+"T"+a.time));
   
+  const todayStr = now.toISOString().split("T")[0];
+  const todayMeeting = [...teamMeetings].find(m => m.date === todayStr) || upcomingMeetings[0]; // fallback to next if no meeting today
+
+  // Sparklines SVG component helper
+  const Sparkline = ({ color }) => (
+    <svg viewBox="0 0 100 20" style={{ width: '100%', height: 30, marginTop: 10, opacity: 0.8 }}>
+      <path d="M0,15 Q5,5 10,15 T20,10 T30,15 T40,5 T50,15 T60,10 T70,18 T80,5 T90,15 T100,10" fill="none" stroke={color} strokeWidth="1.5" />
+      <path d="M0,15 Q5,5 10,15 T20,10 T30,15 T40,5 T50,15 T60,10 T70,18 T80,5 T90,15 T100,10 L100,20 L0,20 Z" fill={`url(#grad-${color.replace('#','')})`} stroke="none" />
+      <defs>
+        <linearGradient id={`grad-${color.replace('#','')}`} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor={color} stopOpacity="0.2" />
+          <stop offset="100%" stopColor={color} stopOpacity="0" />
+        </linearGradient>
+      </defs>
+    </svg>
+  );
+
+  const prevMonth = () => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1));
+  const nextMonth = () => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1));
+
+  const daysInMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0).getDate();
+  const firstDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1).getDay(); // 0 is Sunday
+  
+  // Adjust for Monday start (0=Mon, 6=Sun)
+  const startOffset = firstDayOfMonth === 0 ? 6 : firstDayOfMonth - 1;
+
+  const calendarDays = [];
+  for (let i = 0; i < startOffset; i++) calendarDays.push(null);
+  for (let i = 1; i <= daysInMonth; i++) calendarDays.push(i);
+
+  const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+  
+  // Quick Actions styling
+  const qaBtnStyle = { display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: 16, padding: '15px 10px', gap: 10, cursor: 'pointer', flex: 1 };
+  
+  const handleTakeAttendance = (id) => {
+    // We need a way to open attendance for this specific event.
+    // The main App view has view="Attendance" and attendanceEventId state.
+    // We should pass setAttendanceEventId from App.
+    if(setAttendanceEventId) setAttendanceEventId(id);
+    setView("Attendance");
+  };
+
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-      <div style={{ display: 'flex', gap: 12, marginBottom: 24 }}>
-        <button 
-          className={`btn ${activeTab === "Meetings" ? "btn-primary" : ""}`} 
-          onClick={() => setActiveTab("Meetings")}
-          style={activeTab !== "Meetings" ? { background: "var(--bg3)", color: "var(--text)" } : {}}
-        >
-          Manage Meetings
-        </button>
-        <button 
-          className={`btn ${activeTab === "Attendance" ? "btn-primary" : ""}`} 
-          onClick={() => setActiveTab("Attendance")}
-          style={activeTab !== "Attendance" ? { background: "var(--bg3)", color: "var(--text)" } : {}}
-        >
-          Mark Attendance
-        </button>
-      </div>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', overflowY: 'auto', paddingRight: 10, gap: 24, color: '#e2e8f0', fontFamily: 'Inter, sans-serif' }}>
       
-      <div style={{ flex: 1, overflowY: 'auto' }}>
-        {activeTab === "Meetings" && (
-          <Events 
-            events={teamMeetings} 
-            setEvents={setTeamMeetings} 
-            deleteEvent={deleteTeamMeeting} 
-            getEventStats={getTeamMeetingStats} 
-            showToast={showToast} 
-            isAdmin={isAdmin} 
-            title="Team Meetings" 
-            emptyMsg="No team meetings yet. Create your first meeting!"
-            itemName="Meeting"
-          />
-        )}
-        {activeTab === "Attendance" && (
-          <Attendance 
-            events={teamMeetings} 
-            members={members} 
-            newJoinees={newJoinees} 
-            attendance={teamMeetingAttendance} 
-            setAttendance={setTeamMeetingAttendance} 
-            newJoineeAttendance={newJoineeTeamMeetingAttendance} 
-            setNewJoineeAttendance={setNewJoineeTeamMeetingAttendance} 
-            setNewJoinees={setNewJoinees}
-            showToast={showToast} 
-            isAdmin={isAdmin} 
-            title="Team Meeting Attendance"
-          />
-        )}
+      {/* Top Stats Grid */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 20 }}>
+        <div style={{ background: 'linear-gradient(145deg, rgba(30,30,40,0.8), rgba(20,20,30,0.8))', borderRadius: 24, padding: 20, border: '1px solid rgba(139, 92, 246, 0.2)', boxShadow: '0 10px 30px rgba(0,0,0,0.2)' }}>
+          <div style={{ display: 'flex', gap: 10, alignItems: 'center', marginBottom: 10 }}>
+            <div style={{ width: 32, height: 32, borderRadius: 8, background: 'rgba(139, 92, 246, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#8b5cf6' }}>📅</div>
+            <div style={{ fontSize: 14, color: '#94a3b8' }}>Total Meetings</div>
+          </div>
+          <div style={{ fontSize: 32, fontWeight: 700, margin: '5px 0' }}>{meetingsThisMonth.length}</div>
+          <div style={{ fontSize: 12, color: '#64748b' }}>This Month</div>
+          <Sparkline color="#8b5cf6" />
+        </div>
+        
+        <div style={{ background: 'linear-gradient(145deg, rgba(30,40,35,0.8), rgba(20,30,25,0.8))', borderRadius: 24, padding: 20, border: '1px solid rgba(16, 212, 126, 0.2)', boxShadow: '0 10px 30px rgba(0,0,0,0.2)' }}>
+          <div style={{ display: 'flex', gap: 10, alignItems: 'center', marginBottom: 10 }}>
+            <div style={{ width: 32, height: 32, borderRadius: 8, background: 'rgba(16, 212, 126, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#10d47e' }}>👥</div>
+            <div style={{ fontSize: 14, color: '#94a3b8' }}>Avg. Attendance</div>
+          </div>
+          <div style={{ fontSize: 32, fontWeight: 700, margin: '5px 0', color: '#10d47e' }}>{avgAttendance}%</div>
+          <div style={{ fontSize: 12, color: '#10d47e' }}>↑ 12% vs last month</div>
+          <Sparkline color="#10d47e" />
+        </div>
+        
+        <div style={{ background: 'linear-gradient(145deg, rgba(40,35,25,0.8), rgba(30,25,15,0.8))', borderRadius: 24, padding: 20, border: '1px solid rgba(245, 158, 11, 0.2)', boxShadow: '0 10px 30px rgba(0,0,0,0.2)' }}>
+          <div style={{ display: 'flex', gap: 10, alignItems: 'center', marginBottom: 10 }}>
+            <div style={{ width: 32, height: 32, borderRadius: 8, background: 'rgba(245, 158, 11, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#f59e0b' }}>☑️</div>
+            <div style={{ fontSize: 14, color: '#94a3b8' }}>Action Items</div>
+          </div>
+          <div style={{ fontSize: 32, fontWeight: 700, margin: '5px 0' }}>{pendingActions}</div>
+          <div style={{ fontSize: 12, color: '#64748b' }}>Pending</div>
+          <Sparkline color="#f59e0b" />
+        </div>
+        
+        <div style={{ background: 'linear-gradient(145deg, rgba(25,35,45,0.8), rgba(15,25,35,0.8))', borderRadius: 24, padding: 20, border: '1px solid rgba(14, 165, 233, 0.2)', boxShadow: '0 10px 30px rgba(0,0,0,0.2)' }}>
+          <div style={{ display: 'flex', gap: 10, alignItems: 'center', marginBottom: 10 }}>
+            <div style={{ width: 32, height: 32, borderRadius: 8, background: 'rgba(14, 165, 233, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#0ea5e9' }}>🕒</div>
+            <div style={{ fontSize: 14, color: '#94a3b8' }}>Next Meeting</div>
+          </div>
+          <div style={{ fontSize: 22, fontWeight: 700, margin: '5px 0', color: '#0ea5e9' }}>
+            {nextMeeting ? `${new Date(nextMeeting.date).toLocaleDateString('en-US', {weekday:'short'})}, ${nextMeeting.time}` : 'No upcoming'}
+          </div>
+          <div style={{ fontSize: 12, color: '#cbd5e1' }}>{nextMeeting?.name || '-'}</div>
+          <div style={{ fontSize: 12, color: '#64748b', display: 'flex', alignItems: 'center', gap: 4, marginTop: 4 }}>
+            📍 {nextMeeting?.venue || 'TBA'}
+          </div>
+        </div>
+      </div>
+
+      {/* Main Grid: Left (Calendar+Lists) & Right (Today+Quick Actions) */}
+      <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: 24 }}>
+        
+        {/* LEFT COLUMN */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+          
+          {/* Calendar Section */}
+          <div style={{ background: 'rgba(255,255,255,0.02)', borderRadius: 24, border: '1px solid rgba(255,255,255,0.05)', padding: 24 }}>
+            
+            {/* View Tabs */}
+            <div style={{ display: 'flex', gap: 10, marginBottom: 20 }}>
+              {["Calendar View", "Timeline View", "Board View"].map(tab => (
+                <button 
+                  key={tab}
+                  onClick={() => setActiveViewTab(tab)}
+                  style={{ 
+                    background: activeViewTab === tab ? 'rgba(139, 92, 246, 0.15)' : 'transparent',
+                    color: activeViewTab === tab ? '#a5b4fc' : '#64748b',
+                    border: activeViewTab === tab ? '1px solid rgba(139, 92, 246, 0.3)' : '1px solid transparent',
+                    padding: '8px 16px', borderRadius: 12, fontSize: 14, fontWeight: 500, cursor: 'pointer', transition: 'all 0.2s'
+                  }}
+                >
+                  {tab === "Calendar View" && "📅 "}{tab === "Timeline View" && "⏳ "}{tab === "Board View" && "📋 "}{tab}
+                </button>
+              ))}
+            </div>
+
+            {/* Calendar Controls */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+              <h2 style={{ fontSize: 24, fontWeight: 700, margin: 0 }}>{monthNames[currentDate.getMonth()]} {currentDate.getFullYear()}</h2>
+              <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+                <button style={{ background: 'rgba(255,255,255,0.05)', border: 'none', color: '#fff', width: 32, height: 32, borderRadius: 8, cursor: 'pointer' }} onClick={prevMonth}>&lt;</button>
+                <button style={{ background: 'rgba(255,255,255,0.05)', border: 'none', color: '#fff', padding: '0 16px', height: 32, borderRadius: 8, cursor: 'pointer', fontSize: 14 }} onClick={() => setCurrentDate(new Date())}>Today</button>
+                <button style={{ background: 'rgba(255,255,255,0.05)', border: 'none', color: '#fff', width: 32, height: 32, borderRadius: 8, cursor: 'pointer' }} onClick={nextMonth}>&gt;</button>
+                <button style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', padding: '0 16px', height: 32, borderRadius: 8, cursor: 'pointer', fontSize: 14, marginLeft: 10 }}>Y Filter</button>
+              </div>
+            </div>
+
+            {/* Calendar Grid */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 1 }}>
+              {/* Days Header */}
+              {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map(d => (
+                <div key={d} style={{ textAlign: 'center', fontSize: 12, color: '#64748b', paddingBottom: 10 }}>{d}</div>
+              ))}
+              
+              {/* Days Cells */}
+              <div style={{ gridColumn: '1 / -1', height: 1, background: 'rgba(255,255,255,0.05)', marginBottom: 1 }}></div>
+              {calendarDays.map((day, idx) => {
+                if (!day) return <div key={`empty-${idx}`} style={{ minHeight: 100, padding: 8, borderRight: '1px solid rgba(255,255,255,0.02)', borderBottom: '1px solid rgba(255,255,255,0.02)' }}></div>;
+                
+                const dateStr = `${currentDate.getFullYear()}-${String(currentDate.getMonth()+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+                const dayMeetings = teamMeetings.filter(m => m.date === dateStr);
+                const isToday = dateStr === now.toISOString().split("T")[0];
+
+                return (
+                  <div key={`day-${day}`} style={{ minHeight: 100, padding: 8, borderRight: '1px solid rgba(255,255,255,0.02)', borderBottom: '1px solid rgba(255,255,255,0.02)', background: isToday ? 'rgba(255,255,255,0.02)' : 'transparent' }}>
+                    <div style={{ fontSize: 12, color: isToday ? '#fff' : '#64748b', fontWeight: isToday ? 700 : 400, width: 24, height: 24, borderRadius: '50%', background: isToday ? 'rgba(255,255,255,0.1)' : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 4 }}>
+                      {day}
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                      {dayMeetings.map(m => (
+                        <div key={m.id} style={{ background: `${m.color}20`, borderLeft: `3px solid ${m.color}`, borderRadius: 4, padding: '4px 6px', fontSize: 10, color: '#fff' }}>
+                          <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', fontWeight: 500 }}>{m.name}</div>
+                          <div style={{ color: 'rgba(255,255,255,0.6)', display: 'flex', justifyContent: 'space-between' }}>
+                            <span>{m.time}</span>
+                            <span>👥 {getTeamMeetingStats(m.id).present}</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Bottom Row: Recent Meetings & Insights */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24 }}>
+            {/* Recent Meetings */}
+            <div style={{ background: 'rgba(255,255,255,0.02)', borderRadius: 24, border: '1px solid rgba(255,255,255,0.05)', padding: 24 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+                <h3 style={{ margin: 0, fontSize: 16, fontWeight: 600 }}>Recent Meetings</h3>
+                <span style={{ fontSize: 12, color: '#8b5cf6', cursor: 'pointer' }}>View all</span>
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                {pastMeetings.slice(0, 4).map(m => {
+                  const stats = getTeamMeetingStats(m.id);
+                  return (
+                    <div key={m.id} style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                      <div style={{ width: 40, height: 40, borderRadius: 12, background: `${m.color}20`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: m.color }}>
+                        📋
+                      </div>
+                      <div style={{ flex: 1 }}>
+                        <div style={{ fontSize: 14, fontWeight: 500 }}>{m.name}</div>
+                        <div style={{ fontSize: 12, color: '#64748b' }}>{new Date(m.date).toLocaleDateString('en-GB', {day:'numeric', month:'short', year:'numeric'})} &bull; {m.time}</div>
+                      </div>
+                      <div style={{ textAlign: 'right' }}>
+                        <div style={{ fontSize: 12, fontWeight: 600 }}>{stats.present}/{stats.total}</div>
+                        <div style={{ fontSize: 10, color: '#64748b' }}>Attendance</div>
+                      </div>
+                      <div style={{ width: 40, height: 40, borderRadius: '50%', background: `conic-gradient(#8b5cf6 ${stats.pct}%, rgba(255,255,255,0.1) 0)`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <div style={{ width: 32, height: 32, borderRadius: '50%', background: '#12121a', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, fontWeight: 700 }}>{stats.pct}%</div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Meeting Insights */}
+            <div style={{ background: 'rgba(255,255,255,0.02)', borderRadius: 24, border: '1px solid rgba(255,255,255,0.05)', padding: 24 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+                <h3 style={{ margin: 0, fontSize: 16, fontWeight: 600 }}>Meeting Insights</h3>
+                <span style={{ fontSize: 12, color: '#64748b' }}>This month ▾</span>
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                  <div style={{ color: '#10d47e' }}>🏆</div>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontSize: 12, color: '#64748b' }}>Best Attendance</div>
+                    <div style={{ fontSize: 14 }}>Core Team Sync (15 Jul)</div>
+                  </div>
+                  <div style={{ color: '#10d47e', fontWeight: 600 }}>92% ↑</div>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                  <div style={{ color: '#f59e0b' }}>📉</div>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontSize: 12, color: '#64748b' }}>Lowest Attendance</div>
+                    <div style={{ fontSize: 14 }}>Logistics Meet (16 Jul)</div>
+                  </div>
+                  <div style={{ color: '#f59e0b', fontWeight: 600 }}>62% ↓</div>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                  <div style={{ color: '#0ea5e9' }}>📅</div>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontSize: 12, color: '#64748b' }}>Most Active Day</div>
+                    <div style={{ fontSize: 14 }}>Wednesday</div>
+                  </div>
+                  <div style={{ color: '#0ea5e9', fontWeight: 600 }}>6 Meetings</div>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                  <div style={{ color: '#8b5cf6' }}>⏱️</div>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontSize: 12, color: '#64748b' }}>Preferred Time</div>
+                    <div style={{ fontSize: 14 }}>7:00 PM - 8:00 PM</div>
+                  </div>
+                  <div style={{ color: '#8b5cf6', fontWeight: 600 }}>68% Meetings</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* RIGHT COLUMN */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+          
+          {/* Today's Meeting Card */}
+          <div style={{ background: 'rgba(255,255,255,0.02)', borderRadius: 24, border: '1px solid rgba(255,255,255,0.05)', padding: 24, position: 'relative', overflow: 'hidden' }}>
+            <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: 4, background: 'linear-gradient(90deg, #8b5cf6, #10d47e)' }}></div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+              <h3 style={{ margin: 0, fontSize: 16, fontWeight: 600 }}>Today's Meeting</h3>
+              {todayMeeting?.date === todayStr && <div style={{ fontSize: 10, background: 'rgba(16, 212, 126, 0.1)', color: '#10d47e', padding: '2px 8px', borderRadius: 10, display: 'flex', alignItems: 'center', gap: 4 }}><span style={{ width: 6, height: 6, borderRadius: '50%', background: '#10d47e' }}></span> LIVE</div>}
+            </div>
+
+            {todayMeeting ? (
+              <>
+                <div style={{ display: 'flex', gap: 16, alignItems: 'center', marginBottom: 24 }}>
+                  <div style={{ width: 56, height: 56, borderRadius: 16, background: `${todayMeeting.color}20`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 24 }}>
+                    👥
+                  </div>
+                  <div>
+                    <div style={{ fontSize: 16, fontWeight: 600, color: '#fff' }}>{todayMeeting.name}</div>
+                    <div style={{ fontSize: 12, color: '#64748b', marginTop: 4 }}>Today, {todayMeeting.time}</div>
+                    <div style={{ fontSize: 12, color: '#64748b', marginTop: 2 }}>📍 {todayMeeting.venue}</div>
+                  </div>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 10, marginBottom: 24, textAlign: 'center' }}>
+                  {(() => {
+                    const st = getTeamMeetingStats(todayMeeting.id);
+                    return (
+                      <>
+                        <div>
+                          <div style={{ fontSize: 18, fontWeight: 700, color: '#a5b4fc' }}>{st.total}</div>
+                          <div style={{ fontSize: 10, color: '#64748b' }}>Expected</div>
+                        </div>
+                        <div>
+                          <div style={{ fontSize: 18, fontWeight: 700, color: '#10d47e' }}>{st.present}</div>
+                          <div style={{ fontSize: 10, color: '#64748b' }}>Checked In</div>
+                        </div>
+                        <div>
+                          <div style={{ fontSize: 18, fontWeight: 700, color: '#f59e0b' }}>{st.absent}</div>
+                          <div style={{ fontSize: 10, color: '#64748b' }}>Pending</div>
+                        </div>
+                        <div>
+                          <div style={{ fontSize: 18, fontWeight: 700, color: '#0ea5e9' }}>{st.pct}%</div>
+                          <div style={{ fontSize: 10, color: '#64748b' }}>Attendance</div>
+                        </div>
+                      </>
+                    )
+                  })()}
+                </div>
+
+                <div style={{ display: 'flex', gap: 12 }}>
+                  <button className="btn btn-primary" style={{ flex: 1, padding: '12px 0', fontSize: 14 }} onClick={() => handleTakeAttendance(todayMeeting.id)}>Take Attendance</button>
+                  <button className="btn" style={{ flex: 1, padding: '12px 0', fontSize: 14, background: 'rgba(255,255,255,0.05)', color: '#fff' }}>View Attendees</button>
+                </div>
+              </>
+            ) : (
+              <div style={{ textAlign: 'center', color: '#64748b', padding: '40px 0' }}>No meeting today</div>
+            )}
+          </div>
+
+          {/* Upcoming Meetings List */}
+          <div style={{ background: 'rgba(255,255,255,0.02)', borderRadius: 24, border: '1px solid rgba(255,255,255,0.05)', padding: 24 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+              <h3 style={{ margin: 0, fontSize: 16, fontWeight: 600 }}>Upcoming Meetings</h3>
+              <span style={{ fontSize: 12, color: '#8b5cf6', cursor: 'pointer' }}>View all</span>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+              {upcomingMeetings.slice(0, 4).map(m => (
+                <div key={m.id} style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
+                  <div style={{ background: 'rgba(255,255,255,0.05)', borderRadius: 8, padding: '4px 8px', textAlign: 'center', minWidth: 45 }}>
+                    <div style={{ fontSize: 10, color: '#8b5cf6', textTransform: 'uppercase', fontWeight: 600 }}>{new Date(m.date).toLocaleDateString('en-US', {month:'short'})}</div>
+                    <div style={{ fontSize: 16, fontWeight: 700 }}>{new Date(m.date).getDate()}</div>
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontSize: 14, fontWeight: 500 }}>{m.name}</div>
+                    <div style={{ fontSize: 12, color: '#64748b', display: 'flex', gap: 10, marginTop: 4 }}>
+                      <span>{new Date(m.date).toLocaleDateString('en-US', {weekday:'short'})}, {m.time}</span>
+                      <span>📍 {m.venue || 'TBA'}</span>
+                    </div>
+                  </div>
+                  <div style={{ textAlign: 'right' }}>
+                    <div style={{ fontSize: 14, fontWeight: 600, color: '#10d47e' }}>{getTeamMeetingStats(m.id).total}</div>
+                    <div style={{ fontSize: 10, color: '#64748b' }}>Expected</div>
+                  </div>
+                </div>
+              ))}
+              {upcomingMeetings.length === 0 && <div style={{ color: '#64748b', fontSize: 14, textAlign: 'center' }}>No upcoming meetings</div>}
+            </div>
+          </div>
+
+          {/* Quick Actions */}
+          <div style={{ background: 'rgba(255,255,255,0.02)', borderRadius: 24, border: '1px solid rgba(255,255,255,0.05)', padding: 24 }}>
+            <h3 style={{ margin: '0 0 20px 0', fontSize: 16, fontWeight: 600 }}>Quick Actions for Meetings</h3>
+            <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+              <div style={qaBtnStyle}>
+                <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'rgba(139, 92, 246, 0.1)', color: '#8b5cf6', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>+</div>
+                <div style={{ fontSize: 10, textAlign: 'center' }}>Create<br/>Meeting</div>
+              </div>
+              <div style={qaBtnStyle}>
+                <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'rgba(14, 165, 233, 0.1)', color: '#0ea5e9', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>📄</div>
+                <div style={{ fontSize: 10, textAlign: 'center' }}>Meeting<br/>Templates</div>
+              </div>
+              <div style={qaBtnStyle}>
+                <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'rgba(16, 212, 126, 0.1)', color: '#10d47e', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>↑</div>
+                <div style={{ fontSize: 10, textAlign: 'center' }}>Import<br/>Meeting</div>
+              </div>
+              <div style={qaBtnStyle}>
+                <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'rgba(245, 158, 11, 0.1)', color: '#f59e0b', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>⬇</div>
+                <div style={{ fontSize: 10, textAlign: 'center' }}>Export<br/>Report</div>
+              </div>
+              <div style={qaBtnStyle}>
+                <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'rgba(236, 72, 153, 0.1)', color: '#ec4899', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>🔔</div>
+                <div style={{ fontSize: 10, textAlign: 'center' }}>Send<br/>Reminder</div>
+              </div>
+            </div>
+          </div>
+
+        </div>
       </div>
     </div>
   );
 }
+
 
 function Events({ events, setEvents, deleteEvent, getEventStats, showToast, isAdmin, title = "Events", emptyMsg = "No events yet. Create your first event!", itemName = "Event" }) {
   const [showForm, setShowForm] = useState(false);
