@@ -3110,7 +3110,7 @@ function TeamMeetingsDashboard({
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', overflowY: 'auto', paddingRight: 10, gap: 24, color: '#e2e8f0', fontFamily: 'Inter, sans-serif' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', overflowY: 'auto', overflowX: 'hidden', paddingRight: 10, gap: 24, color: '#e2e8f0', fontFamily: 'Inter, sans-serif' }}>
       
       <style>{`
         @keyframes live-glow {
@@ -3122,10 +3122,10 @@ function TeamMeetingsDashboard({
           .tm-grid-main { grid-template-columns: 1fr !important; }
           .tm-grid-bottom { grid-template-columns: 1fr !important; }
           .tm-grid-top { grid-template-columns: repeat(2, 1fr) !important; }
+          .tm-today-stats { grid-template-columns: repeat(2, 1fr) !important; }
         }
         @media (max-width: 600px) {
           .tm-grid-top { grid-template-columns: 1fr !important; }
-          .tm-today-stats { grid-template-columns: repeat(2, 1fr) !important; }
         }
       `}</style>
 
@@ -3199,7 +3199,7 @@ function TeamMeetingsDashboard({
             
             <div style={{ position: 'relative', zIndex: 1 }}>
               {/* View Tabs */}
-              <div style={{ display: 'flex', gap: 10, marginBottom: 20 }}>
+              <div style={{ display: 'flex', gap: 10, marginBottom: 20, flexWrap: 'wrap' }}>
               {["Calendar View", "Timeline View", "Board View"].map(tab => (
                 <button 
                   key={tab}
@@ -3427,11 +3427,11 @@ function TeamMeetingsDashboard({
                     <div style={{ fontSize: 10, color: '#8b5cf6', textTransform: 'uppercase', fontWeight: 600 }}>{new Date(m.date).toLocaleDateString('en-US', {month:'short'})}</div>
                     <div style={{ fontSize: 16, fontWeight: 700 }}>{new Date(m.date).getDate()}</div>
                   </div>
-                  <div style={{ flex: 1 }}>
-                    <div style={{ fontSize: 14, fontWeight: 500 }}>{m.name}</div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontSize: 14, fontWeight: 500, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{m.name}</div>
                     <div style={{ fontSize: 12, color: '#64748b', display: 'flex', gap: 10, marginTop: 4 }}>
-                      <span>{new Date(m.date).toLocaleDateString('en-US', {weekday:'short'})}, {m.time}</span>
-                      <span>📍 {m.venue || 'TBA'}</span>
+                      <span style={{ whiteSpace: 'nowrap' }}>{new Date(m.date).toLocaleDateString('en-US', {weekday:'short'})}, {m.time}</span>
+                      <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>📍 {m.venue || 'TBA'}</span>
                     </div>
                   </div>
                   <div style={{ textAlign: 'right' }}>
@@ -3498,6 +3498,8 @@ function TeamMeetingsDashboard({
     </div>
   );
 }
+
+
 
 
 
