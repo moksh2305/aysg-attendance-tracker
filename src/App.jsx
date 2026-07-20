@@ -3110,9 +3110,12 @@ function TeamMeetingsDashboard({
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', overflowY: 'auto', overflowX: 'hidden', paddingRight: 10, gap: 24, color: '#e2e8f0', fontFamily: 'Inter, sans-serif' }}>
+    <div className="team-meetings-dashboard" style={{ display: 'flex', flexDirection: 'column', height: '100%', overflowY: 'auto', overflowX: 'hidden', paddingRight: 10, gap: 24, color: '#e2e8f0', fontFamily: 'Inter, sans-serif' }}>
       
       <style>{`
+        .team-meetings-dashboard, .team-meetings-dashboard * {
+          box-sizing: border-box;
+        }
         @keyframes live-glow {
           0% { box-shadow: 0 0 5px rgba(16, 212, 126, 0.2), inset 0 0 10px rgba(16, 212, 126, 0.1); }
           50% { box-shadow: 0 0 20px rgba(16, 212, 126, 0.6), inset 0 0 20px rgba(16, 212, 126, 0.2); border-color: rgba(16, 212, 126, 0.5); }
