@@ -2944,6 +2944,37 @@ function NewJoinees({ newJoinees, setNewJoinees, showToast, isAdmin }) {
   );
 }
 
+function LiveCountdown({ targetDate, targetTime }) {
+  const [timeLeft, setTimeLeft] = React.useState("");
+  
+  React.useEffect(() => {
+    const update = () => {
+      const now = new Date();
+      const target = new Date(`${targetDate}T${targetTime}`);
+      const diff = target - now;
+      if (diff <= 0) {
+        setTimeLeft("Started");
+      } else {
+        const h = Math.floor(diff / (1000 * 60 * 60));
+        const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+        const s = Math.floor((diff % (1000 * 60)) / 1000);
+        setTimeLeft(`${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`);
+      }
+    };
+    update();
+    const timer = setInterval(update, 1000);
+    return () => clearInterval(timer);
+  }, [targetDate, targetTime]);
+
+  if (!timeLeft || timeLeft === "Started") return <div style={{ color: '#10d47e', fontSize: 10, marginTop: 4, fontWeight: 600 }}>Started</div>;
+  return (
+    <div style={{ fontSize: 10, color: '#f59e0b', marginTop: 4, background: 'rgba(245, 158, 11, 0.1)', padding: '4px 6px', borderRadius: 4, display: 'inline-block' }}>
+      <div style={{ opacity: 0.8, fontSize: 9, marginBottom: 2 }}>Starts in</div>
+      <div style={{ fontWeight: 700, fontFamily: 'monospace', fontSize: 11, letterSpacing: 1 }}>{timeLeft}</div>
+    </div>
+  );
+}
+
 function TeamMeetingsDashboard({ 
   teamMeetings, setTeamMeetings, 
   teamMeetingAttendance, setTeamMeetingAttendance, 
@@ -2957,6 +2988,17 @@ function TeamMeetingsDashboard({
 }) {
   const [activeViewTab, setActiveViewTab] = useState("Calendar View");
   const [currentDate, setCurrentDate] = useState(new Date());
+  
+  const calendarRef = React.useRef(null);
+  const [isHoveringCalendar, setIsHoveringCalendar] = useState(false);
+  
+  const handleCalendarMouseMove = (e) => {
+    if (calendarRef.current) {
+      const rect = calendarRef.current.getBoundingClientRect();
+      calendarRef.current.style.setProperty('--mouse-x', `${e.clientX - rect.left}px`);
+      calendarRef.current.style.setProperty('--mouse-y', `${e.clientY - rect.top}px`);
+    }
+  };
 
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState({ name: "", date: "", time: "", venue: "", category: "Team Meeting", notes: "", color: "#8b5cf6", lat: null, lng: null });
@@ -3124,10 +3166,31 @@ function TeamMeetingsDashboard({
         <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
           
           {/* Calendar Section */}
-          <div style={{ background: 'rgba(255,255,255,0.02)', borderRadius: 24, border: '1px solid rgba(255,255,255,0.05)', padding: 24 }}>
+          <div 
+            ref={calendarRef}
+            onMouseMove={handleCalendarMouseMove}
+            onMouseEnter={() => setIsHoveringCalendar(true)}
+            onMouseLeave={() => setIsHoveringCalendar(false)}
+            style={{ background: 'rgba(255,255,255,0.02)', borderRadius: 24, border: '1px solid rgba(255,255,255,0.05)', padding: 24, position: 'relative', overflow: 'hidden' }}
+          >
+            {/* Torch Overlay */}
+            <div style={{
+              position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, pointerEvents: 'none',
+              background: 'radial-gradient(circle 250px at var(--mouse-x, -500px) var(--mouse-y, -500px), rgba(255,255,255,0.08), rgba(0,0,0,0.4) 100%)',
+              zIndex: 10, opacity: isHoveringCalendar ? 1 : 0, transition: 'opacity 0.3s'
+            }} />
             
-            {/* View Tabs */}
-            <div style={{ display: 'flex', gap: 10, marginBottom: 20 }}>
+            <style>{`
+              @keyframes live-glow {
+                0% { box-shadow: 0 0 5px rgba(16, 212, 126, 0.2), inset 0 0 10px rgba(16, 212, 126, 0.1); }
+                50% { box-shadow: 0 0 20px rgba(16, 212, 126, 0.6), inset 0 0 20px rgba(16, 212, 126, 0.2); border-color: rgba(16, 212, 126, 0.5); }
+                100% { box-shadow: 0 0 5px rgba(16, 212, 126, 0.2), inset 0 0 10px rgba(16, 212, 126, 0.1); }
+              }
+            `}</style>
+            
+            <div style={{ position: 'relative', zIndex: 1 }}>
+              {/* View Tabs */}
+              <div style={{ display: 'flex', gap: 10, marginBottom: 20 }}>
               {["Calendar View", "Timeline View", "Board View"].map(tab => (
                 <button 
                   key={tab}
@@ -3172,18 +3235,29 @@ function TeamMeetingsDashboard({
                 const isToday = dateStr === now.toISOString().split("T")[0];
 
                 return (
-                  <div key={`day-${day}`} style={{ minHeight: 100, padding: 8, borderRight: '1px solid rgba(255,255,255,0.02)', borderBottom: '1px solid rgba(255,255,255,0.02)', background: isToday ? 'rgba(255,255,255,0.02)' : 'transparent' }}>
-                    <div style={{ fontSize: 12, color: isToday ? '#fff' : '#64748b', fontWeight: isToday ? 700 : 400, width: 24, height: 24, borderRadius: '50%', background: isToday ? 'rgba(255,255,255,0.1)' : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 4 }}>
+                  <div 
+                    key={`day-${day}`} 
+                    style={{ 
+                      minHeight: 100, 
+                      padding: 8, 
+                      borderRight: '1px solid rgba(255,255,255,0.02)', 
+                      borderBottom: '1px solid rgba(255,255,255,0.02)', 
+                      background: isToday ? 'rgba(255,255,255,0.02)' : 'transparent',
+                      animation: isToday ? 'live-glow 2s infinite' : 'none'
+                    }}
+                  >
+                    <div style={{ fontSize: 12, color: isToday ? '#10d47e' : '#64748b', fontWeight: isToday ? 700 : 400, width: 24, height: 24, borderRadius: '50%', background: isToday ? 'rgba(16, 212, 126, 0.1)' : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 4 }}>
                       {day}
                     </div>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
                       {dayMeetings.map(m => (
-                        <div key={m.id} style={{ background: `${m.color}20`, borderLeft: `3px solid ${m.color}`, borderRadius: 4, padding: '4px 6px', fontSize: 10, color: '#fff' }}>
-                          <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', fontWeight: 500 }}>{m.name}</div>
-                          <div style={{ color: 'rgba(255,255,255,0.6)', display: 'flex', justifyContent: 'space-between' }}>
+                        <div key={m.id} style={{ background: `${m.color}20`, borderLeft: `3px solid ${m.color}`, borderRadius: 4, padding: '6px 8px', fontSize: 10, color: '#fff' }}>
+                          <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', fontWeight: 600, fontSize: 11 }}>{m.name}</div>
+                          <div style={{ color: 'rgba(255,255,255,0.7)', display: 'flex', justifyContent: 'space-between', marginTop: 4 }}>
                             <span>{m.time}</span>
                             <span>👥 {getTeamMeetingStats(m.id).present}</span>
                           </div>
+                          <LiveCountdown targetDate={m.date} targetTime={m.time} />
                         </div>
                       ))}
                     </div>
@@ -3191,6 +3265,7 @@ function TeamMeetingsDashboard({
                 );
               })}
             </div>
+          </div>
           </div>
 
           {/* Bottom Row: Recent Meetings & Insights */}
@@ -3414,6 +3489,8 @@ function TeamMeetingsDashboard({
     </div>
   );
 }
+
+
 
 
 function Events({ events, setEvents, deleteEvent, getEventStats, showToast, isAdmin, title = "Events", emptyMsg = "No events yet. Create your first event!", itemName = "Event" }) {
