@@ -2958,6 +2958,22 @@ function TeamMeetingsDashboard({
   const [activeViewTab, setActiveViewTab] = useState("Calendar View");
   const [currentDate, setCurrentDate] = useState(new Date());
 
+  const [showForm, setShowForm] = useState(false);
+  const [form, setForm] = useState({ name: "", date: "", time: "", venue: "", category: "Team Meeting", notes: "", color: "#8b5cf6", lat: null, lng: null });
+  const colors = ["#7c6af8", "#ec4899", "#14b8a6", "#f59e0b", "#ef4444", "#06b6d4", "#10b981"];
+
+  const openAdd = () => { 
+    setForm({ name: "", date: new Date().toISOString().split("T")[0], time: "09:00", venue: "", category: "Team Meeting", notes: "", color: "#8b5cf6", lat: null, lng: null }); 
+    setShowForm(true); 
+  };
+
+  const saveMeeting = () => {
+    if (!form.name.trim()) return showToast("Meeting name required", "error");
+    setTeamMeetings([...teamMeetings, { ...form, id: genId("TM") }]); 
+    showToast("Meeting created", "success");
+    setShowForm(false);
+  };
+
   const thisMonth = new Date().getMonth();
   const thisYear = new Date().getFullYear();
 
@@ -2980,6 +2996,36 @@ function TeamMeetingsDashboard({
   
   const todayStr = now.toISOString().split("T")[0];
   const todayMeeting = [...teamMeetings].find(m => m.date === todayStr) || upcomingMeetings[0]; // fallback to next if no meeting today
+
+  // Dynamic Insights Calculation
+  let bestMeeting = null;
+  let worstMeeting = null;
+  const dayCounts = {};
+  const timeCounts = {};
+  
+  if (meetingsThisMonth.length > 0) {
+    let bestPct = -1;
+    let worstPct = 101;
+    
+    meetingsThisMonth.forEach(m => {
+      const stats = getTeamMeetingStats(m.id);
+      if (stats.pct > bestPct) { bestPct = stats.pct; bestMeeting = { ...m, pct: stats.pct }; }
+      if (stats.pct < worstPct) { worstPct = stats.pct; worstMeeting = { ...m, pct: stats.pct }; }
+      
+      const d = new Date(m.date).getDay();
+      dayCounts[d] = (dayCounts[d] || 0) + 1;
+      
+      timeCounts[m.time] = (timeCounts[m.time] || 0) + 1;
+    });
+  }
+  
+  const weekdays = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+  const mostActiveDayIndex = Object.keys(dayCounts).sort((a,b) => dayCounts[b] - dayCounts[a])[0];
+  const mostActiveDayStr = mostActiveDayIndex ? weekdays[mostActiveDayIndex] : "-";
+  const mostActiveDayCount = mostActiveDayIndex ? dayCounts[mostActiveDayIndex] : 0;
+  
+  const preferredTimeStr = Object.keys(timeCounts).sort((a,b) => timeCounts[b] - timeCounts[a])[0] || "-";
+  const preferredTimePct = meetingsThisMonth.length > 0 && preferredTimeStr !== "-" ? Math.round((timeCounts[preferredTimeStr] / meetingsThisMonth.length) * 100) : 0;
 
   // Sparklines SVG component helper
   const Sparkline = ({ color }) => (
@@ -3191,33 +3237,33 @@ function TeamMeetingsDashboard({
                   <div style={{ color: '#10d47e' }}>🏆</div>
                   <div style={{ flex: 1 }}>
                     <div style={{ fontSize: 12, color: '#64748b' }}>Best Attendance</div>
-                    <div style={{ fontSize: 14 }}>Core Team Sync (15 Jul)</div>
+                    <div style={{ fontSize: 14 }}>{bestMeeting ? `${bestMeeting.name} (${new Date(bestMeeting.date).toLocaleDateString('en-GB', {day:'numeric', month:'short'})})` : '-'}</div>
                   </div>
-                  <div style={{ color: '#10d47e', fontWeight: 600 }}>92% ↑</div>
+                  <div style={{ color: '#10d47e', fontWeight: 600 }}>{bestMeeting ? `${bestMeeting.pct}%` : '-'}</div>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                   <div style={{ color: '#f59e0b' }}>📉</div>
                   <div style={{ flex: 1 }}>
                     <div style={{ fontSize: 12, color: '#64748b' }}>Lowest Attendance</div>
-                    <div style={{ fontSize: 14 }}>Logistics Meet (16 Jul)</div>
+                    <div style={{ fontSize: 14 }}>{worstMeeting ? `${worstMeeting.name} (${new Date(worstMeeting.date).toLocaleDateString('en-GB', {day:'numeric', month:'short'})})` : '-'}</div>
                   </div>
-                  <div style={{ color: '#f59e0b', fontWeight: 600 }}>62% ↓</div>
+                  <div style={{ color: '#f59e0b', fontWeight: 600 }}>{worstMeeting ? `${worstMeeting.pct}%` : '-'}</div>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                   <div style={{ color: '#0ea5e9' }}>📅</div>
                   <div style={{ flex: 1 }}>
                     <div style={{ fontSize: 12, color: '#64748b' }}>Most Active Day</div>
-                    <div style={{ fontSize: 14 }}>Wednesday</div>
+                    <div style={{ fontSize: 14 }}>{mostActiveDayStr}</div>
                   </div>
-                  <div style={{ color: '#0ea5e9', fontWeight: 600 }}>6 Meetings</div>
+                  <div style={{ color: '#0ea5e9', fontWeight: 600 }}>{mostActiveDayCount} Meetings</div>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                   <div style={{ color: '#8b5cf6' }}>⏱️</div>
                   <div style={{ flex: 1 }}>
                     <div style={{ fontSize: 12, color: '#64748b' }}>Preferred Time</div>
-                    <div style={{ fontSize: 14 }}>7:00 PM - 8:00 PM</div>
+                    <div style={{ fontSize: 14 }}>{preferredTimeStr}</div>
                   </div>
-                  <div style={{ color: '#8b5cf6', fontWeight: 600 }}>68% Meetings</div>
+                  <div style={{ color: '#8b5cf6', fontWeight: 600 }}>{preferredTimePct}% Meetings</div>
                 </div>
               </div>
             </div>
@@ -3318,23 +3364,23 @@ function TeamMeetingsDashboard({
           <div style={{ background: 'rgba(255,255,255,0.02)', borderRadius: 24, border: '1px solid rgba(255,255,255,0.05)', padding: 24 }}>
             <h3 style={{ margin: '0 0 20px 0', fontSize: 16, fontWeight: 600 }}>Quick Actions for Meetings</h3>
             <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
-              <div style={qaBtnStyle}>
+              <div style={qaBtnStyle} onClick={isAdmin ? openAdd : () => showToast("Admin access required", "error")}>
                 <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'rgba(139, 92, 246, 0.1)', color: '#8b5cf6', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>+</div>
                 <div style={{ fontSize: 10, textAlign: 'center' }}>Create<br/>Meeting</div>
               </div>
-              <div style={qaBtnStyle}>
+              <div style={qaBtnStyle} onClick={() => showToast("Meeting Templates coming soon!", "info")}>
                 <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'rgba(14, 165, 233, 0.1)', color: '#0ea5e9', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>📄</div>
                 <div style={{ fontSize: 10, textAlign: 'center' }}>Meeting<br/>Templates</div>
               </div>
-              <div style={qaBtnStyle}>
+              <div style={qaBtnStyle} onClick={() => showToast("Import Feature coming soon!", "info")}>
                 <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'rgba(16, 212, 126, 0.1)', color: '#10d47e', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>↑</div>
                 <div style={{ fontSize: 10, textAlign: 'center' }}>Import<br/>Meeting</div>
               </div>
-              <div style={qaBtnStyle}>
+              <div style={qaBtnStyle} onClick={() => showToast("Export Report coming soon!", "info")}>
                 <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'rgba(245, 158, 11, 0.1)', color: '#f59e0b', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>⬇</div>
                 <div style={{ fontSize: 10, textAlign: 'center' }}>Export<br/>Report</div>
               </div>
-              <div style={qaBtnStyle}>
+              <div style={qaBtnStyle} onClick={() => showToast("Reminders coming soon!", "info")}>
                 <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'rgba(236, 72, 153, 0.1)', color: '#ec4899', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>🔔</div>
                 <div style={{ fontSize: 10, textAlign: 'center' }}>Send<br/>Reminder</div>
               </div>
@@ -3343,6 +3389,28 @@ function TeamMeetingsDashboard({
 
         </div>
       </div>
+
+      <AnimatedModal isOpen={showForm} onClose={() => setShowForm(false)}>
+        <h2>Create New Team Meeting</h2>
+        <div className="field"><label>Meeting Name</label><input className="input" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} placeholder="e.g. Core Team Sync" /></div>
+        <div className="grid-2">
+          <div className="field"><label>Date</label><input className="input" type="date" value={form.date} onChange={e => setForm({ ...form, date: e.target.value })} /></div>
+          <div className="field"><label>Time</label><input className="input" type="time" value={form.time} onChange={e => setForm({ ...form, time: e.target.value })} /></div>
+        </div>
+        <div className="field"><label>Venue</label><input className="input" value={form.venue} onChange={e => setForm({ ...form, venue: e.target.value })} placeholder="Location / Link" /></div>
+        
+        <div className="field"><label>Meeting Color</label>
+          <div className="flex gap-2 mt-1">
+            {colors.map(c => <div key={c} onClick={() => setForm({ ...form, color: c })} style={{ width: 28, height: 28, borderRadius: 8, background: c, cursor: "pointer", border: form.color === c ? "3px solid white" : "2px solid transparent", transition: "all 0.15s" }} />)}
+          </div>
+        </div>
+        
+        <div className="flex gap-3 mt-4">
+          <button className="btn btn-primary flex-1" style={{ justifyContent: "center" }} onClick={saveMeeting}>Create Meeting</button>
+          <button className="btn" onClick={() => setShowForm(false)}>Cancel</button>
+        </div>
+      </AnimatedModal>
+
     </div>
   );
 }
