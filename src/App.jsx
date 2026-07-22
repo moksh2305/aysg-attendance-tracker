@@ -3099,7 +3099,7 @@ function TeamMeetingsDashboard({
   const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
   
   // Quick Actions styling
-  const qaBtnStyle = { display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: 16, padding: '15px 10px', gap: 10, cursor: 'pointer', flex: 1 };
+  const qaBtnStyle = { display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: 16, padding: '15px 10px', gap: 10, cursor: 'pointer', flex: 1, minWidth: 70 };
   
   const handleTakeAttendance = (id) => {
     // We need a way to open attendance for this specific event.
@@ -3180,7 +3180,7 @@ function TeamMeetingsDashboard({
       </div>
 
       {/* Main Grid: Left (Calendar+Lists) & Right (Today+Quick Actions) */}
-      <div className="tm-grid-main" style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: 24 }}>
+      <div className="tm-grid-main" style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 2fr) minmax(0, 1fr)', gap: 24 }}>
         
         {/* LEFT COLUMN */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
@@ -3363,25 +3363,20 @@ function TeamMeetingsDashboard({
           {/* Today's Meeting Card */}
           <div style={{ background: 'rgba(255,255,255,0.02)', borderRadius: 24, border: '1px solid rgba(255,255,255,0.05)', padding: 24, position: 'relative', overflow: 'hidden' }}>
             <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: 4, background: 'linear-gradient(90deg, #8b5cf6, #10d47e)' }}></div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-              <h3 style={{ margin: 0, fontSize: 16, fontWeight: 600 }}>Today's Meeting</h3>
-              {todayMeeting?.date === todayStr && <div style={{ fontSize: 10, background: 'rgba(16, 212, 126, 0.1)', color: '#10d47e', padding: '2px 8px', borderRadius: 10, display: 'flex', alignItems: 'center', gap: 4 }}><span style={{ width: 6, height: 6, borderRadius: '50%', background: '#10d47e' }}></span> LIVE</div>}
-            </div>
+            <h3 style={{ fontSize: 18, fontWeight: 700, margin: '0 0 24px 0' }}>Today's Meeting</h3>
 
             {todayMeeting ? (
               <>
                 <div style={{ display: 'flex', gap: 16, alignItems: 'center', marginBottom: 24 }}>
-                  <div style={{ width: 56, height: 56, borderRadius: 16, background: `${todayMeeting.color}20`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 24, flexShrink: 0 }}>
-                    👥
-                  </div>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontSize: 16, fontWeight: 600, color: '#fff', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{todayMeeting.name}</div>
-                    <div style={{ fontSize: 12, color: '#64748b', marginTop: 4, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Today, {todayMeeting.time}</div>
-                    <div style={{ fontSize: 12, color: '#64748b', marginTop: 2, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>📍 {todayMeeting.venue}</div>
+                  <div style={{ width: 64, height: 64, borderRadius: 16, background: '#1e1e2d', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 24 }}>👥</div>
+                  <div>
+                    <div style={{ fontSize: 18, fontWeight: 700 }}>{todayMeeting.name}</div>
+                    <div style={{ fontSize: 14, color: '#64748b', marginTop: 4 }}>Today, {todayMeeting.time}</div>
+                    <div style={{ fontSize: 12, color: '#94a3b8', marginTop: 4 }}>📍 {todayMeeting.venue || 'TBA'}</div>
                   </div>
                 </div>
 
-                <div className="tm-today-stats" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 10, marginBottom: 24, textAlign: 'center' }}>
+                <div className="tm-today-stats" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(65px, 1fr))', gap: 10, marginBottom: 24, textAlign: 'center' }}>
                   {(() => {
                     const st = getTeamMeetingStats(todayMeeting.id);
                     return (
@@ -3501,6 +3496,8 @@ function TeamMeetingsDashboard({
     </div>
   );
 }
+
+
 
 
 
