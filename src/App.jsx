@@ -3180,10 +3180,10 @@ function TeamMeetingsDashboard({
       </div>
 
       {/* Main Grid: Left (Calendar+Lists) & Right (Today+Quick Actions) */}
-      <div className="tm-grid-main" style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 2fr) minmax(0, 1fr)', gap: 24 }}>
+      <div className="tm-grid-main" style={{ display: 'flex', flexWrap: 'wrap', gap: 24 }}>
         
         {/* LEFT COLUMN */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+        <div style={{ flex: '2 1 600px', display: 'flex', flexDirection: 'column', gap: 24, minWidth: 0 }}>
           
           {/* Calendar Section */}
           <div 
@@ -3281,7 +3281,7 @@ function TeamMeetingsDashboard({
           </div>
 
           {/* Bottom Row: Recent Meetings & Insights */}
-          <div className="tm-grid-bottom" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24 }}>
+          <div className="tm-grid-bottom" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 24 }}>
             {/* Recent Meetings */}
             <div style={{ background: 'rgba(255,255,255,0.02)', borderRadius: 24, border: '1px solid rgba(255,255,255,0.05)', padding: 24 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
@@ -3358,7 +3358,7 @@ function TeamMeetingsDashboard({
         </div>
 
         {/* RIGHT COLUMN */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+        <div style={{ flex: '1 1 300px', display: 'flex', flexDirection: 'column', gap: 24, minWidth: 0 }}>
           
           {/* Today's Meeting Card */}
           <div style={{ background: 'rgba(255,255,255,0.02)', borderRadius: 24, border: '1px solid rgba(255,255,255,0.05)', padding: 24, position: 'relative', overflow: 'hidden' }}>
@@ -3496,6 +3496,8 @@ function TeamMeetingsDashboard({
     </div>
   );
 }
+
+
 
 
 
