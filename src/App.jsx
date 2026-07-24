@@ -1306,20 +1306,20 @@ function DocumentsDashboard({ isAdmin }) {
   const placeholderDocuments = [
     {
       id: "doc1",
-      title: "Quarterly Strategy",
-      type: "Google Docs",
-      icon: "📄",
-      url: "https://docs.google.com/document/d/e/2PACX-1vR6zZ2g4Y_n_Y_W4lR9aE_m9h/pub?embedded=true",
-      lastUpdated: "2 days ago",
-      color: "#2563eb"
+      title: "Google Sheet 1",
+      type: "Google Sheets",
+      icon: "📊",
+      url: "https://docs.google.com/spreadsheets/d/17fIFZ4isjX0OdN4ZvyRXPTUaEqYIb7SqfNIleW1BBdU/edit?usp=sharing",
+      lastUpdated: "Recently",
+      color: "#16a34a"
     },
     {
       id: "doc2",
-      title: "Financial Projections",
+      title: "Google Sheet 2",
       type: "Google Sheets",
       icon: "📊",
-      url: "https://docs.google.com/spreadsheets/d/e/2PACX-1vT/pubhtml?widget=true&headers=false",
-      lastUpdated: "5 hours ago",
+      url: "https://docs.google.com/spreadsheets/d/13MbvUUZHi2VFmV7yDP-0HwWN1kV0AzmS4zwKIy5vQic/edit?usp=sharing",
+      lastUpdated: "Recently",
       color: "#16a34a"
     }
   ];
