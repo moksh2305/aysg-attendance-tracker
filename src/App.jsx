@@ -967,7 +967,7 @@ const IconAIAssistant = ({ color = "currentColor", size = 20 }) => (<svg xmlns="
 const IconReports = ({ color = "currentColor", size = 20 }) => (<svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>);
 const IconSettings = ({ color = "currentColor", size = 20 }) => (<svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>);
 
-const VIEWS = ["Dashboard", "Members", "New Joinees", "Events", "Team Meetings", "Attendance", "Analytics", "AI Assistant", "Reports"];
+const VIEWS = ["Dashboard", "Members", "New Joinees", "Events", "Team Meetings", "Documents", "Attendance", "Analytics", "AI Assistant", "Reports", "Settings"];
 const VIEW_ICONS = { 
   Dashboard: <IconDashboard color="#a78bfa" />, 
   Members: <IconMembers color="#60a5fa" />, 
@@ -975,6 +975,7 @@ const VIEW_ICONS = {
   Roles: <IconSettings color="#fcd34d" />, 
   Events: <IconEvents color="#4ade80" />, 
   "Team Meetings": <IconMembers color="#fb7185" />, 
+  Documents: <span style={{fontSize: 20, color: "#3b82f6", display: 'flex', alignItems: 'center', justifyContent: 'center'}}>📄</span>,
   Attendance: <IconAttendance color="#f59e0b" />, 
   Analytics: <IconAnalytics color="#818cf8" />,
   "AI Assistant": <IconAIAssistant color="#e879f9" />,
@@ -1299,6 +1300,137 @@ function GalaxyVisualizer({ members, getMemberStats }) {
   );
 }
 
+function DocumentsDashboard({ isAdmin }) {
+  const [activeDocument, setActiveDocument] = React.useState(null);
+
+  const placeholderDocuments = [
+    {
+      id: "doc1",
+      title: "Quarterly Strategy",
+      type: "Google Docs",
+      icon: "📄",
+      url: "https://docs.google.com/document/d/e/2PACX-1vR6zZ2g4Y_n_Y_W4lR9aE_m9h/pub?embedded=true",
+      lastUpdated: "2 days ago",
+      color: "#2563eb"
+    },
+    {
+      id: "doc2",
+      title: "Financial Projections",
+      type: "Google Sheets",
+      icon: "📊",
+      url: "https://docs.google.com/spreadsheets/d/e/2PACX-1vT/pubhtml?widget=true&headers=false",
+      lastUpdated: "5 hours ago",
+      color: "#16a34a"
+    }
+  ];
+
+  if (!isAdmin) {
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', color: '#94a3b8' }}>
+        <div style={{ fontSize: 48, marginBottom: 16 }}>🔒</div>
+        <h2 style={{ color: '#e2e8f0' }}>Access Denied</h2>
+        <p>You must be an admin to view documents.</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="documents-dashboard" style={{ display: 'flex', flexDirection: 'column', height: '100%', overflowY: 'auto', gap: 24, paddingRight: 10 }}>
+      <style>{`
+        .documents-dashboard, .documents-dashboard * {
+          box-sizing: border-box;
+        }
+      `}</style>
+
+      {activeDocument ? (
+        <div style={{ display: 'flex', flexDirection: 'column', height: '100%', gap: 16 }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(255,255,255,0.02)', padding: '16px 24px', borderRadius: 16, border: '1px solid rgba(255,255,255,0.05)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+              <button 
+                onClick={() => setActiveDocument(null)}
+                style={{ background: 'rgba(255,255,255,0.05)', border: 'none', color: '#e2e8f0', width: 40, height: 40, borderRadius: '50%', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18 }}
+              >
+                ←
+              </button>
+              <div>
+                <h3 style={{ margin: 0, fontSize: 18, fontWeight: 600 }}>{activeDocument.title}</h3>
+                <span style={{ fontSize: 12, color: '#94a3b8' }}>{activeDocument.type}</span>
+              </div>
+            </div>
+            <a href={activeDocument.url.replace('?embedded=true', '').replace('?widget=true&headers=false', '')} target="_blank" rel="noopener noreferrer" style={{ padding: '8px 16px', background: 'rgba(139, 92, 246, 0.1)', color: '#8b5cf6', borderRadius: 8, textDecoration: 'none', fontSize: 14, fontWeight: 500 }}>
+              Open in new tab ↗
+            </a>
+          </div>
+          
+          <div style={{ flex: 1, background: '#fff', borderRadius: 16, overflow: 'hidden', border: '1px solid rgba(255,255,255,0.1)' }}>
+            <iframe 
+              src={activeDocument.url} 
+              width="100%" 
+              height="100%" 
+              style={{ border: 'none' }}
+              title={activeDocument.title}
+            ></iframe>
+          </div>
+        </div>
+      ) : (
+        <>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(255,255,255,0.02)', borderRadius: 24, padding: 32, border: '1px solid rgba(255,255,255,0.05)', position: 'relative', overflow: 'hidden' }}>
+            <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: 4, background: 'linear-gradient(90deg, #3b82f6, #8b5cf6)' }}></div>
+            <div>
+              <h2 style={{ margin: '0 0 8px 0', fontSize: 28, fontWeight: 700 }}>Admin Documents</h2>
+              <p style={{ margin: 0, color: '#94a3b8', fontSize: 14 }}>Securely view and manage internal spreadsheets and documents.</p>
+            </div>
+            <div style={{ fontSize: 48, opacity: 0.5 }}>📁</div>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 24 }}>
+            {placeholderDocuments.map(doc => (
+              <div 
+                key={doc.id}
+                onClick={() => setActiveDocument(doc)}
+                style={{ 
+                  background: 'rgba(255,255,255,0.03)', 
+                  borderRadius: 20, 
+                  padding: 24, 
+                  border: '1px solid rgba(255,255,255,0.05)',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: 16
+                }}
+                onMouseEnter={e => {
+                  e.currentTarget.style.background = 'rgba(255,255,255,0.05)';
+                  e.currentTarget.style.transform = 'translateY(-2px)';
+                }}
+                onMouseLeave={e => {
+                  e.currentTarget.style.background = 'rgba(255,255,255,0.03)';
+                  e.currentTarget.style.transform = 'translateY(0)';
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+                  <div style={{ width: 48, height: 48, borderRadius: 12, background: `${doc.color}15`, color: doc.color, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 24 }}>
+                    {doc.icon}
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontWeight: 600, fontSize: 16, marginBottom: 4 }}>{doc.title}</div>
+                    <div style={{ fontSize: 12, color: '#64748b' }}>{doc.type}</div>
+                  </div>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: 16, borderTop: '1px solid rgba(255,255,255,0.05)' }}>
+                  <span style={{ fontSize: 12, color: '#64748b' }}>Updated {doc.lastUpdated}</span>
+                  <span style={{ color: doc.color, fontSize: 14, fontWeight: 500 }}>Open →</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
+
 export default function App() {
   const [view, setView] = useState("Dashboard");
   const [attendanceEventId, setAttendanceEventId] = useState("");
@@ -1556,6 +1688,7 @@ export default function App() {
                     {view === "Analytics" && <Analytics members={members} newJoinees={newJoinees} events={events} getMemberStats={getMemberStats} attendance={attendance} newJoineeAttendance={newJoineeAttendance} isAdmin={isAdmin} />}
                     {view === "AI Assistant" && <AIAssistantView members={members} newJoinees={newJoinees} events={events} attendance={attendance} newJoineeAttendance={newJoineeAttendance} getMemberStats={getMemberStats} getEventStats={getEventStats} setView={setView} showToast={showToast} isAdmin={isAdmin} />}
                     {view === "Reports" && <Reports members={members} newJoinees={newJoinees} events={events} attendance={attendance} newJoineeAttendance={newJoineeAttendance} getEventStats={getEventStats} showToast={showToast} isAdmin={isAdmin} />}
+                    {view === "Documents" && <DocumentsDashboard isAdmin={isAdmin} />}
                   </motion.div>
                 </AnimatePresence>
               </div>
@@ -1636,7 +1769,7 @@ function Sidebar({ view, setView, members, newJoinees, events, isAdmin, collapse
       </div>
       <div className="nav scroll-area">
         <div className="nav-section">Navigation</div>
-        {VIEWS.map(v => (
+        {VIEWS.filter(v => v !== "Documents" || isAdmin).map(v => (
           <div key={v} data-tip={v} className={`nav-item${view === v ? " active" : ""}`} onClick={() => setView(v)}>
             <div className="nav-icon">{VIEW_ICONS[v]}</div>
             <span className="nav-label">{v}</span>
