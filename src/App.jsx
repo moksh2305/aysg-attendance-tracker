@@ -3205,8 +3205,8 @@ function TeamMeetingsDashboard({
   // Sparklines SVG component helper
   const Sparkline = ({ color }) => (
     <svg viewBox="0 0 100 20" style={{ width: '100%', height: 30, marginTop: 10, opacity: 0.8 }}>
-      <path d="M0,15 Q5,5 10,15 T20,10 T30,15 T40,5 T50,15 T60,10 T70,18 T80,5 T90,15 T100,10" fill="none" stroke={color} strokeWidth="1.5" />
-      <path d="M0,15 Q5,5 10,15 T20,10 T30,15 T40,5 T50,15 T60,10 T70,18 T80,5 T90,15 T100,10 L100,20 L0,20 Z" fill={`url(#grad-${color.replace('#','')})`} stroke="none" />
+      <path d="M0,15 C5,15 5,10 10,10 C15,10 15,14 20,14 C25,14 25,8 30,8 C35,8 35,12 40,12 C45,12 45,6 50,6 C55,6 55,11 60,11 C65,11 65,5 70,5 C75,5 75,9 80,9 C85,9 85,4 90,4 C95,4 95,7 100,7" fill="none" stroke={color} strokeWidth="1.5" />
+      <path d="M0,15 C5,15 5,10 10,10 C15,10 15,14 20,14 C25,14 25,8 30,8 C35,8 35,12 40,12 C45,12 45,6 50,6 C55,6 55,11 60,11 C65,11 65,5 70,5 C75,5 75,9 80,9 C85,9 85,4 90,4 C95,4 95,7 100,7 L100,20 L0,20 Z" fill={`url(#grad-${color.replace('#','')})`} stroke="none" />
       <defs>
         <linearGradient id={`grad-${color.replace('#','')}`} x1="0" y1="0" x2="0" y2="1">
           <stop offset="0%" stopColor={color} stopOpacity="0.2" />
