@@ -3440,6 +3440,15 @@ function TeamMeetingsDashboard({
                       <div style={{ width: 40, height: 40, borderRadius: '50%', background: `conic-gradient(#8b5cf6 ${stats.pct}%, rgba(255,255,255,0.1) 0)`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                         <div style={{ width: 32, height: 32, borderRadius: '50%', background: '#12121a', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, fontWeight: 700 }}>{stats.pct}%</div>
                       </div>
+                      {isAdmin && (
+                        <div
+                          style={{ color: '#ef4444', cursor: 'pointer', padding: '4px', fontSize: 16 }}
+                          onClick={(e) => { e.stopPropagation(); deleteTeamMeeting(m.id); }}
+                          title="Delete Meeting"
+                        >
+                          🗑️
+                        </div>
+                      )}
                     </div>
                   );
                 })}
@@ -3569,6 +3578,15 @@ function TeamMeetingsDashboard({
                     <div style={{ fontSize: 14, fontWeight: 600, color: '#10d47e' }}>{getTeamMeetingStats(m.id).total}</div>
                     <div style={{ fontSize: 10, color: '#64748b' }}>Expected</div>
                   </div>
+                  {isAdmin && (
+                    <div
+                      style={{ color: '#ef4444', cursor: 'pointer', padding: '4px', fontSize: 16 }}
+                      onClick={(e) => { e.stopPropagation(); deleteTeamMeeting(m.id); }}
+                      title="Delete Meeting"
+                    >
+                      🗑️
+                    </div>
+                  )}
                 </div>
               ))}
               {upcomingMeetings.length === 0 && <div style={{ color: '#64748b', fontSize: 14, textAlign: 'center' }}>No upcoming meetings</div>}
