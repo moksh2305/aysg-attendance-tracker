@@ -1306,7 +1306,7 @@ function DocumentsDashboard({ isAdmin }) {
   const placeholderDocuments = [
     {
       id: "doc1",
-      title: "Google Sheet 1",
+      title: "Gurupurnima 2026 Members Seva",
       type: "Google Sheets",
       icon: "📊",
       url: "https://docs.google.com/spreadsheets/d/17fIFZ4isjX0OdN4ZvyRXPTUaEqYIb7SqfNIleW1BBdU/edit?usp=sharing",
@@ -1315,7 +1315,7 @@ function DocumentsDashboard({ isAdmin }) {
     },
     {
       id: "doc2",
-      title: "Google Sheet 2",
+      title: "AYSG GGN Teams",
       type: "Google Sheets",
       icon: "📊",
       url: "https://docs.google.com/spreadsheets/d/13MbvUUZHi2VFmV7yDP-0HwWN1kV0AzmS4zwKIy5vQic/edit?usp=sharing",
@@ -1343,7 +1343,7 @@ function DocumentsDashboard({ isAdmin }) {
       `}</style>
 
       {activeDocument ? (
-        <div style={{ display: 'flex', flexDirection: 'column', height: '100%', gap: 16 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', height: '100%', minHeight: 'calc(100vh - 120px)', gap: 16 }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(255,255,255,0.02)', padding: '16px 24px', borderRadius: 16, border: '1px solid rgba(255,255,255,0.05)' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
               <button 
