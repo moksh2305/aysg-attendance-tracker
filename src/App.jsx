@@ -136,6 +136,7 @@ const PERSISTED_DATA_KEYS = Object.freeze({
   teams: "aysg_teams",
   actionItems: "aysg_action_items",
   meetingTemplates: "aysg_meeting_templates",
+  documents: "aysg_documents",
 });
 
 const MEMBER_NAMES = [
@@ -319,6 +320,27 @@ const DEMO_MEMBER_NAMES = [
   "Anita Gupta",
   "Rohit Verma",
   "Pooja Thakur",
+];
+
+const INITIAL_DOCUMENTS = [
+  {
+    id: "doc1",
+    title: "Gurupurnima 2026 Members Seva",
+    type: "Google Sheets",
+    icon: "📊",
+    url: "https://docs.google.com/spreadsheets/d/17fIFZ4isjX0OdN4ZvyRXPTUaEqYIb7SqfNIleW1BBdU/edit?usp=sharing",
+    lastUpdated: "Recently",
+    color: "#16a34a"
+  },
+  {
+    id: "doc2",
+    title: "AYSG GGN Teams",
+    type: "Google Sheets",
+    icon: "📊",
+    url: "https://docs.google.com/spreadsheets/d/13MbvUUZHi2VFmV7yDP-0HwWN1kV0AzmS4zwKIy5vQic/edit?usp=sharing",
+    lastUpdated: "Recently",
+    color: "#16a34a"
+  }
 ];
 
 const INITIAL_EVENTS = [
@@ -1300,29 +1322,23 @@ function GalaxyVisualizer({ members, getMemberStats }) {
   );
 }
 
-function DocumentsDashboard({ isAdmin }) {
+function DocumentsDashboard({ isAdmin, documents, setDocuments }) {
   const [activeDocument, setActiveDocument] = React.useState(null);
+  const [showAddForm, setShowAddForm] = React.useState(false);
+  const [newDoc, setNewDoc] = React.useState({ title: '', url: '', type: 'Google Sheets' });
 
-  const placeholderDocuments = [
-    {
-      id: "doc1",
-      title: "Gurupurnima 2026 Members Seva",
-      type: "Google Sheets",
-      icon: "📊",
-      url: "https://docs.google.com/spreadsheets/d/17fIFZ4isjX0OdN4ZvyRXPTUaEqYIb7SqfNIleW1BBdU/edit?usp=sharing",
-      lastUpdated: "Recently",
-      color: "#16a34a"
-    },
-    {
-      id: "doc2",
-      title: "AYSG GGN Teams",
-      type: "Google Sheets",
-      icon: "📊",
-      url: "https://docs.google.com/spreadsheets/d/13MbvUUZHi2VFmV7yDP-0HwWN1kV0AzmS4zwKIy5vQic/edit?usp=sharing",
-      lastUpdated: "Recently",
-      color: "#16a34a"
-    }
-  ];
+  const handleAdd = () => {
+    if (!newDoc.title || !newDoc.url) return;
+    setDocuments([...(documents || []), { 
+      id: "doc_" + Date.now(), 
+      ...newDoc, 
+      icon: newDoc.type === 'Google Sheets' ? '📊' : newDoc.type === 'Google Docs' ? '📄' : '🔗',
+      color: newDoc.type === 'Google Sheets' ? '#16a34a' : newDoc.type === 'Google Docs' ? '#2563eb' : '#8b5cf6',
+      lastUpdated: 'Just now'
+    }]);
+    setShowAddForm(false);
+    setNewDoc({ title: '', url: '', type: 'Google Sheets' });
+  };
 
   if (!isAdmin) {
     return (
@@ -1380,11 +1396,39 @@ function DocumentsDashboard({ isAdmin }) {
               <h2 style={{ margin: '0 0 8px 0', fontSize: 28, fontWeight: 700 }}>Admin Documents</h2>
               <p style={{ margin: 0, color: '#94a3b8', fontSize: 14 }}>Securely view and manage internal spreadsheets and documents.</p>
             </div>
-            <div style={{ fontSize: 48, opacity: 0.5 }}>📁</div>
+            <button onClick={() => setShowAddForm(true)} className="btn btn-primary" style={{ position: 'relative', zIndex: 1 }}>+ Add Document</button>
           </div>
 
+          {showAddForm && (
+            <div className="modal-bg" onClick={() => setShowAddForm(false)}>
+              <div className="modal" onClick={e => e.stopPropagation()}>
+                <h2>Add Document</h2>
+                <div className="field">
+                  <label>Title</label>
+                  <input className="input" placeholder="e.g. Master Tracker" value={newDoc.title} onChange={e => setNewDoc({...newDoc, title: e.target.value})} />
+                </div>
+                <div className="field">
+                  <label>Type</label>
+                  <select className="input" value={newDoc.type} onChange={e => setNewDoc({...newDoc, type: e.target.value})}>
+                    <option>Google Sheets</option>
+                    <option>Google Docs</option>
+                    <option>Other Link</option>
+                  </select>
+                </div>
+                <div className="field">
+                  <label>URL (Share Link)</label>
+                  <input className="input" placeholder="https://docs.google.com/..." value={newDoc.url} onChange={e => setNewDoc({...newDoc, url: e.target.value})} />
+                </div>
+                <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end', marginTop: 24 }}>
+                  <button className="btn" onClick={() => setShowAddForm(false)}>Cancel</button>
+                  <button className="btn btn-primary" onClick={handleAdd}>Add</button>
+                </div>
+              </div>
+            </div>
+          )}
+
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 24 }}>
-            {placeholderDocuments.map(doc => (
+            {(documents || []).map(doc => (
               <div 
                 key={doc.id}
                 onClick={() => setActiveDocument(doc)}
@@ -1419,7 +1463,16 @@ function DocumentsDashboard({ isAdmin }) {
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: 16, borderTop: '1px solid rgba(255,255,255,0.05)' }}>
                   <span style={{ fontSize: 12, color: '#64748b' }}>Updated {doc.lastUpdated}</span>
-                  <span style={{ color: doc.color, fontSize: 14, fontWeight: 500 }}>Open →</span>
+                  <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
+                    <span 
+                      style={{ color: '#ef4444', fontSize: 14, cursor: 'pointer' }}
+                      onClick={(e) => { e.stopPropagation(); setDocuments(documents.filter(d => d.id !== doc.id)); }}
+                      title="Delete Document"
+                    >
+                      🗑️
+                    </span>
+                    <span style={{ color: doc.color, fontSize: 14, fontWeight: 500 }}>Open →</span>
+                  </div>
                 </div>
               </div>
             ))}
@@ -1489,6 +1542,7 @@ export default function App() {
   const [teams, setTeams] = useSyncedStorage(PERSISTED_DATA_KEYS.teams, INITIAL_TEAMS);
   const [actionItems, setActionItems] = useSyncedStorage(PERSISTED_DATA_KEYS.actionItems, []);
   const [meetingTemplates, setMeetingTemplates] = useSyncedStorage(PERSISTED_DATA_KEYS.meetingTemplates, []);
+  const [documents, setDocuments] = useSyncedStorage(PERSISTED_DATA_KEYS.documents, INITIAL_DOCUMENTS);
   const [adminUser, setAdminUser] = useState(null);
   const [authReady, setAuthReady] = useState(false);
   const [adminErr, setAdminErr] = useState("");
@@ -1688,7 +1742,7 @@ export default function App() {
                     {view === "Analytics" && <Analytics members={members} newJoinees={newJoinees} events={events} getMemberStats={getMemberStats} attendance={attendance} newJoineeAttendance={newJoineeAttendance} isAdmin={isAdmin} />}
                     {view === "AI Assistant" && <AIAssistantView members={members} newJoinees={newJoinees} events={events} attendance={attendance} newJoineeAttendance={newJoineeAttendance} getMemberStats={getMemberStats} getEventStats={getEventStats} setView={setView} showToast={showToast} isAdmin={isAdmin} />}
                     {view === "Reports" && <Reports members={members} newJoinees={newJoinees} events={events} attendance={attendance} newJoineeAttendance={newJoineeAttendance} getEventStats={getEventStats} showToast={showToast} isAdmin={isAdmin} />}
-                    {view === "Documents" && <DocumentsDashboard isAdmin={isAdmin} />}
+                    {view === "Documents" && <DocumentsDashboard isAdmin={isAdmin} documents={documents} setDocuments={setDocuments} />}
                   </motion.div>
                 </AnimatePresence>
               </div>
