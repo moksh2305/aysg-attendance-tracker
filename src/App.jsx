@@ -126,6 +126,134 @@ const DATA_SCHEMA_VERSION = 1;
 const PERSISTED_DATA_KEYS = Object.freeze({
   members: "aysg_members",
   newJoinees: "aysg_new_joinees",
+import React, { useState, useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
+import { onAuthStateChanged, signInWithPopup, signOut } from "firebase/auth";
+import { doc, onSnapshot, serverTimestamp, setDoc, collection, addDoc, query, where, deleteDoc } from "firebase/firestore";
+import { QRCodeCanvas } from "qrcode.react";
+import readXlsxFile from "read-excel-file/browser";
+import { LineChart, Line, XAxis, YAxis, Tooltip as RechartsTooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from "recharts";
+import { Canvas, useFrame } from "@react-three/fiber";
+import { OrbitControls, Stars, Html } from "@react-three/drei";
+import { motion, AnimatePresence, animate } from "framer-motion";
+import {
+  Users, CalendarDays, ClipboardCheck, LayoutDashboard, Settings,
+  LogOut, Plus, Edit2, Trash2, Search, Filter, Download,
+  MapPin, Clock, Phone, AlertCircle, CheckCircle2, ChevronDown, Activity, UserPlus
+} from "lucide-react";
+import { auth, db, googleProvider } from "./firebase";
+import { GoogleGenAI } from "@google/genai";
+
+const AnimatedModal = ({ isOpen, onClose, children, style, className = "modal", maxWidth }) => (
+  <AnimatePresence>
+    {isOpen && (
+      <motion.div
+        initial={{ opacity: 0, backdropFilter: "blur(0px)" }}
+        animate={{ opacity: 1, backdropFilter: "blur(4px)" }}
+        exit={{ opacity: 0, backdropFilter: "blur(0px)" }}
+        transition={{ duration: 0.2 }}
+        className="modal-bg"
+        onClick={e => e.target === e.currentTarget && onClose && onClose()}
+      >
+        <motion.div
+          initial={{ scale: 0.95, opacity: 0, y: 10 }}
+          animate={{ scale: 1, opacity: 1, y: 0 }}
+          exit={{ scale: 0.95, opacity: 0, y: 10 }}
+          transition={{ type: "spring", damping: 25, stiffness: 300 }}
+          className={className}
+          style={{ ...style, maxWidth }}
+          onClick={e => e.stopPropagation()}
+        >
+          {children}
+        </motion.div>
+      </motion.div>
+    )}
+  </AnimatePresence>
+);
+
+const AnimatedNumber = ({ value }) => {
+  const [displayValue, setDisplayValue] = useState(0);
+  useEffect(() => {
+    const controls = animate(displayValue, value, {
+      duration: 1.2,
+      ease: [0.25, 1, 0.5, 1], // easeOutQuart
+      onUpdate(v) {
+        setDisplayValue(Math.round(v));
+      }
+    });
+    return () => controls.stop();
+  }, [value]);
+  return <>{displayValue}</>;
+};
+
+const SpotlightCard = ({ children, className = "", ...props }) => {
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+  const [isHovering, setIsHovering] = useState(false);
+  const handleMouseMove = (e) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    setMousePosition({ x: e.clientX - rect.left, y: e.clientY - rect.top });
+  };
+  return (
+    <div
+      onMouseMove={handleMouseMove}
+      onMouseEnter={() => setIsHovering(true)}
+      onMouseLeave={() => setIsHovering(false)}
+      className={`spotlight-card ${className}`}
+      {...props}
+    >
+      <motion.div
+        className="spotlight"
+        animate={{ opacity: isHovering ? 1 : 0 }}
+        transition={{ duration: 0.3 }}
+        style={{
+          background: `radial-gradient(400px circle at ${mousePosition.x}px ${mousePosition.y}px, rgba(124, 106, 248, 0.15), transparent 40%)`
+        }}
+      />
+      {children}
+    </div>
+  );
+};
+
+const ParticleBurst = ({ trigger, x, y, color = "#10d47e" }) => {
+  if (!trigger) return null;
+  const particles = Array.from({ length: 20 });
+  return createPortal(
+    <div style={{ position: "fixed", top: y, left: x, pointerEvents: "none", zIndex: 99999 }}>
+      {particles.map((_, i) => {
+        const angle = (i / particles.length) * Math.PI * 2;
+        const velocity = 60 + Math.random() * 120;
+        return (
+          <motion.div
+            key={i}
+            initial={{ x: 0, y: 0, scale: 0, opacity: 1 }}
+            animate={{
+              x: Math.cos(angle) * velocity,
+              y: Math.sin(angle) * velocity + 50, // slight gravity
+              scale: [0, 1.5, 0],
+              opacity: [1, 1, 0]
+            }}
+            transition={{ duration: 0.6 + Math.random() * 0.4, ease: "easeOut" }}
+            style={{
+              position: "absolute",
+              width: 6 + Math.random() * 6,
+              height: 6 + Math.random() * 6,
+              borderRadius: Math.random() > 0.5 ? "50%" : "2px",
+              background: color
+            }}
+          />
+        );
+      })}
+    </div>,
+    document.body
+  );
+};
+
+const ALLOWED_ADMIN_NAMES = new Set(["moksh", "moksh shah", "dheer sheth"]);
+const FIRESTORE_STATE_COLLECTION = "appState";
+const DATA_SCHEMA_VERSION = 1;
+const PERSISTED_DATA_KEYS = Object.freeze({
+  members: "aysg_members",
+  newJoinees: "aysg_new_joinees",
   events: "aysg_events",
   attendance: "aysg_attendance",
   newJoineeAttendance: "aysg_new_joinee_attendance",
@@ -136,6 +264,7 @@ const PERSISTED_DATA_KEYS = Object.freeze({
   teams: "aysg_teams",
   actionItems: "aysg_action_items",
   meetingTemplates: "aysg_meeting_templates",
+  documents: "aysg_documents",
 });
 
 const MEMBER_NAMES = [
@@ -319,6 +448,27 @@ const DEMO_MEMBER_NAMES = [
   "Anita Gupta",
   "Rohit Verma",
   "Pooja Thakur",
+];
+
+const INITIAL_DOCUMENTS = [
+  {
+    id: "doc1",
+    title: "Gurupurnima 2026 Members Seva",
+    type: "Google Sheets",
+    icon: "📊",
+    url: "https://docs.google.com/spreadsheets/d/17fIFZ4isjX0OdN4ZvyRXPTUaEqYIb7SqfNIleW1BBdU/edit?usp=sharing",
+    lastUpdated: "Recently",
+    color: "#16a34a"
+  },
+  {
+    id: "doc2",
+    title: "AYSG GGN Teams",
+    type: "Google Sheets",
+    icon: "📊",
+    url: "https://docs.google.com/spreadsheets/d/13MbvUUZHi2VFmV7yDP-0HwWN1kV0AzmS4zwKIy5vQic/edit?usp=sharing",
+    lastUpdated: "Recently",
+    color: "#16a34a"
+  }
 ];
 
 const INITIAL_EVENTS = [
@@ -1300,29 +1450,23 @@ function GalaxyVisualizer({ members, getMemberStats }) {
   );
 }
 
-function DocumentsDashboard({ isAdmin }) {
+function DocumentsDashboard({ isAdmin, documents, setDocuments }) {
   const [activeDocument, setActiveDocument] = React.useState(null);
+  const [showAddForm, setShowAddForm] = React.useState(false);
+  const [newDoc, setNewDoc] = React.useState({ title: '', url: '', type: 'Google Sheets' });
 
-  const placeholderDocuments = [
-    {
-      id: "doc1",
-      title: "Gurupurnima 2026 Members Seva",
-      type: "Google Sheets",
-      icon: "📊",
-      url: "https://docs.google.com/spreadsheets/d/17fIFZ4isjX0OdN4ZvyRXPTUaEqYIb7SqfNIleW1BBdU/edit?usp=sharing",
-      lastUpdated: "Recently",
-      color: "#16a34a"
-    },
-    {
-      id: "doc2",
-      title: "AYSG GGN Teams",
-      type: "Google Sheets",
-      icon: "📊",
-      url: "https://docs.google.com/spreadsheets/d/13MbvUUZHi2VFmV7yDP-0HwWN1kV0AzmS4zwKIy5vQic/edit?usp=sharing",
-      lastUpdated: "Recently",
-      color: "#16a34a"
-    }
-  ];
+  const handleAdd = () => {
+    if (!newDoc.title || !newDoc.url) return;
+    setDocuments([...documents, { 
+      id: "doc_" + Date.now(), 
+      ...newDoc, 
+      icon: newDoc.type === 'Google Sheets' ? '📊' : newDoc.type === 'Google Docs' ? '📄' : '🔗',
+      color: newDoc.type === 'Google Sheets' ? '#16a34a' : newDoc.type === 'Google Docs' ? '#2563eb' : '#8b5cf6',
+      lastUpdated: 'Just now'
+    }]);
+    setShowAddForm(false);
+    setNewDoc({ title: '', url: '', type: 'Google Sheets' });
+  };
 
   if (!isAdmin) {
     return (
@@ -1380,11 +1524,40 @@ function DocumentsDashboard({ isAdmin }) {
               <h2 style={{ margin: '0 0 8px 0', fontSize: 28, fontWeight: 700 }}>Admin Documents</h2>
               <p style={{ margin: 0, color: '#94a3b8', fontSize: 14 }}>Securely view and manage internal spreadsheets and documents.</p>
             </div>
-            <div style={{ fontSize: 48, opacity: 0.5 }}>📁</div>
+            <button onClick={() => setShowAddForm(true)} className="btn btn-primary" style={{ position: 'relative', zIndex: 1 }}>+ Add Document</button>
           </div>
 
+          {showAddForm && (
+            <div className="modal-bg" onClick={() => setShowAddForm(false)}>
+              <div className="modal" onClick={e => e.stopPropagation()}>
+                <h2>Add Document</h2>
+                <div className="field">
+                  <label>Title</label>
+                  <input className="input" placeholder="e.g. Master Tracker" value={newDoc.title} onChange={e => setNewDoc({...newDoc, title: e.target.value})} />
+                </div>
+                <div className="field">
+                  <label>Type</label>
+                  <select className="input" value={newDoc.type} onChange={e => setNewDoc({...newDoc, type: e.target.value})}>
+                    <option>Google Sheets</option>
+                    <option>Google Docs</option>
+                    <option>Other Link</option>
+                  </select>
+                </div>
+                <div className="field">
+                  <label>URL (Share Link)</label>
+                  <input className="input" placeholder="https://docs.google.com/..." value={newDoc.url} onChange={e => setNewDoc({...newDoc, url: e.target.value})} />
+                </div>
+                <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end', marginTop: 24 }}>
+                  <button className="btn" onClick={() => setShowAddForm(false)}>Cancel</button>
+                  <button className="btn btn-primary" onClick={handleAdd}>Add</button>
+                </div>
+              </div>
+            </div>
+          )}
+
+
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 24 }}>
-            {placeholderDocuments.map(doc => (
+            {documents.map(doc => (
               <div 
                 key={doc.id}
                 onClick={() => setActiveDocument(doc)}
@@ -1419,7 +1592,16 @@ function DocumentsDashboard({ isAdmin }) {
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: 16, borderTop: '1px solid rgba(255,255,255,0.05)' }}>
                   <span style={{ fontSize: 12, color: '#64748b' }}>Updated {doc.lastUpdated}</span>
-                  <span style={{ color: doc.color, fontSize: 14, fontWeight: 500 }}>Open →</span>
+                  <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
+                    <span 
+                      style={{ color: '#ef4444', fontSize: 14, cursor: 'pointer' }}
+                      onClick={(e) => { e.stopPropagation(); setDocuments(documents.filter(d => d.id !== doc.id)); }}
+                      title="Delete Document"
+                    >
+                      🗑️
+                    </span>
+                    <span style={{ color: doc.color, fontSize: 14, fontWeight: 500 }}>Open →</span>
+                  </div>
                 </div>
               </div>
             ))}
@@ -1431,69 +1613,6 @@ function DocumentsDashboard({ isAdmin }) {
 }
 
 
-export default function App() {
-  const [view, setView] = useState("Dashboard");
-  const [attendanceEventId, setAttendanceEventId] = useState("");
-  const urlParams = new URLSearchParams(window.location.search);
-  const checkinEventId = urlParams.get("checkin");
-  const [darkMode, setDarkMode] = useState(() => {
-    const saved = localStorage.getItem("aysg_theme");
-    const isDark = saved ? saved === "dark" : true;
-    // Apply immediately to avoid flash of wrong theme
-    if (!isDark) document.documentElement.classList.add("light");
-    else document.documentElement.classList.remove("light");
-    return isDark;
-  });
-  const toggleDark = (e) => {
-    const next = !darkMode;
-    // Get the click coordinates for the circular reveal origin
-    const x = e?.clientX ?? window.innerWidth - 40;
-    const y = e?.clientY ?? window.innerHeight - 40;
-    const endRadius = Math.hypot(Math.max(x, window.innerWidth - x), Math.max(y, window.innerHeight - y));
-
-    // If View Transitions API is available, use circular reveal
-    if (document.startViewTransition) {
-      const transition = document.startViewTransition(() => {
-        localStorage.setItem("aysg_theme", next ? "dark" : "light");
-        setDarkMode(next);
-      });
-      transition.ready.then(() => {
-        document.documentElement.animate(
-          { clipPath: [`circle(0px at ${x}px ${y}px)`, `circle(${endRadius}px at ${x}px ${y}px)`] },
-          { duration: 500, easing: "ease-in-out", pseudoElement: "::view-transition-new(root)" }
-        );
-      });
-    } else {
-      // Fallback: just toggle instantly
-      localStorage.setItem("aysg_theme", next ? "dark" : "light");
-      setDarkMode(next);
-    }
-  };
-  // Apply theme class to <html> so CSS variables cascade to body and all elements
-  useEffect(() => {
-    if (darkMode) {
-      document.documentElement.classList.remove("light");
-    } else {
-      document.documentElement.classList.add("light");
-    }
-  }, [darkMode]);
-  const [members, setMembers] = useSyncedStorage(PERSISTED_DATA_KEYS.members, INITIAL_MEMBERS, migrateMembers);
-  const [newJoinees, setNewJoinees] = useSyncedStorage(PERSISTED_DATA_KEYS.newJoinees, INITIAL_NEW_JOINEES, migrateNewJoinees);
-  const [events, setEvents, eventsReady] = useSyncedStorage(PERSISTED_DATA_KEYS.events, INITIAL_EVENTS);
-  const [attendance, setAttendance] = useSyncedStorage(PERSISTED_DATA_KEYS.attendance, INITIAL_ATTENDANCE, migrateAttendance);
-  const [newJoineeAttendance, setNewJoineeAttendance] = useSyncedStorage(PERSISTED_DATA_KEYS.newJoineeAttendance, INITIAL_ATTENDANCE);
-  const [teamMeetings, setTeamMeetings, teamMeetingsReady] = useSyncedStorage(PERSISTED_DATA_KEYS.teamMeetings, []);
-  const [teamMeetingAttendance, setTeamMeetingAttendance] = useSyncedStorage(PERSISTED_DATA_KEYS.teamMeetingAttendance, {});
-  const [newJoineeTeamMeetingAttendance, setNewJoineeTeamMeetingAttendance] = useSyncedStorage(PERSISTED_DATA_KEYS.newJoineeTeamMeetingAttendance, {});
-  const [teamChats, setTeamChats] = useSyncedStorage(PERSISTED_DATA_KEYS.teamChats, {});
-  const [teams, setTeams] = useSyncedStorage(PERSISTED_DATA_KEYS.teams, INITIAL_TEAMS);
-  const [actionItems, setActionItems] = useSyncedStorage(PERSISTED_DATA_KEYS.actionItems, []);
-  const [meetingTemplates, setMeetingTemplates] = useSyncedStorage(PERSISTED_DATA_KEYS.meetingTemplates, []);
-  const [adminUser, setAdminUser] = useState(null);
-  const [authReady, setAuthReady] = useState(false);
-  const [adminErr, setAdminErr] = useState("");
-  const [toast, setToast] = useState(null);
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const toastTimer = useRef();
   const isAdmin = isAllowedAdminUser(adminUser);
 
@@ -1688,7 +1807,7 @@ export default function App() {
                     {view === "Analytics" && <Analytics members={members} newJoinees={newJoinees} events={events} getMemberStats={getMemberStats} attendance={attendance} newJoineeAttendance={newJoineeAttendance} isAdmin={isAdmin} />}
                     {view === "AI Assistant" && <AIAssistantView members={members} newJoinees={newJoinees} events={events} attendance={attendance} newJoineeAttendance={newJoineeAttendance} getMemberStats={getMemberStats} getEventStats={getEventStats} setView={setView} showToast={showToast} isAdmin={isAdmin} />}
                     {view === "Reports" && <Reports members={members} newJoinees={newJoinees} events={events} attendance={attendance} newJoineeAttendance={newJoineeAttendance} getEventStats={getEventStats} showToast={showToast} isAdmin={isAdmin} />}
-                    {view === "Documents" && <DocumentsDashboard isAdmin={isAdmin} />}
+                    {view === "Documents" && <DocumentsDashboard isAdmin={isAdmin} documents={documents} setDocuments={setDocuments} />}
                   </motion.div>
                 </AnimatePresence>
               </div>
