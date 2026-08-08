@@ -850,10 +850,10 @@ select.input{cursor:pointer}
   .event-actions{width:100%;justify-content:flex-end}
   .member-rank-card{grid-template-columns:auto auto 1fr}
   .member-rank-card .avatar{display:none}
-  .top-search{display:none}
-  h1.page-title{font-size:16px !important}
-  .mode-chip{font-size:10px;padding:4px 6px}
+  .top-search,.mode-chip{display:none !important}
+  h1.page-title{font-size:16px !important; flex-shrink: 1 !important; width: auto !important;}
   .modal-content{padding:20px;max-width:92%;margin:0 auto}
+  .topbar{gap:6px;padding:0 8px}
 }
 
 .earth-bg {
