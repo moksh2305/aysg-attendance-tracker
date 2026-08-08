@@ -604,8 +604,15 @@ html.light{
 }
 html.light body{background:var(--bg);color:var(--text)}
 html.light .sidebar::before{background:radial-gradient(ellipse at 50% 0%,rgba(98,84,232,0.06) 0%,transparent 60%)}
-html.light .attendance-card{box-shadow:0 1px 4px rgba(0,0,0,0.06)}
-html.light .stat-card{box-shadow:0 1px 4px rgba(0,0,0,0.06)}
+html.light .card, html.light .stat-card, html.light .spotlight-card, html.light .attendance-card {
+  background: var(--accent) !important;
+  color: var(--text) !important;
+  border-color: rgba(17,34,80,0.2) !important;
+  box-shadow: 0 4px 12px rgba(17,34,80,0.1) !important;
+}
+html.light .card-label, html.light .stat-label, html.light .card-value, html.light .stat-value, html.light .text-xs.color-muted {
+  color: var(--text) !important;
+}
 .app{display:flex;height:100vh;overflow:hidden;background:var(--bg);color:var(--text);position:relative}
 .app::before, .app::after{content:'';position:absolute;width:40vw;height:40vw;border-radius:50%;filter:blur(100px);z-index:0;pointer-events:none;opacity:0.3}
 .app::before{top:-10%;left:-10%;background:rgba(124,106,248,0.5);animation:float1 20s infinite alternate ease-in-out}
