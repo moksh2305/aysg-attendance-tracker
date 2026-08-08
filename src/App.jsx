@@ -1711,6 +1711,8 @@ export default function App() {
                 onAdminExit={handleAdminLogout}
                 adminUser={adminUser}
                 authReady={authReady}
+                darkMode={darkMode}
+                toggleDark={toggleDark}
               />
               <div className="content scroll-area">
                 <AnimatePresence mode="wait">
@@ -1873,7 +1875,7 @@ function Sidebar({ view, setView, members, newJoinees, events, isAdmin, collapse
   );
 }
 
-function Topbar({ view, setView, members, newJoinees, events, isAdmin, onAdminClick, onAdminExit, adminUser, authReady }) {
+function Topbar({ view, setView, members, newJoinees, events, isAdmin, onAdminClick, onAdminExit, adminUser, authReady, darkMode, toggleDark }) {
   const [query, setQuery] = useState("");
   const [showNotifications, setShowNotifications] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
@@ -1913,6 +1915,9 @@ function Topbar({ view, setView, members, newJoinees, events, isAdmin, onAdminCl
       <button className="btn btn-sm quick-top-action" onClick={() => setView("Attendance")}>A Mark</button>
       <button className="btn btn-sm quick-top-action" onClick={() => setView("Reports")}>R Export</button>
       <span className={`mode-chip ${isAdmin ? "admin" : "view"}`}>{isAdmin ? "◉ Unlocked Admin" : "◎ View Only"}</span>
+      <button className="top-icon-btn" onClick={toggleDark} title="Toggle Light/Dark Mode" style={{ marginLeft: 8 }}>
+        {darkMode ? "☀️" : "🌙"}
+      </button>
       {!isAdmin && <button className="btn btn-sm" onClick={onAdminClick} disabled={!authReady}>{authReady ? "Google Login" : "Checking..."}</button>}
       {isAdmin && <button className="btn btn-sm btn-danger" onClick={onAdminExit}>Lock</button>}
       <div className="flex items-center gap-2 topbar-date" style={{ fontSize: 12, color: "var(--text2)" }}><span className="sync-dot" />Synced now</div>
