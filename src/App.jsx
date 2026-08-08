@@ -1497,47 +1497,10 @@ export default function App() {
   const [attendanceEventId, setAttendanceEventId] = useState("");
   const urlParams = new URLSearchParams(window.location.search);
   const checkinEventId = urlParams.get("checkin");
-  const [darkMode, setDarkMode] = useState(() => {
-    const saved = localStorage.getItem("aysg_theme");
-    const isDark = saved ? saved === "dark" : true;
-    // Apply immediately to avoid flash of wrong theme
-    if (!isDark) document.documentElement.classList.add("light");
-    else document.documentElement.classList.remove("light");
-    return isDark;
-  });
-  const toggleDark = (e) => {
-    const next = !darkMode;
-    // Get the click coordinates for the circular reveal origin
-    const x = e?.clientX ?? window.innerWidth - 40;
-    const y = e?.clientY ?? window.innerHeight - 40;
-    const endRadius = Math.hypot(Math.max(x, window.innerWidth - x), Math.max(y, window.innerHeight - y));
-
-    // If View Transitions API is available, use circular reveal
-    if (document.startViewTransition) {
-      const transition = document.startViewTransition(() => {
-        localStorage.setItem("aysg_theme", next ? "dark" : "light");
-        setDarkMode(next);
-      });
-      transition.ready.then(() => {
-        document.documentElement.animate(
-          { clipPath: [`circle(0px at ${x}px ${y}px)`, `circle(${endRadius}px at ${x}px ${y}px)`] },
-          { duration: 500, easing: "ease-in-out", pseudoElement: "::view-transition-new(root)" }
-        );
-      });
-    } else {
-      // Fallback: just toggle instantly
-      localStorage.setItem("aysg_theme", next ? "dark" : "light");
-      setDarkMode(next);
-    }
-  };
-  // Apply theme class to <html> so CSS variables cascade to body and all elements
   useEffect(() => {
-    if (darkMode) {
-      document.documentElement.classList.remove("light");
-    } else {
-      document.documentElement.classList.add("light");
-    }
-  }, [darkMode]);
+    document.documentElement.classList.remove("light");
+    localStorage.removeItem("aysg_theme");
+  }, []);
   const [members, setMembers] = useSyncedStorage(PERSISTED_DATA_KEYS.members, INITIAL_MEMBERS, migrateMembers);
   const [newJoinees, setNewJoinees] = useSyncedStorage(PERSISTED_DATA_KEYS.newJoinees, INITIAL_NEW_JOINEES, migrateNewJoinees);
   const [events, setEvents, eventsReady] = useSyncedStorage(PERSISTED_DATA_KEYS.events, INITIAL_EVENTS);
@@ -1703,8 +1666,6 @@ export default function App() {
               collapsed={sidebarCollapsed}
               setCollapsed={setSidebarCollapsed}
               onAdminClick={isAdmin ? handleAdminLogout : openAdminLogin}
-              darkMode={darkMode}
-              toggleDark={toggleDark}
             />
             <div className="main">
               <Topbar
@@ -1718,8 +1679,6 @@ export default function App() {
                 onAdminExit={handleAdminLogout}
                 adminUser={adminUser}
                 authReady={authReady}
-                darkMode={darkMode}
-                toggleDark={toggleDark}
               />
               <div className="content scroll-area">
                 <AnimatePresence mode="wait">
@@ -1815,7 +1774,7 @@ export default function App() {
   );
 }
 
-function Sidebar({ view, setView, members, newJoinees, events, isAdmin, collapsed, setCollapsed, onAdminClick, darkMode, toggleDark }) {
+function Sidebar({ view, setView, members, newJoinees, events, isAdmin, collapsed, setCollapsed, onAdminClick }) {
   const activeCount = members.filter(m => m.active).length;
   return (
     <div className={`sidebar ${collapsed ? "collapsed" : ""} ${isAdmin ? "admin" : "view"}`}>
@@ -1882,7 +1841,7 @@ function Sidebar({ view, setView, members, newJoinees, events, isAdmin, collapse
   );
 }
 
-function Topbar({ view, setView, members, newJoinees, events, isAdmin, onAdminClick, onAdminExit, adminUser, authReady, darkMode, toggleDark }) {
+function Topbar({ view, setView, members, newJoinees, events, isAdmin, onAdminClick, onAdminExit, adminUser, authReady }) {
   const [query, setQuery] = useState("");
   const [showNotifications, setShowNotifications] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
@@ -1922,9 +1881,6 @@ function Topbar({ view, setView, members, newJoinees, events, isAdmin, onAdminCl
       <button className="btn btn-sm quick-top-action" onClick={() => setView("Attendance")}>A Mark</button>
       <button className="btn btn-sm quick-top-action" onClick={() => setView("Reports")}>R Export</button>
       <span className={`mode-chip ${isAdmin ? "admin" : "view"}`}>{isAdmin ? "◉ Unlocked Admin" : "◎ View Only"}</span>
-      <button className="top-icon-btn" onClick={toggleDark} title="Toggle Light/Dark Mode" style={{ marginLeft: 8 }}>
-        {darkMode ? "☀️" : "🌙"}
-      </button>
       {!isAdmin && <button className="btn btn-sm" onClick={onAdminClick} disabled={!authReady}>{authReady ? "Google Login" : "Checking..."}</button>}
       {isAdmin && <button className="btn btn-sm btn-danger" onClick={onAdminExit}>Lock</button>}
       <div className="flex items-center gap-2 topbar-date" style={{ fontSize: 12, color: "var(--text2)" }}><span className="sync-dot" />Synced now</div>
