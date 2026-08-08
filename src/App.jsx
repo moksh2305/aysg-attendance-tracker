@@ -1861,7 +1861,9 @@ function Topbar({ view, setView, members, newJoinees, events, isAdmin, onAdminCl
   ];
   return (
     <div className={`topbar ${isAdmin ? "admin" : "view"}`}>
-      <h1 className="page-title" style={{ fontSize: 17 }}>{view}</h1>
+      <h1 className="page-title" style={{ fontSize: 17, width: 170, flexShrink: 0, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+        {view === "TVMode" ? "Live TV" : view}
+      </h1>
       <div className="top-search">
         <input className="input" value={query} onChange={e => setQuery(e.target.value)} placeholder="Search members, events, pages..." />
         {results.length > 0 && (
@@ -1878,6 +1880,7 @@ function Topbar({ view, setView, members, newJoinees, events, isAdmin, onAdminCl
           </div>
         )}
       </div>
+      <div style={{ flex: 1 }} />
       <span className={`mode-chip ${isAdmin ? "admin" : "view"}`}>{isAdmin ? "◉ Unlocked Admin" : "◎ View Only"}</span>
       {!isAdmin && <button className="btn btn-sm" onClick={onAdminClick} disabled={!authReady}>{authReady ? "Google Login" : "Checking..."}</button>}
       {isAdmin && <button className="btn btn-sm btn-danger" onClick={onAdminExit}>Lock</button>}
