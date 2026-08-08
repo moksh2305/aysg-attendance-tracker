@@ -662,8 +662,8 @@ html.light .topbar{border-bottom:1px solid rgba(0,0,0,0.05)}
 .sidebar.collapsed .badge{position:absolute;right:7px;top:5px;font-size:9px;padding:1px 5px}
 .sidebar.collapsed .nav-item[data-tip]:hover::after{content:attr(data-tip);position:absolute;left:64px;top:50%;transform:translateY(-50%);white-space:nowrap;background:var(--bg2);border:1px solid var(--border2);color:var(--text);padding:7px 9px;border-radius:8px;font-size:12px;box-shadow:0 8px 28px rgba(0,0,0,0.35);z-index:50}
 .collapse-btn{position:absolute;right:-13px;top:76px;width:26px;height:26px;border-radius:50%;border:1px solid var(--border2);background:var(--bg3);color:var(--text2);display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:30}
-.top-search{position:relative;min-width:260px;max-width:420px;flex:1}
-.top-search input{height:38px}
+.top-search{position:relative;min-width:320px;max-width:640px;flex:1}
+.top-search input{height:46px;font-size:15px;padding-left:18px;border-radius:12px}
 .search-results{position:absolute;top:44px;left:0;right:0;background:var(--bg2);border:1px solid var(--border2);border-radius:12px;padding:8px;box-shadow:0 12px 38px rgba(0,0,0,0.42);z-index:40}
 .search-result{display:flex;align-items:center;gap:10px;padding:8px;border-radius:8px;cursor:pointer;color:var(--text2);font-size:12.5px}
 .search-result:hover{background:var(--cardh);color:var(--text)}
