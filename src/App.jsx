@@ -1692,7 +1692,7 @@ export default function App() {
                   >
                     {view === "Dashboard" && <Dashboard members={members} events={events} attendance={attendance} getEventStats={getEventStats} getMemberStats={getMemberStats} setView={setView} setAttendanceEventId={setAttendanceEventId} isAdmin={isAdmin} getMemberBadges={getMemberBadges} />}
                     {view === "Members" && <Members members={members} setMembers={setMembers} newJoinees={newJoinees} setNewJoinees={setNewJoinees} events={events} attendance={attendance} getMemberStats={getMemberStats} showToast={showToast} isAdmin={isAdmin} setView={setView} getMemberBadges={getMemberBadges} teams={teams} />}
-                    {view === "New Joinees" && <NewJoinees newJoinees={newJoinees} setNewJoinees={setNewJoinees} showToast={showToast} isAdmin={isAdmin} />}
+                    {view === "New Joinees" && <NewJoinees members={members} setMembers={setMembers} newJoinees={newJoinees} setNewJoinees={setNewJoinees} attendance={attendance} setAttendance={setAttendance} newJoineeAttendance={newJoineeAttendance} setNewJoineeAttendance={setNewJoineeAttendance} showToast={showToast} isAdmin={isAdmin} />}
                     {view === "Roles" && <RolesDashboard members={members} setMembers={setMembers} isAdmin={isAdmin} attendance={attendance} events={events} teamChats={teamChats} setTeamChats={setTeamChats} teams={teams} setTeams={setTeams} />}
                     {view === "Events" && <Events events={events} setEvents={setEvents} deleteEvent={deleteEvent} getEventStats={getEventStats} showToast={showToast} isAdmin={isAdmin} />}
                     {view === "Team Meetings" && (
@@ -2982,12 +2982,47 @@ function RolesDashboard({ members, setMembers, isAdmin, attendance, events, team
   );
 }
 
-function NewJoinees({ newJoinees, setNewJoinees, showToast, isAdmin }) {
+function NewJoinees({ members, setMembers, newJoinees, setNewJoinees, attendance, setAttendance, newJoineeAttendance, setNewJoineeAttendance, showToast, isAdmin }) {
   const [search, setSearch] = useState("");
   const [editJoinee, setEditJoinee] = useState(null);
   const [deleteConfirmId, setDeleteConfirmId] = useState(null);
+  const [shiftConfirmId, setShiftConfirmId] = useState(null);
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState({ name: "", joinDate: "", notes: "", active: true });
+
+  const shiftToMain = () => {
+    if (!shiftConfirmId) return;
+    const joinee = newJoinees.find(j => j.id === shiftConfirmId);
+    if (!joinee) {
+      setShiftConfirmId(null);
+      return;
+    }
+
+    const isDuplicate = members.some(m => normalizeName(m.name) === normalizeName(joinee.name));
+    if (isDuplicate) {
+      showToast("A member with this name already exists in main members", "error");
+      setShiftConfirmId(null);
+      return;
+    }
+
+    const newId = genId("M");
+    const newMember = { ...joinee, id: newId, isGuest: false };
+    
+    const newAttendance = { ...attendance };
+    Object.keys(newJoineeAttendance).forEach(eventId => {
+      if (newJoineeAttendance[eventId]?.[joinee.id]) {
+        if (!newAttendance[eventId]) newAttendance[eventId] = {};
+        newAttendance[eventId][newId] = newJoineeAttendance[eventId][joinee.id];
+      }
+    });
+
+    setMembers([...members, newMember]);
+    setNewJoinees(newJoinees.filter(j => j.id !== shiftConfirmId));
+    setAttendance(newAttendance);
+    
+    showToast(`${joinee.name} shifted to main members!`, "success");
+    setShiftConfirmId(null);
+  };
 
   const filtered = newJoinees.filter(j =>
     !search ||
@@ -3058,6 +3093,7 @@ function NewJoinees({ newJoinees, setNewJoinees, showToast, isAdmin }) {
                   <td><span className={`tag ${j.active ? "tag-present" : "tag-absent"}`}>{j.active ? "Active" : "Inactive"}</span></td>                  {isAdmin && (
                     <td>
                       <div className="flex gap-2">
+                        <button className="btn btn-sm btn-primary" onClick={() => setShiftConfirmId(j.id)}>Shift to Main</button>
                         <button className="btn btn-sm" onClick={() => openEdit(j)}>Edit</button>
                         <button className="btn btn-sm btn-danger" onClick={() => setDeleteConfirmId(j.id)}>Delete</button>
                       </div>
@@ -3095,6 +3131,14 @@ function NewJoinees({ newJoinees, setNewJoinees, showToast, isAdmin }) {
         <div className="flex gap-3 mt-4">
           <button className="btn btn-danger flex-1" style={{ justifyContent: "center" }} onClick={() => deleteJoinee(deleteConfirmId)}>Delete</button>
           <button className="btn" onClick={() => setDeleteConfirmId(null)}>Cancel</button>
+        </div>
+      </AnimatedModal>
+      <AnimatedModal isOpen={!!shiftConfirmId} onClose={() => setShiftConfirmId(null)}>
+        <h2>Shift to Main Members</h2>
+        <p>Are you sure you want to shift this person to the main members list? Their attendance history will be migrated and they will be removed from the new joinees list.</p>
+        <div className="flex gap-3 mt-4">
+          <button className="btn btn-primary flex-1" style={{ justifyContent: "center" }} onClick={shiftToMain}>Confirm Shift</button>
+          <button className="btn" onClick={() => setShiftConfirmId(null)}>Cancel</button>
         </div>
       </AnimatedModal>
     </div>
