@@ -824,9 +824,37 @@ select.input{cursor:pointer}
 .bar-fill{position:absolute;left:0;top:0;bottom:0;border-radius:6px;opacity:0.25;transition:width 0.5s ease}
 .empty-state{text-align:center;padding:60px 20px;color:var(--text2)}
 .empty-icon{font-size:48px;margin-bottom:16px;opacity:0.4}
+.mobile-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:90;backdrop-filter:blur(4px);opacity:0;animation:fadeIn 0.2s forwards}
+.mobile-menu-btn{display:none;font-size:20px;padding:0;width:38px;height:38px;margin-right:8px}
+.table-responsive{width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch;margin-bottom:12px}
+@keyframes fadeIn{to{opacity:1}}
 @media (max-width:1100px){.grid-4,.quick-actions{grid-template-columns:repeat(2,1fr)}.grid-2{grid-template-columns:1fr}.event-actions{opacity:1;transform:none}.top-search{min-width:180px}}
-@media (max-width:820px){.sidebar{width:76px}.sidebar .brand-copy,.sidebar .nav-section,.sidebar .nav-label,.sidebar .sb-mode-copy{display:none}.sidebar .brand{justify-content:center;padding-left:8px;padding-right:8px}.sidebar .nav-item{justify-content:center;padding:8px}.topbar{gap:8px;padding:0 12px}.topbar-date,.quick-top-action{display:none}.top-search{min-width:120px}}
-@media (max-width:680px){.content{padding:16px}.grid-3,.grid-4,.quick-actions{grid-template-columns:1fr}.dashboard-event{align-items:flex-start;flex-wrap:wrap}.event-actions{width:100%;justify-content:flex-end}.member-rank-card{grid-template-columns:auto auto 1fr}.member-rank-card .avatar{display:none}.top-search{display:none}}
+@media (max-width:820px){
+  .sidebar{position:fixed;left:0;top:0;bottom:0;z-index:100;transform:translateX(-100%);margin:0;border-radius:0;height:100vh;width:280px !important;border-right:1px solid rgba(255,255,255,0.1)}
+  .sidebar.mobile-open{transform:translateX(0)}
+  .sidebar .collapse-btn{display:none}
+  .sidebar .brand-copy,.sidebar .nav-section,.sidebar .nav-label,.sidebar .sb-mode-copy{display:block}
+  .sidebar .brand{justify-content:flex-start;padding-left:16px;padding-right:16px}
+  .sidebar .nav-item{justify-content:flex-start;padding:12px 14px}
+  .topbar{gap:8px;padding:0 12px}
+  .topbar-date,.quick-top-action{display:none}
+  .top-search{min-width:120px}
+  .mobile-menu-btn{display:flex}
+}
+@media (max-width:680px){
+  .app{padding:0}
+  .main{margin:0;border-radius:0;border:none}
+  .content{padding:16px}
+  .grid-3,.grid-4,.quick-actions,.grid-2{grid-template-columns:1fr}
+  .dashboard-event{align-items:flex-start;flex-wrap:wrap}
+  .event-actions{width:100%;justify-content:flex-end}
+  .member-rank-card{grid-template-columns:auto auto 1fr}
+  .member-rank-card .avatar{display:none}
+  .top-search{display:none}
+  h1.page-title{font-size:16px !important}
+  .mode-chip{font-size:10px;padding:4px 6px}
+  .modal-content{padding:20px;max-width:92%;margin:0 auto}
+}
 
 .earth-bg {
   position: absolute;
@@ -1494,6 +1522,7 @@ function DocumentsDashboard({ isAdmin, documents, setDocuments }) {
 
 export default function App() {
   const [view, setView] = useState("Dashboard");
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [attendanceEventId, setAttendanceEventId] = useState("");
   const urlParams = new URLSearchParams(window.location.search);
   const checkinEventId = urlParams.get("checkin");
@@ -1658,7 +1687,7 @@ export default function App() {
           <div className={`app ${isAdmin ? "admin-mode" : "view-mode"}`}>
             <Sidebar
               view={view}
-              setView={setView}
+              setView={(v) => { setView(v); setMobileMenuOpen(false); }}
               members={members}
               newJoinees={newJoinees}
               events={events}
@@ -1666,7 +1695,10 @@ export default function App() {
               collapsed={sidebarCollapsed}
               setCollapsed={setSidebarCollapsed}
               onAdminClick={isAdmin ? handleAdminLogout : openAdminLogin}
+              mobileMenuOpen={mobileMenuOpen}
+              setMobileMenuOpen={setMobileMenuOpen}
             />
+            {mobileMenuOpen && <div className="mobile-overlay" onClick={() => setMobileMenuOpen(false)}></div>}
             <div className="main">
               <Topbar
                 view={view}
@@ -1679,6 +1711,8 @@ export default function App() {
                 onAdminExit={handleAdminLogout}
                 adminUser={adminUser}
                 authReady={authReady}
+                mobileMenuOpen={mobileMenuOpen}
+                setMobileMenuOpen={setMobileMenuOpen}
               />
               <div className="content scroll-area">
                 <AnimatePresence mode="wait">
@@ -1774,10 +1808,10 @@ export default function App() {
   );
 }
 
-function Sidebar({ view, setView, members, newJoinees, events, isAdmin, collapsed, setCollapsed, onAdminClick }) {
+function Sidebar({ view, setView, members, newJoinees, events, isAdmin, collapsed, setCollapsed, onAdminClick, mobileMenuOpen, setMobileMenuOpen }) {
   const activeCount = members.filter(m => m.active).length;
   return (
-    <div className={`sidebar ${collapsed ? "collapsed" : ""} ${isAdmin ? "admin" : "view"}`}>
+    <div className={`sidebar ${collapsed ? "collapsed" : ""} ${isAdmin ? "admin" : "view"} ${mobileMenuOpen ? "mobile-open" : ""}`}>
       <button className="collapse-btn" onClick={() => setCollapsed(!collapsed)} title={collapsed ? "Expand sidebar" : "Collapse sidebar"}>
         {collapsed ? "›" : "‹"}
       </button>
@@ -1841,7 +1875,7 @@ function Sidebar({ view, setView, members, newJoinees, events, isAdmin, collapse
   );
 }
 
-function Topbar({ view, setView, members, newJoinees, events, isAdmin, onAdminClick, onAdminExit, adminUser, authReady }) {
+function Topbar({ view, setView, members, newJoinees, events, isAdmin, onAdminClick, onAdminExit, adminUser, authReady, mobileMenuOpen, setMobileMenuOpen }) {
   const [query, setQuery] = useState("");
   const [showNotifications, setShowNotifications] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
@@ -1854,13 +1888,15 @@ function Topbar({ view, setView, members, newJoinees, events, isAdmin, onAdminCl
   const results = query.trim()
     ? searchItems.filter(item => `${item.label} ${item.meta}`.toLowerCase().includes(query.toLowerCase())).slice(0, 6)
     : [];
+  
   const notifications = [
-    `${events.length} events tracked`,
-    `${members.filter(m => m.active).length} active members`,
+    ...(membersWithoutMobile.length > 0 ? [`${membersWithoutMobile.length} members missing mobile numbers`] : []),
+    ...(newJoineesWithoutMobile.length > 0 ? [`${newJoineesWithoutMobile.length} new joinees missing mobile numbers`] : []),
     isAdmin ? `Admin editing is enabled for ${adminUser?.displayName || "admin"}` : "View-only mode is active",
   ];
   return (
     <div className={`topbar ${isAdmin ? "admin" : "view"}`}>
+      <button className="top-icon-btn mobile-menu-btn" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>☰</button>
       <h1 className="page-title" style={{ fontSize: 17, width: 170, flexShrink: 0, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
         {view === "TVMode" ? "Live TV" : view}
       </h1>
@@ -2405,7 +2441,7 @@ function Members({ members, setMembers, newJoinees, setNewJoinees, events, atten
       </div>
       <div className="card" style={{ padding: 0, overflow: "hidden" }}>
         {filtered.length === 0 ? <EmptyState icon="👥" msg="No members found" /> : (
-          <div style={{ overflowX: "auto" }}>
+          <div className="table-responsive">
             <table className="table dense-table" style={{ minWidth: 1040 }}>
               <thead><tr><th>Member</th><th>Attendance</th><th>Streak</th><th>Last Attended</th><th>Role</th><th>Area</th><th>Activity</th><th></th></tr></thead>
               <tbody>
@@ -3081,28 +3117,30 @@ function NewJoinees({ members, setMembers, newJoinees, setNewJoinees, attendance
       </div>
       <div className="card" style={{ padding: 0, overflow: "hidden" }}>
         {filtered.length === 0 ? <EmptyState icon="🆕" msg="No new joinees found" /> : (
-          <table className="table">
-            <thead><tr><th>Name</th><th>ID</th><th>Joined</th><th>Notes</th><th>Status</th>{isAdmin && <th></th>}</tr></thead>
-            <tbody>
-              {filtered.map(j => (
-                <tr key={j.id}>
-                  <td><div className="flex items-center gap-3"><Avatar name={j.name} /><div style={{ fontWeight: 600, fontSize: 13.5 }}>{j.name}</div></div></td>
-                  <td><span className="tag tag-purple">{j.id}</span></td>
-                  <td style={{ fontSize: 12.5, color: "var(--text2)" }}>{fmtDate(j.joinDate)}</td>
-                  <td style={{ fontSize: 13, color: "var(--text2)" }}>{j.notes}</td>
-                  <td><span className={`tag ${j.active ? "tag-present" : "tag-absent"}`}>{j.active ? "Active" : "Inactive"}</span></td>                  {isAdmin && (
-                    <td>
-                      <div className="flex gap-2">
-                        <button className="btn btn-sm btn-primary" onClick={() => setShiftConfirmId(j.id)}>Shift to Main</button>
-                        <button className="btn btn-sm" onClick={() => openEdit(j)}>Edit</button>
-                        <button className="btn btn-sm btn-danger" onClick={() => setDeleteConfirmId(j.id)}>Delete</button>
-                      </div>
-                    </td>
-                  )}
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          <div className="table-responsive">
+            <table className="table">
+              <thead><tr><th>Name</th><th>ID</th><th>Joined</th><th>Notes</th><th>Status</th>{isAdmin && <th></th>}</tr></thead>
+              <tbody>
+                {filtered.map(j => (
+                  <tr key={j.id}>
+                    <td><div className="flex items-center gap-3"><Avatar name={j.name} /><div style={{ fontWeight: 600, fontSize: 13.5 }}>{j.name}</div></div></td>
+                    <td><span className="tag tag-purple">{j.id}</span></td>
+                    <td style={{ fontSize: 12.5, color: "var(--text2)" }}>{fmtDate(j.joinDate)}</td>
+                    <td style={{ fontSize: 13, color: "var(--text2)" }}>{j.notes}</td>
+                    <td><span className={`tag ${j.active ? "tag-present" : "tag-absent"}`}>{j.active ? "Active" : "Inactive"}</span></td>                  {isAdmin && (
+                      <td>
+                        <div className="flex gap-2">
+                          <button className="btn btn-sm btn-primary" onClick={() => setShiftConfirmId(j.id)}>Shift to Main</button>
+                          <button className="btn btn-sm" onClick={() => openEdit(j)}>Edit</button>
+                          <button className="btn btn-sm btn-danger" onClick={() => setDeleteConfirmId(j.id)}>Delete</button>
+                        </div>
+                      </td>
+                    )}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
       </div>
       <AnimatedModal isOpen={showForm} onClose={() => setShowForm(false)}>
@@ -4690,7 +4728,7 @@ function Analytics({ members, newJoinees, events, getMemberStats, attendance, ne
             <div className={`ac-tab ${smartTab === 'highPerformers' ? 'active' : ''}`} onClick={() => setSmartTab('highPerformers')}>High Performers ({highPerformersList.length})</div>
           </div>
 
-          <div style={{ overflowX: "auto" }}>
+          <div className="table-responsive">
             <table className="ac-table">
               <thead>
                 <tr>
@@ -4910,8 +4948,9 @@ function buildReportHtml({ template, data, options }) {
 
   if (template === "detailedAttendance" || template === "volunteerReport" || template === "singleEvent") {
     htmlBody += `
-      <table class="data-table">
-        <thead>
+      <div class="table-responsive">
+        <table class="data-table">
+          <thead>
           <tr>
             <th style="text-align: center; vertical-align: middle;">Member</th>
             ${includePhone ? `<th style="text-align: center; vertical-align: middle;">Phone</th>` : ""}
@@ -4948,13 +4987,15 @@ function buildReportHtml({ template, data, options }) {
             `;
     }).join("")}
         </tbody>
-      </table>
+        </table>
+      </div>
     `;
   } else {
     // Basic event list for monthly summary
     htmlBody += `
-      <table class="data-table">
-        <thead>
+      <div class="table-responsive">
+        <table class="data-table">
+          <thead>
           <tr>
             <th style="text-align: left;">Event Date & Title</th>
             <th style="text-align: center;">Present</th>
@@ -4980,7 +5021,8 @@ function buildReportHtml({ template, data, options }) {
             `;
     }).join("")}
         </tbody>
-      </table>
+        </table>
+      </div>
     `;
   }
 
