@@ -1878,8 +1878,6 @@ function Topbar({ view, setView, members, newJoinees, events, isAdmin, onAdminCl
           </div>
         )}
       </div>
-      <button className="btn btn-sm quick-top-action" onClick={() => setView("Attendance")}>A Mark</button>
-      <button className="btn btn-sm quick-top-action" onClick={() => setView("Reports")}>R Export</button>
       <span className={`mode-chip ${isAdmin ? "admin" : "view"}`}>{isAdmin ? "◉ Unlocked Admin" : "◎ View Only"}</span>
       {!isAdmin && <button className="btn btn-sm" onClick={onAdminClick} disabled={!authReady}>{authReady ? "Google Login" : "Checking..."}</button>}
       {isAdmin && <button className="btn btn-sm btn-danger" onClick={onAdminExit}>Lock</button>}
