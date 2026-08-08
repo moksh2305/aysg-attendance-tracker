@@ -1879,6 +1879,10 @@ function Topbar({ view, setView, members, newJoinees, events, isAdmin, onAdminCl
   const [query, setQuery] = useState("");
   const [showNotifications, setShowNotifications] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
+
+  const membersWithoutMobile = members.filter(m => m.active && (!m.mobile || String(m.mobile).length < 10));
+  const newJoineesWithoutMobile = newJoinees.filter(j => j.active && (!j.mobile || String(j.mobile).length < 10));
+
   const searchItems = [
     ...VIEWS.map(v => ({ label: v, meta: "Navigation", view: v })),
     ...members.slice(0, 8).map(m => ({ label: m.name, meta: `Member · ${m.area || "No area"}`, view: "Members" })),
