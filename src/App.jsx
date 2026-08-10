@@ -1725,6 +1725,8 @@ export default function App() {
                 authReady={authReady}
                 mobileMenuOpen={mobileMenuOpen}
                 setMobileMenuOpen={setMobileMenuOpen}
+                theme={theme}
+                setTheme={setTheme}
               />
               <div className="content scroll-area">
                 <AnimatePresence mode="wait">
@@ -1887,7 +1889,7 @@ function Sidebar({ view, setView, members, newJoinees, events, isAdmin, collapse
   );
 }
 
-function Topbar({ view, setView, members, newJoinees, events, isAdmin, onAdminClick, onAdminExit, adminUser, authReady, mobileMenuOpen, setMobileMenuOpen }) {
+function Topbar({ view, setView, members, newJoinees, events, isAdmin, onAdminClick, onAdminExit, adminUser, authReady, mobileMenuOpen, setMobileMenuOpen, theme, setTheme }) {
   const [query, setQuery] = useState("");
   const [showNotifications, setShowNotifications] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
