@@ -1879,9 +1879,9 @@ function Sidebar({ view, setView, members, newJoinees, events, isAdmin, collapse
               { label: "Live TV Mode", color: "#a78bfa", view: "TVMode", icon: <IconTV color="#a78bfa" /> },
               { label: "Export Report", color: "#f59e0b", view: "Reports", icon: <IconReports color="#f59e0b" /> },
             ].map(a => (
-              <div key={a.label} className={`nav-item${view === a.view ? " active" : ""}`} onClick={() => setView(a.view)} style={{ background: `${a.color}15`, marginBottom: 8, border: `1px solid ${a.color}30` }}>
-                <div className="nav-icon" style={{ color: a.color }}>{a.icon}</div>
-                <span className="nav-label" style={{ color: a.color, fontWeight: 700 }}>{a.label}</span>
+              <div key={a.label} className={`nav-item${view === a.view ? " active" : ""}`} onClick={() => setView(a.view)} style={{ background: "rgba(0,0,0,0.025)", marginBottom: 4 }}>
+                <div className="nav-icon">{a.icon}</div>
+                <span className="nav-label">{a.label}</span>
               </div>
             ))}
           </>
