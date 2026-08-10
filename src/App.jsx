@@ -1879,7 +1879,7 @@ function Sidebar({ view, setView, members, newJoinees, events, isAdmin, collapse
               { label: "Live TV Mode", color: "#a78bfa", view: "TVMode", icon: <IconTV color="#a78bfa" /> },
               { label: "Export Report", color: "#f59e0b", view: "Reports", icon: <IconReports color="#f59e0b" /> },
             ].map(a => (
-              <div key={a.label} className="sb-quick-action" onClick={() => setView(a.view)} style={{ borderColor: `${a.color}44` }}>
+              <div key={a.label} className="sb-quick-action" onClick={() => setView(a.view)} style={{ borderColor: a.color }}>
                 <div className="sb-quick-action-icon" style={{ color: a.color }}>{a.icon}</div>
                 <div className="nav-label" style={{ color: a.color }}>{a.label}</div>
                 <div className="sb-quick-action-arrow nav-label" style={{ color: a.color }}>→</div>
