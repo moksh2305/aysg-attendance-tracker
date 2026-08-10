@@ -594,24 +594,24 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
   --glass:rgba(124,106,248,0.08);--glow:rgba(124,106,248,0.15);
 }
 html.light{
-  --bg:#f8f7f4;--bg2:#ffffff;--bg3:#f0efeb;--bg4:#e8e5df;
-  --border:#e2dfd8;--border2:#d2cec2;
-  --accent:#C9B98F;--accent2:#bfae83;--accent3:#a89973;
-  --gold:#C9B98F;--emerald:#10d47e;--rose:#f43f5e;--cyan:#0891b2;
-  --text:#606C38;--text2:#4d562c;--text3:#3c4322;
-  --card:rgba(96,108,56,0.02);--cardh:rgba(96,108,56,0.04);
-  --glass:rgba(201,185,143,0.15);--glow:rgba(201,185,143,0.3);
+  --bg:#f2edd0;--bg2:#e6e0bd;--bg3:#dbd4ab;--bg4:#c2bc95;
+  --border:#d5cfa8;--border2:#b3ac85;
+  --accent:#45b075;--accent2:#3c9a66;--accent3:#2d744d;
+  --gold:#45b075;--emerald:#10d47e;--rose:#f43f5e;--cyan:#0891b2;
+  --text:#5c4033;--text2:#4a3627;--text3:#38271b;
+  --card:rgba(69,176,117,0.1);--cardh:rgba(69,176,117,0.15);
+  --glass:rgba(69,176,117,0.15);--glow:rgba(69,176,117,0.3);
 }
 html.light body{background:var(--bg);color:var(--text)}
-html.light .sidebar::before{background:radial-gradient(ellipse at 50% 0%,rgba(98,84,232,0.06) 0%,transparent 60%)}
+html.light .sidebar::before{background:radial-gradient(ellipse at 50% 0%,rgba(69,176,117,0.06) 0%,transparent 60%)}
 html.light .card, html.light .stat-card, html.light .spotlight-card, html.light .attendance-card {
   background: var(--accent) !important;
-  color: var(--text) !important;
-  border-color: rgba(96,108,56,0.2) !important;
-  box-shadow: 0 4px 12px rgba(96,108,56,0.1) !important;
+  color: #ffffff !important;
+  border-color: rgba(69,176,117,0.2) !important;
+  box-shadow: 0 4px 12px rgba(69,176,117,0.15) !important;
 }
 html.light .card-label, html.light .stat-label, html.light .card-value, html.light .stat-value, html.light .text-xs.color-muted {
-  color: var(--text) !important;
+  color: #ffffff !important;
 }
 .app{display:flex;height:100vh;overflow:hidden;background:var(--bg);color:var(--text);position:relative}
 .app::before, .app::after{content:'';position:absolute;width:40vw;height:40vw;border-radius:50%;filter:blur(100px);z-index:0;pointer-events:none;opacity:0.3}
@@ -619,19 +619,19 @@ html.light .card-label, html.light .stat-label, html.light .card-value, html.lig
 .app::after{bottom:-10%;right:-10%;background:rgba(16,212,126,0.3);animation:float2 25s infinite alternate ease-in-out}
 @keyframes float1{0%{transform:translate(0,0) scale(1)}100%{transform:translate(10vw,10vh) scale(1.2)}}
 @keyframes float2{0%{transform:translate(0,0) scale(1)}100%{transform:translate(-10vw,-10vh) scale(1.1)}}
-html.light .app::before{background:rgba(201,185,143,0.15);opacity:0.6}
-html.light .app::after{background:rgba(96,108,56,0.1);opacity:0.6}
+html.light .app::before{background:rgba(69,176,117,0.15);opacity:0.6}
+html.light .app::after{background:rgba(69,176,117,0.1);opacity:0.6}
 .app.admin-mode .topbar,.app.admin-mode .sidebar{box-shadow:inset 0 0 0 1px rgba(16,212,126,0.12),0 0 28px rgba(16,212,126,0.05)}
 .app.view-mode .topbar,.app.view-mode .sidebar{box-shadow:inset 0 0 0 1px rgba(124,106,248,0.08)}
 .sidebar{width:280px;flex-shrink:0;background:rgba(10, 10, 15, 0.65);backdrop-filter:blur(24px) saturate(180%);-webkit-backdrop-filter:blur(24px) saturate(180%);border:1px solid rgba(124,106,248,0.25);box-shadow:0 16px 40px rgba(0,0,0,0.4), inset 0 0 0 1px rgba(255,255,255,0.02);border-radius:24px;margin:16px;height:calc(100vh - 32px);display:flex;flex-direction:column;overflow:visible;position:relative;z-index:10;transition:width 0.25s cubic-bezier(0.2,0.8,0.2,1),transform 0.4s cubic-bezier(0.2,0.8,0.2,1),border-color 0.2s,box-shadow 0.2s}
-html.light .sidebar{background:rgba(255, 255, 255, 0.7);border:1px solid rgba(201,185,143,0.4);box-shadow:0 16px 40px rgba(96,108,56,0.08), inset 0 0 0 1px rgba(255,255,255,0.8)}
+html.light .sidebar{background:rgba(242, 237, 208, 0.7);border:1px solid rgba(69,176,117,0.4);box-shadow:0 16px 40px rgba(92,64,51,0.08), inset 0 0 0 1px rgba(255,255,255,0.8)}
 html.light .earth-bg{display:none !important;}
 .sidebar.collapsed{width:76px}
 .sidebar.admin{border-color:rgba(16,212,126,0.35)}
 .sidebar.view{border-color:rgba(124,106,248,0.18)}
 .sidebar::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 0%,rgba(124,106,248,0.08) 0%,transparent 60%);pointer-events:none}
 .main{flex:1;display:flex;flex-direction:column;overflow:hidden;background:rgba(20, 20, 25, 0.45);backdrop-filter:blur(24px) saturate(180%);-webkit-backdrop-filter:blur(24px) saturate(180%);border:1px solid rgba(255,255,255,0.08);box-shadow:0 16px 40px rgba(0,0,0,0.3), inset 0 0 0 1px rgba(255,255,255,0.05);border-radius:24px;margin:16px 16px 16px 0}
-html.light .main{background:rgba(255, 255, 255, 0.6);border:1px solid rgba(255,255,255,0.8);box-shadow:0 16px 40px rgba(0,0,0,0.05), inset 0 0 0 1px rgba(255,255,255,0.5)}
+html.light .main{background:rgba(242, 237, 208, 0.6);border:1px solid rgba(255,255,255,0.8);box-shadow:0 16px 40px rgba(92,64,51,0.05), inset 0 0 0 1px rgba(255,255,255,0.5)}
 .topbar{height:62px;background:transparent;border-bottom:1px solid rgba(255,255,255,0.08);display:flex;align-items:center;padding:0 20px;gap:12px;flex-shrink:0;position:relative;z-index:8;border-radius:24px 24px 0 0}
 html.light .topbar{border-bottom:1px solid rgba(0,0,0,0.05)}
 .topbar.admin{border-bottom-color:rgba(16,212,126,0.32)}
@@ -1528,14 +1528,20 @@ function DocumentsDashboard({ isAdmin, documents, setDocuments }) {
 
 export default function App() {
   const [view, setView] = useState("Dashboard");
+  const [theme, setTheme] = useState(() => localStorage.getItem("aysg_theme") || "dark");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [attendanceEventId, setAttendanceEventId] = useState("");
   const urlParams = new URLSearchParams(window.location.search);
   const checkinEventId = urlParams.get("checkin");
   useEffect(() => {
-    document.documentElement.classList.remove("light");
-    localStorage.removeItem("aysg_theme");
-  }, []);
+    if (theme === "light") {
+      document.documentElement.classList.add("light");
+      localStorage.setItem("aysg_theme", "light");
+    } else {
+      document.documentElement.classList.remove("light");
+      localStorage.setItem("aysg_theme", "dark");
+    }
+  }, [theme]);
   const [members, setMembers] = useSyncedStorage(PERSISTED_DATA_KEYS.members, INITIAL_MEMBERS, migrateMembers);
   const [newJoinees, setNewJoinees] = useSyncedStorage(PERSISTED_DATA_KEYS.newJoinees, INITIAL_NEW_JOINEES, migrateNewJoinees);
   const [events, setEvents, eventsReady] = useSyncedStorage(PERSISTED_DATA_KEYS.events, INITIAL_EVENTS);
@@ -1927,6 +1933,9 @@ function Topbar({ view, setView, members, newJoinees, events, isAdmin, onAdminCl
         )}
       </div>
       <div style={{ flex: 1 }} />
+      <button className="top-icon-btn" style={{ marginRight: 4 }} onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')} title="Toggle Light/Dark Mode">
+        {theme === 'dark' ? '☀️' : '🌙'}
+      </button>
       <span className={`mode-chip ${isAdmin ? "admin" : "view"}`}>{isAdmin ? "◉ Unlocked Admin" : "◎ View Only"}</span>
       {!isAdmin && <button className="btn btn-sm" onClick={onAdminClick} disabled={!authReady}>{authReady ? "Google Login" : "Checking..."}</button>}
       {isAdmin && <button className="btn btn-sm btn-danger" onClick={onAdminExit}>Lock</button>}
