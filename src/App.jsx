@@ -137,6 +137,7 @@ const PERSISTED_DATA_KEYS = Object.freeze({
   actionItems: "aysg_action_items",
   meetingTemplates: "aysg_meeting_templates",
   documents: "aysg_documents",
+  auditLogs: "aysg_audit_logs",
 });
 
 const MEMBER_NAMES = [
@@ -1050,7 +1051,7 @@ const IconAIAssistant = ({ color = "currentColor", size = 20 }) => (<svg xmlns="
 const IconReports = ({ color = "currentColor", size = 20 }) => (<svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>);
 const IconSettings = ({ color = "currentColor", size = 20 }) => (<svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>);
 
-const VIEWS = ["Dashboard", "Members", "New Joinees", "Events", "Team Meetings", "Documents", "Attendance", "Analytics", "Engagement", "AI Assistant", "Reports", "Settings"];
+const VIEWS = ["Dashboard", "Members", "New Joinees", "Events", "Team Meetings", "Documents", "Attendance", "Analytics", "Engagement", "AI Assistant", "Reports", "Activity Log", "Settings"];
 const VIEW_ICONS = { 
   Dashboard: <IconDashboard color="#a78bfa" />, 
   Members: <IconMembers color="#60a5fa" />, 
@@ -1064,6 +1065,7 @@ const VIEW_ICONS = {
   Engagement: <span style={{fontSize: 18, color: "#10b981", display: 'flex', alignItems: 'center', justifyContent: 'center'}}>📈</span>,
   "AI Assistant": <IconAIAssistant color="#e879f9" />,
   Reports: <IconReports color="#38bdf8" />,
+  "Activity Log": <span style={{fontSize: 18, color: "#f87171", display: 'flex', alignItems: 'center', justifyContent: 'center'}}>📜</span>,
   Settings: <IconSettings color="#9ca3af" />
 };
 
@@ -1575,9 +1577,25 @@ export default function App() {
   const [actionItems, setActionItems] = useSyncedStorage(PERSISTED_DATA_KEYS.actionItems, []);
   const [meetingTemplates, setMeetingTemplates] = useSyncedStorage(PERSISTED_DATA_KEYS.meetingTemplates, []);
   const [documents, setDocuments] = useSyncedStorage(PERSISTED_DATA_KEYS.documents, INITIAL_DOCUMENTS);
+  const [auditLogs, setAuditLogs] = useSyncedStorage(PERSISTED_DATA_KEYS.auditLogs, []);
   const [adminUser, setAdminUser] = useState(null);
   const [authReady, setAuthReady] = useState(false);
   const [adminErr, setAdminErr] = useState("");
+
+  const logActivity = (action, target, details, prevVal = null, newVal = null) => {
+    const adminName = adminUser?.displayName || "AI Assistant / System";
+    const entry = {
+      id: crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(),
+      timestamp: new Date().toISOString(),
+      adminName,
+      action,
+      target,
+      details,
+      prevVal,
+      newVal
+    };
+    setAuditLogs(prev => [entry, ...prev].slice(0, 1000));
+  };
   const [toast, setToast] = useState(null);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const toastTimer = useRef();
@@ -1756,6 +1774,7 @@ export default function App() {
     return { present, absent: total - present, total, pct: total ? Math.round(present / total * 100) : 0 };
   };
   const deleteEvent = (eventId) => {
+    const event = events.find(e => e.id === eventId);
     setEvents(events.filter(e => e.id !== eventId));
     if (attendance[eventId]) {
       const newAttendance = { ...attendance };
@@ -1766,6 +1785,9 @@ export default function App() {
       const newNjAtt = { ...newJoineeAttendance };
       delete newNjAtt[eventId];
       setNewJoineeAttendance(newNjAtt);
+    }
+    if (event) {
+      logActivity("Deleted Event", "Event", `Deleted event: ${event.name}`);
     }
     showToast("Event deleted", "success");
   };
@@ -1779,6 +1801,7 @@ export default function App() {
   };
 
   const deleteTeamMeeting = (eventId) => {
+    const meeting = teamMeetings.find(e => e.id === eventId);
     setTeamMeetings(teamMeetings.filter(e => e.id !== eventId));
     if (teamMeetingAttendance[eventId]) {
       const newAttendance = { ...teamMeetingAttendance };
@@ -1789,6 +1812,9 @@ export default function App() {
       const newNjAtt = { ...newJoineeTeamMeetingAttendance };
       delete newNjAtt[eventId];
       setNewJoineeTeamMeetingAttendance(newNjAtt);
+    }
+    if (meeting) {
+      logActivity("Deleted Team Meeting", "Team Meeting", `Deleted meeting: ${meeting.name}`);
     }
     showToast("Team meeting deleted", "success");
   };
@@ -1854,10 +1880,10 @@ export default function App() {
                     style={{ minHeight: "100%", width: "100%" }}
                   >
                     {view === "Dashboard" && <Dashboard members={members} events={events} attendance={attendance} getEventStats={getEventStats} getMemberStats={getMemberStats} setView={setView} setAttendanceEventId={setAttendanceEventId} isAdmin={isAdmin} getMemberBadges={getMemberBadges} />}
-                    {view === "Members" && <Members members={members} setMembers={setMembers} newJoinees={newJoinees} setNewJoinees={setNewJoinees} events={events} attendance={attendance} getMemberStats={getMemberStats} showToast={showToast} isAdmin={isAdmin} setView={setView} getMemberBadges={getMemberBadges} teams={teams} />}
-                    {view === "New Joinees" && <NewJoinees members={members} setMembers={setMembers} newJoinees={newJoinees} setNewJoinees={setNewJoinees} attendance={attendance} setAttendance={setAttendance} newJoineeAttendance={newJoineeAttendance} setNewJoineeAttendance={setNewJoineeAttendance} showToast={showToast} isAdmin={isAdmin} />}
-                    {view === "Roles" && <RolesDashboard members={members} setMembers={setMembers} isAdmin={isAdmin} attendance={attendance} events={events} teamChats={teamChats} setTeamChats={setTeamChats} teams={teams} setTeams={setTeams} />}
-                    {view === "Events" && <Events events={events} setEvents={setEvents} deleteEvent={deleteEvent} getEventStats={getEventStats} showToast={showToast} isAdmin={isAdmin} />}
+                    {view === "Members" && <Members members={members} setMembers={setMembers} newJoinees={newJoinees} setNewJoinees={setNewJoinees} events={events} attendance={attendance} getMemberStats={getMemberStats} showToast={showToast} isAdmin={isAdmin} setView={setView} getMemberBadges={getMemberBadges} teams={teams} logActivity={logActivity} />}
+                    {view === "New Joinees" && <NewJoinees members={members} setMembers={setMembers} newJoinees={newJoinees} setNewJoinees={setNewJoinees} attendance={attendance} setAttendance={setAttendance} newJoineeAttendance={newJoineeAttendance} setNewJoineeAttendance={setNewJoineeAttendance} showToast={showToast} isAdmin={isAdmin} logActivity={logActivity} />}
+                    {view === "Roles" && <RolesDashboard members={members} setMembers={setMembers} isAdmin={isAdmin} attendance={attendance} events={events} teamChats={teamChats} setTeamChats={setTeamChats} teams={teams} setTeams={setTeams} logActivity={logActivity} />}
+                    {view === "Events" && <Events events={events} setEvents={setEvents} deleteEvent={deleteEvent} getEventStats={getEventStats} showToast={showToast} isAdmin={isAdmin} logActivity={logActivity} />}
                     {view === "Team Meetings" && (
                       <TeamMeetingsDashboard 
                         teamMeetings={teamMeetings} setTeamMeetings={setTeamMeetings} 
@@ -1868,14 +1894,16 @@ export default function App() {
                         actionItems={actionItems} setActionItems={setActionItems}
                         meetingTemplates={meetingTemplates} setMeetingTemplates={setMeetingTemplates}
                         setView={setView} setAttendanceEventId={setAttendanceEventId}
+                        logActivity={logActivity}
                       />
                     )}
-                    {view === "Attendance" && <Attendance events={events} members={members} newJoinees={newJoinees} attendance={attendance} setAttendance={setAttendance} newJoineeAttendance={newJoineeAttendance} setNewJoineeAttendance={setNewJoineeAttendance} setNewJoinees={setNewJoinees} showToast={showToast} isAdmin={isAdmin} attendanceEventId={attendanceEventId} setAttendanceEventId={setAttendanceEventId} />}
+                    {view === "Attendance" && <Attendance events={events} members={members} newJoinees={newJoinees} attendance={attendance} setAttendance={setAttendance} newJoineeAttendance={newJoineeAttendance} setNewJoineeAttendance={setNewJoineeAttendance} setNewJoinees={setNewJoinees} showToast={showToast} isAdmin={isAdmin} attendanceEventId={attendanceEventId} setAttendanceEventId={setAttendanceEventId} logActivity={logActivity} />}
                     {view === "Analytics" && <Analytics members={members} newJoinees={newJoinees} events={events} getMemberStats={getMemberStats} attendance={attendance} newJoineeAttendance={newJoineeAttendance} isAdmin={isAdmin} />}
                     {view === "Engagement" && <EngagementDashboard members={members} newJoinees={newJoinees} events={events} teamMeetings={teamMeetings} getMemberEngagement={getMemberEngagement} />}
                     {view === "AI Assistant" && <AIAssistantView members={members} newJoinees={newJoinees} events={events} attendance={attendance} newJoineeAttendance={newJoineeAttendance} getMemberStats={getMemberStats} getEventStats={getEventStats} setView={setView} showToast={showToast} isAdmin={isAdmin} />}
                     {view === "Reports" && <Reports members={members} newJoinees={newJoinees} events={events} attendance={attendance} newJoineeAttendance={newJoineeAttendance} getEventStats={getEventStats} showToast={showToast} isAdmin={isAdmin} />}
-                    {view === "Documents" && <DocumentsDashboard isAdmin={isAdmin} documents={documents} setDocuments={setDocuments} />}
+                    {view === "Activity Log" && <ActivityLogDashboard auditLogs={auditLogs} isAdmin={isAdmin} />}
+                    {view === "Documents" && <DocumentsDashboard isAdmin={isAdmin} documents={documents} setDocuments={setDocuments} logActivity={logActivity} />}
                   </motion.div>
                 </AnimatePresence>
               </div>
@@ -2413,7 +2441,7 @@ function Dashboard({ members, events, attendance, getEventStats, getMemberStats,
   </div>
 );
 }
-function Members({ members, setMembers, newJoinees, setNewJoinees, events, attendance, getMemberStats, showToast, isAdmin, setView, getMemberBadges, teams }) {
+function Members({ members, setMembers, newJoinees, setNewJoinees, events, attendance, getMemberStats, showToast, isAdmin, setView, getMemberBadges, teams, logActivity }) {
   const [search, setSearch] = useState("");
   const [filterArea, setFilterArea] = useState("");
   const [filterPerformance, setFilterPerformance] = useState("");
@@ -2481,15 +2509,21 @@ function Members({ members, setMembers, newJoinees, setNewJoinees, events, atten
     if (!form.name.trim()) return showToast("Name is required", "error");
     if (editMember) {
       setMembers(members.map(m => m.id === editMember ? { ...form, id: editMember } : m));
+      const oldMember = members.find(m => m.id === editMember);
+      if (logActivity) logActivity("Edited Member", "Member", `Edited profile of ${form.name}`, JSON.stringify(oldMember), JSON.stringify(form));
       showToast("Member updated", "success");
     } else {
-      setMembers([...members, { ...form, id: genId("M") }]);
+      const newId = genId("M");
+      setMembers([...members, { ...form, id: newId }]);
+      if (logActivity) logActivity("Created Member", "Member", `Created profile for ${form.name}`);
       showToast("Member added", "success");
     }
     setShowForm(false);
   };
   const deleteMember = (id) => {
+    const member = members.find(m => m.id === id);
     setMembers(prev => prev.filter(m => m.id !== id));
+    if (member && logActivity) logActivity("Deleted Member", "Member", `Deleted profile of ${member.name}`);
     showToast("Member removed", "success");
     setDeleteConfirmId(null);
   };
@@ -3156,7 +3190,7 @@ function RolesDashboard({ members, setMembers, isAdmin, attendance, events, team
   );
 }
 
-function NewJoinees({ members, setMembers, newJoinees, setNewJoinees, attendance, setAttendance, newJoineeAttendance, setNewJoineeAttendance, showToast, isAdmin }) {
+function NewJoinees({ members, setMembers, newJoinees, setNewJoinees, attendance, setAttendance, newJoineeAttendance, setNewJoineeAttendance, showToast, isAdmin, logActivity }) {
   const [search, setSearch] = useState("");
   const [editJoinee, setEditJoinee] = useState(null);
   const [deleteConfirmId, setDeleteConfirmId] = useState(null);
@@ -3194,6 +3228,7 @@ function NewJoinees({ members, setMembers, newJoinees, setNewJoinees, attendance
     setNewJoinees(newJoinees.filter(j => j.id !== shiftConfirmId));
     setAttendance(newAttendance);
     
+    if (logActivity) logActivity("Shifted Member", "Member", `Shifted ${joinee.name} to main members`);
     showToast(`${joinee.name} shifted to main members!`, "success");
     setShiftConfirmId(null);
   };
@@ -3225,16 +3260,21 @@ function NewJoinees({ members, setMembers, newJoinees, setNewJoinees, attendance
 
     if (editJoinee) {
       setNewJoinees(newJoinees.map(j => j.id === editJoinee ? { ...form, name, id: editJoinee } : j));
+      const oldJoinee = newJoinees.find(j => j.id === editJoinee);
+      if (logActivity) logActivity("Edited Joinee", "New Joinee", `Edited profile of ${name}`, JSON.stringify(oldJoinee), JSON.stringify(form));
       showToast("New joinee updated", "success");
     } else {
       setNewJoinees([...newJoinees, { ...form, name, id: genId("N") }]);
+      if (logActivity) logActivity("Created Joinee", "New Joinee", `Created profile for ${name}`);
       showToast("New joinee added", "success");
     }
     setShowForm(false);
   };
 
   const deleteJoinee = (id) => {
+    const joinee = newJoinees.find(j => j.id === id);
     setNewJoinees(prev => prev.filter(j => j.id !== id));
+    if (joinee && logActivity) logActivity("Deleted Joinee", "New Joinee", `Deleted profile of ${joinee.name}`);
     showToast("New joinee removed", "success");
     setDeleteConfirmId(null);
   };
@@ -3361,7 +3401,8 @@ function TeamMeetingsDashboard({
   actionItems, setActionItems,
   meetingTemplates, setMeetingTemplates,
   setView,
-  setAttendanceEventId
+  setAttendanceEventId,
+  logActivity
 }) {
   const [activeViewTab, setActiveViewTab] = useState("Calendar View");
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -3389,6 +3430,7 @@ function TeamMeetingsDashboard({
   const saveMeeting = () => {
     if (!form.name.trim()) return showToast("Meeting name required", "error");
     setTeamMeetings([...teamMeetings, { ...form, id: genId("TM") }]); 
+    if (logActivity) logActivity("Created Team Meeting", "Team Meeting", `Created new team meeting: ${form.name}`);
     showToast("Meeting created", "success");
     setShowForm(false);
   };
@@ -3903,7 +3945,7 @@ function TeamMeetingsDashboard({
 
 
 
-function Events({ events, setEvents, deleteEvent, getEventStats, showToast, isAdmin, title = "Events", emptyMsg = "No events yet. Create your first event!", itemName = "Event" }) {
+function Events({ events, setEvents, deleteEvent, getEventStats, showToast, isAdmin, logActivity, title = "Events", emptyMsg = "No events yet. Create your first event!", itemName = "Event" }) {
   const [showForm, setShowForm] = useState(false);
   const [editEvent, setEditEvent] = useState(null);
   const [form, setForm] = useState({ name: "", date: "", time: "", venue: "", category: "Religious", notes: "", color: "#7c6af8", lat: null, lng: null });
@@ -3914,8 +3956,16 @@ function Events({ events, setEvents, deleteEvent, getEventStats, showToast, isAd
   const openEdit = (e) => { setForm({ ...e }); setEditEvent(e.id); setShowForm(true); };
   const saveEvent = () => {
     if (!form.name.trim()) return showToast("Event name required", "error");
-    if (editEvent) { setEvents(events.map(e => e.id === editEvent ? { ...form, id: editEvent } : e)); showToast("Event updated", "success"); }
-    else { setEvents([...events, { ...form, id: genId("E") }]); showToast("Event created", "success"); }
+    if (editEvent) {
+      setEvents(events.map(e => e.id === editEvent ? { ...form, id: editEvent } : e));
+      const oldEvent = events.find(e => e.id === editEvent);
+      if (logActivity) logActivity(`Edited ${itemName}`, itemName, `Edited details for ${form.name}`, JSON.stringify(oldEvent), JSON.stringify(form));
+      showToast(`${itemName} updated`, "success");
+    } else {
+      setEvents([...events, { ...form, id: genId("E") }]);
+      if (logActivity) logActivity(`Created ${itemName}`, itemName, `Created new ${itemName.toLowerCase()}: ${form.name}`);
+      showToast(`${itemName} created`, "success");
+    }
     setShowForm(false);
   };
 
@@ -4019,7 +4069,7 @@ function Events({ events, setEvents, deleteEvent, getEventStats, showToast, isAd
   );
 }
 
-function Attendance({ events, members, newJoinees, attendance, setAttendance, newJoineeAttendance, setNewJoineeAttendance, setNewJoinees, showToast, isAdmin, attendanceEventId, setAttendanceEventId, title = "Attendance" }) {
+function Attendance({ events, members, newJoinees, attendance, setAttendance, newJoineeAttendance, setNewJoineeAttendance, setNewJoinees, showToast, isAdmin, attendanceEventId, setAttendanceEventId, logActivity, title = "Attendance" }) {
   const sortedEvents = [...events].sort((a, b) => new Date(b.date) - new Date(a.date));
   const [selEvent, setSelEvent] = useState(attendanceEventId || sortedEvents[0]?.id || "");
   useEffect(() => {
@@ -4154,7 +4204,12 @@ function Attendance({ events, members, newJoinees, attendance, setAttendance, ne
 
   const setPersonStatus = (personId, status) => {
     if (!isAdmin) return;
+    const prev = statusOf(personId);
     setStore({ ...store, [selEvent]: { ...rec, [personId]: status } });
+    if (logActivity && prev !== status) {
+      const personName = activePeople.find(p => p.id === personId)?.name || personId;
+      logActivity("Changed Attendance", "Attendance", `Changed ${personName}'s attendance for ${event?.name || selEvent} (${prev} → ${status})`, prev, status);
+    }
   };
 
   const cycleStatus = (personId) => {
@@ -6172,6 +6227,82 @@ function EngagementDashboard({ members, newJoinees, events, teamMeetings, getMem
               ))}
               {filtered.length === 0 && (
                 <tr><td colSpan={6} style={{ textAlign: 'center', padding: 40 }}>No members found in this category.</td></tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ActivityLogDashboard({ auditLogs, isAdmin }) {
+  if (!isAdmin) {
+    return (
+      <div className="flex items-center justify-center" style={{ height: "60vh", color: "var(--text2)" }}>
+        You do not have permission to view the activity log.
+      </div>
+    );
+  }
+
+  return (
+    <div style={{ padding: "0 4px" }}>
+      <div className="flex items-center justify-between" style={{ marginBottom: 24, flexWrap: "wrap", gap: 16 }}>
+        <h1 className="page-title">Activity Log</h1>
+        <p className="color-muted text-sm">{auditLogs.length} recent actions tracked</p>
+      </div>
+
+      <div className="card">
+        <div className="table-responsive">
+          <table className="table dense-table" style={{ minWidth: 800 }}>
+            <thead>
+              <tr>
+                <th>Date & Time</th>
+                <th>Admin</th>
+                <th>Target</th>
+                <th>Action details</th>
+                <th>Changes</th>
+              </tr>
+            </thead>
+            <tbody>
+              {auditLogs.map(log => {
+                const date = new Date(log.timestamp);
+                const isAI = log.adminName.includes("AI");
+                return (
+                  <tr key={log.id}>
+                    <td style={{ fontSize: 13, color: "var(--text2)", whiteSpace: "nowrap" }}>
+                      <div>{date.toLocaleDateString()}</div>
+                      <div style={{ fontSize: 11 }}>{date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
+                    </td>
+                    <td>
+                      <div className="flex items-center gap-2">
+                        {isAI ? <span style={{fontSize:16}}>🤖</span> : <span style={{fontSize:16}}>👤</span>}
+                        <span style={{ fontWeight: 600, fontSize: 13, color: isAI ? "#e879f9" : "var(--text)" }}>{log.adminName}</span>
+                      </div>
+                    </td>
+                    <td>
+                      <span className="tag" style={{ background: "rgba(96,165,250,0.1)", color: "#60a5fa" }}>{log.target}</span>
+                    </td>
+                    <td style={{ fontSize: 13.5, color: "var(--text)" }}>
+                      <strong style={{ display: 'block', marginBottom: 2, color: "var(--text)" }}>{log.action}</strong>
+                      <span style={{ color: "var(--text2)" }}>{log.details}</span>
+                    </td>
+                    <td style={{ fontSize: 12, minWidth: 200 }}>
+                      {log.prevVal && log.newVal && log.prevVal !== log.newVal ? (
+                        <div className="flex gap-2 items-center" style={{ flexWrap: "wrap" }}>
+                          <span style={{ color: "#ef4444", background: "rgba(239,68,68,0.1)", padding: "2px 6px", borderRadius: 4, textDecoration: "line-through" }}>{log.prevVal}</span>
+                          <span style={{ color: "var(--text2)" }}>→</span>
+                          <span style={{ color: "#10b981", background: "rgba(16,185,129,0.1)", padding: "2px 6px", borderRadius: 4 }}>{log.newVal}</span>
+                        </div>
+                      ) : (
+                        <span style={{ color: "var(--text2)", fontStyle: "italic" }}>-</span>
+                      )}
+                    </td>
+                  </tr>
+                );
+              })}
+              {auditLogs.length === 0 && (
+                <tr><td colSpan={5} style={{ textAlign: 'center', padding: 40, color: "var(--text2)" }}>No activities logged yet.</td></tr>
               )}
             </tbody>
           </table>
