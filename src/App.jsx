@@ -1889,10 +1889,12 @@ function Sidebar({ view, setView, members, newJoinees, events, isAdmin, collapse
               { label: "Start Attendance", color: "#a3e635", view: "Attendance", icon: <IconAttendance color="#a3e635" /> },
               { label: "Live TV Mode", color: "#a78bfa", view: "TVMode", icon: <IconTV color="#a78bfa" /> },
               { label: "Export Report", color: "#f59e0b", view: "Reports", icon: <IconReports color="#f59e0b" /> },
+              { label: "Expense Tracker", color: "#ec4899", external: "https://aysg-expense-tracker.vercel.app/", icon: <span style={{ fontSize: 16, display: 'flex', alignItems: 'center', justifyContent: 'center', width: 20, height: 20 }}>💰</span> }
             ].map(a => (
-              <div key={a.label} className={`nav-item${view === a.view ? " active" : ""}`} onClick={() => setView(a.view)} style={{ background: "rgba(0,0,0,0.025)", marginBottom: 4 }}>
+              <div key={a.label} className={`nav-item${view === a.view ? " active" : ""}`} onClick={() => a.external ? window.open(a.external, '_blank') : setView(a.view)} style={{ background: "rgba(0,0,0,0.025)", marginBottom: 4 }}>
                 <div className="nav-icon">{a.icon}</div>
                 <span className="nav-label">{a.label}</span>
+                {a.external && <span className="nav-label" style={{ marginLeft: "auto", fontSize: 14, opacity: 0.5 }}>↗</span>}
               </div>
             ))}
           </>
