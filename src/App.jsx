@@ -1050,7 +1050,7 @@ const IconAIAssistant = ({ color = "currentColor", size = 20 }) => (<svg xmlns="
 const IconReports = ({ color = "currentColor", size = 20 }) => (<svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>);
 const IconSettings = ({ color = "currentColor", size = 20 }) => (<svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>);
 
-const VIEWS = ["Dashboard", "Members", "New Joinees", "Events", "Team Meetings", "Documents", "Attendance", "Analytics", "AI Assistant", "Reports", "Settings"];
+const VIEWS = ["Dashboard", "Members", "New Joinees", "Events", "Team Meetings", "Documents", "Attendance", "Analytics", "Engagement", "AI Assistant", "Reports", "Settings"];
 const VIEW_ICONS = { 
   Dashboard: <IconDashboard color="#a78bfa" />, 
   Members: <IconMembers color="#60a5fa" />, 
@@ -1061,6 +1061,7 @@ const VIEW_ICONS = {
   Documents: <span style={{fontSize: 20, color: "#3b82f6", display: 'flex', alignItems: 'center', justifyContent: 'center'}}>📄</span>,
   Attendance: <IconAttendance color="#f59e0b" />, 
   Analytics: <IconAnalytics color="#818cf8" />,
+  Engagement: <span style={{fontSize: 18, color: "#10b981", display: 'flex', alignItems: 'center', justifyContent: 'center'}}>📈</span>,
   "AI Assistant": <IconAIAssistant color="#e879f9" />,
   Reports: <IconReports color="#38bdf8" />,
   Settings: <IconSettings color="#9ca3af" />
@@ -1643,6 +1644,90 @@ export default function App() {
     return { total, present, pct: total ? Math.round(present / total * 100) : 0 };
   };
 
+  const getMemberEngagement = (member, isNewJoinee = false) => {
+    let eventTotal = 0, eventPresent = 0;
+    const attSource = isNewJoinee ? newJoineeAttendance : attendance;
+    events.forEach(e => {
+      eventTotal++;
+      if (isAttendedStatus(attSource[e.id]?.[member.id])) eventPresent++;
+    });
+    const eventPct = eventTotal ? Math.round((eventPresent / eventTotal) * 100) : 0;
+
+    let meetingTotal = 0, meetingPresent = 0;
+    const meetingAttSource = isNewJoinee ? newJoineeTeamMeetingAttendance : teamMeetingAttendance;
+    const memberTeams = member.teams || [];
+    teamMeetings.forEach(tm => {
+      if (memberTeams.includes(tm.teamId) || tm.teamId === "all") {
+        meetingTotal++;
+        if (isAttendedStatus(meetingAttSource[tm.id]?.[member.id])) meetingPresent++;
+      }
+    });
+    const meetingPct = meetingTotal ? Math.round((meetingPresent / meetingTotal) * 100) : 0;
+
+    let lastPartDate = null;
+    let lastPartName = "";
+    
+    events.forEach(e => {
+      if (isAttendedStatus(attSource[e.id]?.[member.id])) {
+        const d = new Date(e.date);
+        if (!lastPartDate || d > lastPartDate) {
+          lastPartDate = d;
+          lastPartName = e.name;
+        }
+      }
+    });
+    teamMeetings.forEach(tm => {
+      if (isAttendedStatus(meetingAttSource[tm.id]?.[member.id])) {
+        const d = new Date(tm.date);
+        if (!lastPartDate || d > lastPartDate) {
+          lastPartDate = d;
+          lastPartName = tm.name;
+        }
+      }
+    });
+
+    let combinedPct = 0;
+    if (eventTotal > 0 && meetingTotal > 0) {
+      combinedPct = Math.round((eventPct + meetingPct) / 2);
+    } else if (eventTotal > 0) {
+      combinedPct = eventPct;
+    } else if (meetingTotal > 0) {
+      combinedPct = meetingPct;
+    }
+
+    let classification = "Inactive";
+    let classColor = "#64748b";
+    let classBg = "rgba(100,116,139,0.15)";
+    
+    if (member.active === false) {
+      classification = "Inactive";
+    } else if (eventTotal === 0 && meetingTotal === 0) {
+      classification = "New";
+      classColor = "#a78bfa";
+      classBg = "rgba(167,139,250,0.15)";
+    } else {
+      if (combinedPct >= 80) {
+        classification = "Highly Active";
+        classColor = "#10b981";
+        classBg = "rgba(16,185,129,0.15)";
+      } else if (combinedPct >= 50) {
+        classification = "Active";
+        classColor = "#3b82f6";
+        classBg = "rgba(59,130,246,0.15)";
+      } else if (combinedPct >= 20) {
+        classification = "Occasional";
+        classColor = "#f59e0b";
+        classBg = "rgba(245,158,11,0.15)";
+      } else {
+        classification = "At Risk";
+        classColor = "#ef4444";
+        classBg = "rgba(239,68,68,0.15)";
+      }
+    }
+
+    return { eventTotal, eventPresent, eventPct, meetingTotal, meetingPresent, meetingPct, combinedPct, lastPartDate, lastPartName, classification, classColor, classBg };
+  };
+
   const getMemberBadges = (member) => {
     const stats = getMemberStats(member.id);
     const sortedEvents = [...events].sort((a, b) => new Date(b.date) - new Date(a.date));
@@ -1787,6 +1872,7 @@ export default function App() {
                     )}
                     {view === "Attendance" && <Attendance events={events} members={members} newJoinees={newJoinees} attendance={attendance} setAttendance={setAttendance} newJoineeAttendance={newJoineeAttendance} setNewJoineeAttendance={setNewJoineeAttendance} setNewJoinees={setNewJoinees} showToast={showToast} isAdmin={isAdmin} attendanceEventId={attendanceEventId} setAttendanceEventId={setAttendanceEventId} />}
                     {view === "Analytics" && <Analytics members={members} newJoinees={newJoinees} events={events} getMemberStats={getMemberStats} attendance={attendance} newJoineeAttendance={newJoineeAttendance} isAdmin={isAdmin} />}
+                    {view === "Engagement" && <EngagementDashboard members={members} newJoinees={newJoinees} events={events} teamMeetings={teamMeetings} getMemberEngagement={getMemberEngagement} />}
                     {view === "AI Assistant" && <AIAssistantView members={members} newJoinees={newJoinees} events={events} attendance={attendance} newJoineeAttendance={newJoineeAttendance} getMemberStats={getMemberStats} getEventStats={getEventStats} setView={setView} showToast={showToast} isAdmin={isAdmin} />}
                     {view === "Reports" && <Reports members={members} newJoinees={newJoinees} events={events} attendance={attendance} newJoineeAttendance={newJoineeAttendance} getEventStats={getEventStats} showToast={showToast} isAdmin={isAdmin} />}
                     {view === "Documents" && <DocumentsDashboard isAdmin={isAdmin} documents={documents} setDocuments={setDocuments} />}
@@ -5981,6 +6067,117 @@ function EmptyState({ icon, msg }) {
       </motion.div>
       <div>{msg}</div>
     </motion.div>
+  );
+}
+
+function EngagementDashboard({ members, newJoinees, events, teamMeetings, getMemberEngagement }) {
+  const [filter, setFilter] = useState("All");
+
+  const allMembers = [
+    ...members.map(m => ({ ...m, isNewJoinee: false })),
+    ...newJoinees.map(m => ({ ...m, isNewJoinee: true }))
+  ];
+
+  const engagementData = allMembers.map(m => {
+    return { member: m, eng: getMemberEngagement(m, m.isNewJoinee) };
+  }).sort((a, b) => b.eng.combinedPct - a.eng.combinedPct);
+
+  const filtered = filter === "All" ? engagementData : engagementData.filter(d => d.eng.classification === filter);
+
+  const stats = {
+    "Highly Active": engagementData.filter(d => d.eng.classification === "Highly Active").length,
+    "Active": engagementData.filter(d => d.eng.classification === "Active").length,
+    "Occasional": engagementData.filter(d => d.eng.classification === "Occasional").length,
+    "At Risk": engagementData.filter(d => d.eng.classification === "At Risk").length,
+    "Inactive": engagementData.filter(d => d.eng.classification === "Inactive").length,
+    "New": engagementData.filter(d => d.eng.classification === "New").length,
+  };
+
+  return (
+    <div style={{ padding: "0 4px" }}>
+      <div className="flex items-center justify-between" style={{ marginBottom: 24, flexWrap: "wrap", gap: 16 }}>
+        <h1 className="page-title">Engagement Dashboard</h1>
+      </div>
+
+      <div className="grid-4" style={{ marginBottom: 24 }}>
+        {[
+          { label: "Highly Active", color: "#10b981", val: stats["Highly Active"] },
+          { label: "Active", color: "#3b82f6", val: stats["Active"] },
+          { label: "Occasional", color: "#f59e0b", val: stats["Occasional"] },
+          { label: "At Risk", color: "#ef4444", val: stats["At Risk"] }
+        ].map(s => (
+          <div key={s.label} className="stat-card" style={{ padding: 20 }}>
+            <div className="stat-label" style={{ color: "rgba(255,255,255,0.7)" }}>{s.label}</div>
+            <div className="stat-value">{s.val}</div>
+          </div>
+        ))}
+      </div>
+
+      <div className="card">
+        <div className="flex gap-2" style={{ marginBottom: 16, overflowX: 'auto', paddingBottom: 4 }}>
+          {["All", "Highly Active", "Active", "Occasional", "At Risk", "Inactive", "New"].map(f => (
+            <button key={f} className={`btn ${filter === f ? "btn-primary" : "btn-secondary"}`} style={{ borderRadius: 20, padding: "6px 16px", flexShrink: 0 }} onClick={() => setFilter(f)}>
+              {f} ({f === "All" ? engagementData.length : stats[f]})
+            </button>
+          ))}
+        </div>
+        
+        <div className="table-responsive">
+          <table className="table dense-table" style={{ minWidth: 800 }}>
+            <thead>
+              <tr>
+                <th>Member</th>
+                <th>Classification</th>
+                <th>Event Score</th>
+                <th>Meeting Score</th>
+                <th>Overall Engagement</th>
+                <th>Last Participation</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filtered.map(d => (
+                <tr key={d.member.id + (d.member.isNewJoinee ? "-new" : "")}>
+                  <td>
+                    <div className="flex items-center gap-3">
+                      <Avatar name={d.member.name} size={30} />
+                      <div>
+                        <div style={{ fontWeight: 700, fontSize: 13 }}>{d.member.name} {d.member.isNewJoinee && <span className="tag tag-purple" style={{ marginLeft: 6, transform: 'scale(0.8)' }}>New Joinee</span>}</div>
+                        <div className="text-xs color-muted">{d.member.id} · {d.member.area || "No Area"}</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td>
+                    <span className="tag" style={{ background: d.eng.classBg, color: d.eng.classColor, border: `1px solid ${d.eng.classColor}40` }}>{d.eng.classification}</span>
+                  </td>
+                  <td>
+                    <div style={{ fontSize: 13, fontWeight: 600 }}>{d.eng.eventPct}%</div>
+                    <div className="text-xs color-muted">{d.eng.eventPresent}/{d.eng.eventTotal} events</div>
+                  </td>
+                  <td>
+                    <div style={{ fontSize: 13, fontWeight: 600 }}>{d.eng.meetingPct}%</div>
+                    <div className="text-xs color-muted">{d.eng.meetingPresent}/{d.eng.meetingTotal} mtgs</div>
+                  </td>
+                  <td>
+                    <div style={{ fontSize: 14, fontWeight: 700, color: d.eng.classColor }}>{d.eng.combinedPct}%</div>
+                  </td>
+                  <td style={{ fontSize: 12.5, color: "var(--text2)" }}>
+                    {d.eng.lastPartDate ? (
+                      <>
+                        <span style={{ color: "var(--text)" }}>{d.eng.lastPartName}</span><br />
+                        {fmtDate(d.eng.lastPartDate)}
+                      </>
+                    ) : "No participation"}
+                  </td>
+                </tr>
+              ))}
+              {filtered.length === 0 && (
+                <tr><td colSpan={6} style={{ textAlign: 'center', padding: 40 }}>No members found in this category.</td></tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
   );
 }
 
