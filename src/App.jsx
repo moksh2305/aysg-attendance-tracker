@@ -844,7 +844,7 @@ select.input{cursor:pointer}
 .bar-fill{position:absolute;left:0;top:0;bottom:0;border-radius:6px;opacity:0.25;transition:width 0.5s ease}
 .empty-state{text-align:center;padding:60px 20px;color:var(--text2)}
 .empty-icon{font-size:48px;margin-bottom:16px;opacity:0.4}
-.mobile-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:90;backdrop-filter:blur(4px);opacity:0;animation:fadeIn 0.2s forwards}
+.mobile-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:90;backdrop-filter:blur(4px)}
 .mobile-menu-btn{display:none;font-size:20px;padding:0;width:38px;height:38px;margin-right:8px}
 .table-responsive{width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch;margin-bottom:12px}
 @keyframes fadeIn{to{opacity:1}}
@@ -862,7 +862,7 @@ select.input{cursor:pointer}
   .mobile-menu-btn{display:flex}
 }
 @media (max-width:680px){
-  .app{padding:0}
+  .app{padding:0;padding-top:env(safe-area-inset-top, 0px)}
   .main{margin:0;border-radius:0;border:none}
   .content{padding:16px}
   .grid-3,.grid-4,.quick-actions,.grid-2{grid-template-columns:1fr}
@@ -873,7 +873,7 @@ select.input{cursor:pointer}
   .top-search,.mode-chip{display:none !important}
   h1.page-title{font-size:16px !important; flex-shrink: 1 !important; width: auto !important;}
   .modal-content{padding:20px;max-width:92%;margin:0 auto}
-  .topbar{gap:6px;padding:0 8px}
+  .topbar{gap:6px;padding:0 8px;border-radius:0}
 }
 
 .earth-bg {
@@ -1729,7 +1729,18 @@ export default function App() {
               mobileMenuOpen={mobileMenuOpen}
               setMobileMenuOpen={setMobileMenuOpen}
             />
-            {mobileMenuOpen && <div className="mobile-overlay" onClick={() => setMobileMenuOpen(false)}></div>}
+            <AnimatePresence>
+              {mobileMenuOpen && (
+                <motion.div 
+                  className="mobile-overlay" 
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.25 }}
+                  onClick={() => setMobileMenuOpen(false)}
+                />
+              )}
+            </AnimatePresence>
             <div className="main">
               <Topbar
                 view={view}
