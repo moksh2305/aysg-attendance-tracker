@@ -1976,7 +1976,10 @@ function Sidebar({ view, setView, members, newJoinees, events, isAdmin, collapse
       </div>
       <div className="nav scroll-area">
         <div className="nav-section">Navigation</div>
-        {VIEWS.filter(v => v !== "Documents" || isAdmin).map(v => (
+        {VIEWS.filter(v => {
+          if (!isAdmin && ["New Joinees", "Documents", "Analytics", "Engagement", "Reports", "Activity Log"].includes(v)) return false;
+          return true;
+        }).map(v => (
           <div key={v} data-tip={v} className={`nav-item${view === v ? " active" : ""}`} onClick={() => setView(v)}>
             <div className="nav-icon">{VIEW_ICONS[v]}</div>
             <span className="nav-label">{v}</span>
@@ -2035,7 +2038,10 @@ function Topbar({ view, setView, members, newJoinees, events, isAdmin, onAdminCl
   const newJoineesWithoutMobile = newJoinees.filter(j => j.active && (!j.mobile || String(j.mobile).length < 10));
 
   const searchItems = [
-    ...VIEWS.map(v => ({ label: v, meta: "Navigation", view: v })),
+    ...VIEWS.filter(v => {
+      if (!isAdmin && ["New Joinees", "Documents", "Analytics", "Engagement", "Reports", "Activity Log"].includes(v)) return false;
+      return true;
+    }).map(v => ({ label: v, meta: "Navigation", view: v })),
     ...members.slice(0, 8).map(m => ({ label: m.name, meta: `Member · ${m.area || "No area"}`, view: "Members" })),
     ...newJoinees.slice(0, 5).map(j => ({ label: j.name, meta: "New Joinee", view: "New Joinees" })),
     ...events.slice(0, 8).map(e => ({ label: e.name, meta: `Event · ${fmtDate(e.date)}`, view: "Events" })),
