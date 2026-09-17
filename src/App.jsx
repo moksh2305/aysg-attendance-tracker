@@ -1424,7 +1424,7 @@ function DocumentsDashboard({ isAdmin, documents, setDocuments }) {
 
       {activeDocument ? (
         <div style={{ display: 'flex', flexDirection: 'column', height: '100%', minHeight: 'calc(100vh - 120px)', gap: 16 }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(255,255,255,0.02)', padding: '16px 24px', borderRadius: 16, border: '1px solid rgba(255,255,255,0.05)' }}>
+          <div className="card" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 24px', borderRadius: 16 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
               <button 
                 onClick={() => setActiveDocument(null)}
@@ -1442,7 +1442,7 @@ function DocumentsDashboard({ isAdmin, documents, setDocuments }) {
             </a>
           </div>
           
-          <div style={{ flex: 1, background: '#fff', borderRadius: 16, overflow: 'hidden', border: '1px solid rgba(255,255,255,0.1)' }}>
+          <div style={{ flex: 1, background: 'var(--card)', borderRadius: 16, overflow: 'hidden', border: '1px solid var(--border)' }}>
             <iframe 
               src={activeDocument.url} 
               width="100%" 
@@ -1454,7 +1454,7 @@ function DocumentsDashboard({ isAdmin, documents, setDocuments }) {
         </div>
       ) : (
         <>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(255,255,255,0.02)', borderRadius: 24, padding: 32, border: '1px solid rgba(255,255,255,0.05)', position: 'relative', overflow: 'hidden' }}>
+          <div className="card" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderRadius: 24, padding: 32, position: 'relative', overflow: 'hidden' }}>
             <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: 4, background: 'linear-gradient(90deg, #3b82f6, #8b5cf6)' }}></div>
             <div>
               <h2 style={{ margin: '0 0 8px 0', fontSize: 28, fontWeight: 700 }}>Admin Documents</h2>
@@ -1492,28 +1492,20 @@ function DocumentsDashboard({ isAdmin, documents, setDocuments }) {
           )}
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 24 }}>
-            {(documents || []).map(doc => (
+            {[...(documents || [])].reverse().map(doc => (
               <div 
                 key={doc.id}
                 onClick={() => setActiveDocument(doc)}
+                className="card card-hover"
                 style={{ 
-                  background: 'rgba(255,255,255,0.03)', 
                   borderRadius: 20, 
                   padding: 24, 
-                  border: '1px solid rgba(255,255,255,0.05)',
                   cursor: 'pointer',
-                  transition: 'all 0.2s ease',
                   display: 'flex',
                   flexDirection: 'column',
-                  gap: 16
-                }}
-                onMouseEnter={e => {
-                  e.currentTarget.style.background = 'rgba(255,255,255,0.05)';
-                  e.currentTarget.style.transform = 'translateY(-2px)';
-                }}
-                onMouseLeave={e => {
-                  e.currentTarget.style.background = 'rgba(255,255,255,0.03)';
-                  e.currentTarget.style.transform = 'translateY(0)';
+                  gap: 16,
+                  background: 'var(--bg3)',
+                  border: '1px solid var(--border)'
                 }}
               >
                 <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
@@ -1525,7 +1517,7 @@ function DocumentsDashboard({ isAdmin, documents, setDocuments }) {
                     <div style={{ fontSize: 12, color: '#64748b' }}>{doc.type}</div>
                   </div>
                 </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: 16, borderTop: '1px solid rgba(255,255,255,0.05)' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: 16, borderTop: '1px solid var(--border)', marginTop: 'auto' }}>
                   <span style={{ fontSize: 12, color: '#64748b' }}>Updated {doc.lastUpdated}</span>
                   <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
                     <span 
