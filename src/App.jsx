@@ -1189,6 +1189,8 @@ function PendingRow({ docId, data, members, onApprove, onReject }) {
       if (m && m.id !== matchId) {
         // use setTimeout to avoid set-state-in-effect warning if needed, or simply let it run
         setTimeout(() => setMatchId(m.id), 0);
+      } else if (!m && matchId !== "NEW_JOINEE") {
+        setTimeout(() => setMatchId("NEW_JOINEE"), 0);
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
